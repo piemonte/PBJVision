@@ -1,3 +1,5 @@
+![PBJVision](https://raw.github.com/piemonte/PBJVision/master/pbj.gif)
+
 ## PBJVision
 'PBJVision' is an iOS camera engine that supports touch-to-record video and photo capture.
 
