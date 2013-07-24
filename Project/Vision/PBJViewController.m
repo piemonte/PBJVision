@@ -12,6 +12,24 @@
 
 #import <AssetsLibrary/AssetsLibrary.h>
 
+@interface UIButton (ExtendedHit)
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event;
+
+@end
+
+@implementation UIButton (ExtendedHit)
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
+{
+    CGRect relativeFrame = self.bounds;
+    UIEdgeInsets hitTestEdgeInsets = UIEdgeInsetsMake(-35, -35, -35, -35);
+    CGRect hitFrame = UIEdgeInsetsInsetRect(relativeFrame, hitTestEdgeInsets);
+    return CGRectContainsPoint(hitFrame, point);
+}
+
+@end
+
 @interface PBJViewController () <
     UIGestureRecognizerDelegate,
     PBJVisionDelegate,
