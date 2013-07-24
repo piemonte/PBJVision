@@ -1,7 +1,9 @@
 ## PBJVision
 'PBJVision' is an iOS camera engine that supports touch-to-record video and photo capture.
 
-We created this at DIY.org as a fun means for kids to author video but also so as a way to easily create stop motion. We'll be adding more features and documentation in the future.
+We created this at DIY.org as a fun means for kids to author video but also so as a way to easily create stop motion. This same concept is used in Vine and Instagram.
+
+I'll be adding more features and documentation in the future.
 
 ### Basic Use
 ```objective-c
