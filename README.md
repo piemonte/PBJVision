@@ -50,6 +50,13 @@ We created this at DIY.org as a fun means for kids to author video but also so a
 ```
 
 ```objective-c
+- (void)_handleDoneButton:(UIButton *)button
+{
+    [self _endCapture];
+}
+```
+
+```objective-c
 - (void)vision:(PBJVision *)vision capturedVideo:(NSDictionary *)videoDict error:(NSError *)error
 {   
     NSString *videoPath = [_currentVideo  objectForKey:PBJVisionVideoPathKey];
