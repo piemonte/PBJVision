@@ -1142,17 +1142,23 @@ typedef void (^PBJVisionBlock)();
     
 }
 
-- (CMSampleBufferRef)_createAdjustedSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset
+- (CMSampleBufferRef)_createOffsetSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset
 {
     CMItemCount itemCount;
-    CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, 0, nil, &itemCount);
+    
+    OSStatus status = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, 0, NULL, &itemCount);
+    if (status) {
+        DLog(@"couldn't determine the timing info count");
+        return NULL;
+    }
+    
     CMSampleTimingInfo *timingInfo = (CMSampleTimingInfo *)malloc(sizeof(CMSampleTimingInfo) * (unsigned long)itemCount);
     if (!timingInfo) {
         DLog(@"couldn't allocate timing info");
         return NULL;
     }
     
-    OSStatus status = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, itemCount, timingInfo, &itemCount);
+    status = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, itemCount, timingInfo, &itemCount);
     if (status) {
         free(timingInfo);
         timingInfo = NULL;
@@ -1208,107 +1214,103 @@ typedef void (^PBJVisionBlock)();
         BOOL isVideo = (connection == [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo]);
         BOOL wasReadyToRecord = (_flags.readyForAudio && _flags.readyForVideo);
 
-        if (isVideo) {
-        
-            if (!_flags.readyForVideo) {
-                _flags.readyForVideo = (unsigned int)[self _setupAssetWriterVideoInput:formatDescription];
-                DLog(@"ready for video (%d)", _flags.readyForVideo);
-            }
+        if (isAudio && !_flags.readyForAudio) {
+            _flags.readyForAudio = (unsigned int)[self _setupAssetWriterAudioInput:formatDescription];
+            DLog(@"ready for audio (%d)", _flags.readyForAudio);
+        }
+
+        if (isVideo && !_flags.readyForVideo) {
+            _flags.readyForVideo = (unsigned int)[self _setupAssetWriterVideoInput:formatDescription];
+            DLog(@"ready for video (%d)", _flags.readyForVideo);
+        }
+
+        BOOL isReadyToRecord = (_flags.readyForAudio && _flags.readyForVideo);
+
+        if (isVideo && isReadyToRecord) {
             
-            if (_flags.readyForVideo && _flags.readyForAudio && !_flags.interrupted) {
+            if (!_flags.interrupted) {
                             
                 CMSampleBufferRef bufferToWrite = NULL;
 
                 if (_timeOffset.value > 0) {
-                    bufferToWrite = [self _createAdjustedSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
+                    bufferToWrite = [self _createOffsetSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
                     if (!bufferToWrite) {
-                        bufferToWrite = sampleBuffer;
-                        CFRetain(bufferToWrite);
+                        DLog(@"error subtracting the timeoffset from the sampleBuffer");
                     }
                 } else {
                     bufferToWrite = sampleBuffer;
                     CFRetain(bufferToWrite);
                 }
 
-                // update the last video timestamp
-                CMTime time = CMSampleBufferGetPresentationTimeStamp(bufferToWrite);
-                CMTime duration = CMSampleBufferGetDuration(bufferToWrite);
-                if (duration.value > 0)
-                    time = CMTimeAdd(time, duration);
-                
-                if (time.value > _videoTimestamp.value) {
-                    [self _writeSampleBuffer:bufferToWrite ofType:AVMediaTypeVideo];
-                    _videoTimestamp = time;
-                    _flags.videoWritten = YES;
-                }
-                
-                if (bufferToWrite)
-                    CFRelease(bufferToWrite);
-            }
-            
-        } else if (isAudio) {
-        
-            if (!_flags.readyForAudio) {
-                _flags.readyForAudio = (unsigned int)[self _setupAssetWriterAudioInput:formatDescription];
-                DLog(@"ready for audio (%d)", _flags.readyForAudio);
-            }
-            
-            if (_flags.readyForVideo && _flags.readyForAudio) {
-                
-                // calculate the length of the interruption
-                if (_flags.interrupted) {
-                    _flags.interrupted = NO;
-                    
-                    CMTime pTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-        
-                    // calculate the appropriate time offset
-                    if (CMTIME_IS_VALID(_audioTimestamp)) {
-                        if (CMTIME_IS_VALID(_timeOffset)) {
-                            pTimestamp = CMTimeSubtract(pTimestamp, _timeOffset);
-                        }
-                        
-                        CMTime offset = CMTimeSubtract(pTimestamp, _audioTimestamp);
-                        _timeOffset = (_timeOffset.value == 0) ? offset : CMTimeAdd(_timeOffset, offset);
-                        DLog(@"new calculated offset %f valid (%d)", CMTimeGetSeconds(_timeOffset), CMTIME_IS_VALID(_timeOffset));
-                    }
-                    _audioTimestamp.flags = 0;
-                    _videoTimestamp.flags = 0;
-                }
-                
-                CMSampleBufferRef bufferToWrite = NULL;
-
-                if (_timeOffset.value > 0) {
-                    bufferToWrite = [self _createAdjustedSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
-                    if (!bufferToWrite) {
-                        bufferToWrite = sampleBuffer;
-                        CFRetain(bufferToWrite);
-                    }
-                } else {
-                    bufferToWrite = sampleBuffer;
-                    CFRetain(bufferToWrite);
-                }
-
-                // once we've initially written a video frame, then we can start recording audio
-                if (_flags.videoWritten) {
-                    // update the last audio timestamp
+                if (bufferToWrite) {
+                    // update the last video timestamp
                     CMTime time = CMSampleBufferGetPresentationTimeStamp(bufferToWrite);
                     CMTime duration = CMSampleBufferGetDuration(bufferToWrite);
                     if (duration.value > 0)
                         time = CMTimeAdd(time, duration);
-
-                    if (time.value > _audioTimestamp.value) {
-                        [self _writeSampleBuffer:bufferToWrite ofType:AVMediaTypeAudio];
-                        _audioTimestamp = time;
+                    
+                    if (time.value > _videoTimestamp.value) {
+                        [self _writeSampleBuffer:bufferToWrite ofType:AVMediaTypeVideo];
+                        _videoTimestamp = time;
+                        _flags.videoWritten = YES;
                     }
+                    CFRelease(bufferToWrite);
+                }
+            }
+            
+        } else if (isAudio && isReadyToRecord) {
+            
+            // calculate the length of the interruption
+            if (_flags.interrupted) {
+    
+                // calculate the appropriate time offset
+                if (CMTIME_IS_VALID(_audioTimestamp)) {
+                    CMTime pTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+                    if (CMTIME_IS_VALID(_timeOffset)) {
+                        pTimestamp = CMTimeSubtract(pTimestamp, _timeOffset);
+                    }
+                    
+                    CMTime offset = CMTimeSubtract(pTimestamp, _audioTimestamp);
+                    _timeOffset = (_timeOffset.value == 0) ? offset : CMTimeAdd(_timeOffset, offset);
+                    DLog(@"new calculated offset %f valid (%d)", CMTimeGetSeconds(_timeOffset), CMTIME_IS_VALID(_timeOffset));
+                } else {
+                    DLog(@"invalid audio timestamp, no offset update");
                 }
                 
-                if (bufferToWrite)
-                    CFRelease(bufferToWrite);
+                _flags.interrupted = NO;
+                _audioTimestamp.flags = 0;
+                _videoTimestamp.flags = 0;
+                
+            }
+            
+            CMSampleBufferRef bufferToWrite = NULL;
 
+            if (_timeOffset.value > 0) {
+                bufferToWrite = [self _createOffsetSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
+                if (!bufferToWrite) {
+                    DLog(@"error subtracting the timeoffset from the sampleBuffer");
+                }
+            } else {
+                bufferToWrite = sampleBuffer;
+                CFRetain(bufferToWrite);
+            }
+
+            // once we've initially written a video frame, then we can start recording audio
+            if (_flags.videoWritten && bufferToWrite) {
+                // update the last audio timestamp
+                CMTime time = CMSampleBufferGetPresentationTimeStamp(bufferToWrite);
+                CMTime duration = CMSampleBufferGetDuration(bufferToWrite);
+                if (duration.value > 0)
+                    time = CMTimeAdd(time, duration);
+
+                if (time.value > _audioTimestamp.value) {
+                    [self _writeSampleBuffer:bufferToWrite ofType:AVMediaTypeAudio];
+                    _audioTimestamp = time;
+                }
+                CFRelease(bufferToWrite);
             }
         }
         
-        BOOL isReadyToRecord = (_flags.readyForAudio && _flags.readyForVideo);
         if ( !wasReadyToRecord && isReadyToRecord ) {
             [self _enqueueBlockOnMainQueue:^{
                 if ([_delegate respondsToSelector:@selector(visionDidStartVideoCapture:)])
