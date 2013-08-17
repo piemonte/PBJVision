@@ -93,6 +93,7 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
         unsigned int recording:1;
         unsigned int isPaused:1;
         unsigned int interrupted:1;
+        unsigned int videoWritten:1;
     } __block _flags;
 }
 
@@ -899,6 +900,7 @@ typedef void (^PBJVisionBlock)();
         _flags.interrupted = NO;
         _flags.readyForAudio = NO;
         _flags.readyForVideo = NO;
+        _flags.videoWritten = NO;
 
         NSError *error = nil;
         _assetWriter = [[AVAssetWriter alloc] initWithURL:_outputURL fileType:(NSString *)kUTTypeQuickTimeMovie error:&error];
@@ -1271,6 +1273,7 @@ typedef void (^PBJVisionBlock)();
                 if (time.value > _videoTimestamp.value) {
                     [self _writeSampleBuffer:bufferToWrite ofType:AVMediaTypeVideo];
                     _videoTimestamp = time;
+                    _flags.videoWritten = YES;
                 }
                 CFRelease(bufferToWrite);
             }
@@ -1289,7 +1292,7 @@ typedef void (^PBJVisionBlock)();
                 CFRetain(bufferToWrite);
             }
 
-            if (bufferToWrite) {
+            if (bufferToWrite && _flags.videoWritten) {
                 // update the last audio timestamp
                 CMTime time = CMSampleBufferGetPresentationTimeStamp(bufferToWrite);
                 CMTime duration = CMSampleBufferGetDuration(bufferToWrite);
