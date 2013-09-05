@@ -93,7 +93,7 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
         unsigned int readyForAudio:1;
         unsigned int readyForVideo:1;
         unsigned int recording:1;
-        unsigned int isPaused:1;
+        unsigned int paused:1;
         unsigned int interrupted:1;
         unsigned int videoWritten:1;
     } __block _flags;
@@ -128,6 +128,15 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
 - (BOOL)isActive
 {
     return ([_captureSession isRunning]);
+}
+
+- (BOOL)isRecording
+{
+    __block BOOL isRecording = NO;
+    [self _enqueueBlockInCaptureVideoQueue:^{
+        isRecording = (BOOL)_flags.recording;
+    }];
+    return isRecording;
 }
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
@@ -202,15 +211,6 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
 - (void)setCameraMode:(PBJCameraMode)cameraMode
 {
     [self _setCameraMode:cameraMode cameraDevice:_cameraDevice];
-}
-
-- (BOOL)isRecording
-{
-    __block BOOL isRecording = NO;
-    [self _enqueueBlockInCaptureVideoQueue:^{
-        isRecording = (BOOL)_flags.recording;
-    }];
-    return isRecording;
 }
 
 #pragma mark - init
@@ -327,7 +327,7 @@ typedef void (^PBJVisionBlock)();
 {
     if (!_captureSession)
         return;
-    
+
     // remove notification observers (we don't want to just 'remove all' because we're also observing background notifications
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         
@@ -406,7 +406,9 @@ typedef void (^PBJVisionBlock)();
     AVCaptureDevice *newCaptureDevice = nil;
     
     [_captureSession beginConfiguration];
+
     [_captureSession setSessionPreset:AVCaptureSessionPresetMedium];
+    NSString *sessionPreset = [_captureSession sessionPreset];
     
     if (shouldSwitchDevice) {
         switch (_cameraDevice) {
@@ -481,9 +483,9 @@ typedef void (^PBJVisionBlock)();
     if (!newCaptureOutput)
         newCaptureOutput = _currentOutput;
 
-    NSString *sessionPreset = [_captureSession sessionPreset];
     if (newCaptureOutput == _captureOutputVideo) {
-        
+
+        // setup video connection
         AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
         
         [self _setOrientationForConnection:videoConnection];
@@ -491,32 +493,42 @@ typedef void (^PBJVisionBlock)();
         // setup stabilization, if available
         if ([videoConnection isVideoStabilizationSupported])
             [videoConnection setEnablesVideoStabilizationWhenAvailable:YES];
-                
-        // setup pixel format
-        NSDictionary *videoSettings = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                       [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange], (id)kCVPixelBufferPixelFormatTypeKey,
-                                        nil];
-        [_captureOutputVideo setVideoSettings:videoSettings];
-        
-        // discard late frames
-        [_captureOutputVideo setAlwaysDiscardsLateVideoFrames:NO];
-        
-        // setup video to use 640 x 480 for the hightest quality touch-to-record
-        if ( [_captureSession canSetSessionPreset:AVCaptureSessionPreset640x480] )
-            sessionPreset = AVCaptureSessionPreset640x480;
-        
-        // set the framerate and preset
+
+        // setup framerate
         CMTime frameDuration = CMTimeMake( 1, 30 );
         if ( videoConnection.supportsVideoMinFrameDuration )
             videoConnection.videoMinFrameDuration = frameDuration; // needs to be applied to session in iOS 7
         if ( videoConnection.supportsVideoMaxFrameDuration )
             videoConnection.videoMaxFrameDuration = frameDuration; // needs to be applied to session in iOS 7
+
+        // discard late frames
+        [_captureOutputVideo setAlwaysDiscardsLateVideoFrames:NO];
+        
+        // specify video preset
+        sessionPreset = AVCaptureSessionPreset640x480;
+
+        // setup video settings
+        
+        // kCVPixelFormatType_420YpCbCr8BiPlanarFullRange Bi-Planar Component Y'CbCr 8-bit 4:2:0, full-range (luma=[0,255] chroma=[1,255])
+        // baseAddr points to a big-endian CVPlanarPixelBufferInfo_YCbCrBiPlanar struct
+        BOOL supportsFullRangeYUV = NO;
+        NSArray *supportedPixelFormats = _captureOutputVideo.availableVideoCVPixelFormatTypes;
+        for (NSNumber *currentPixelFormat in supportedPixelFormats) {
+            if ([currentPixelFormat intValue] == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) {
+                supportsFullRangeYUV = YES;
+            }
+        }
+        NSMutableDictionary *videoSettings = supportsFullRangeYUV ?
+                [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey] :
+                [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+        [_captureOutputVideo setVideoSettings:videoSettings];
         
     } else if (newCaptureOutput == _captureOutputPhoto) {
     
-        // specify photo presets
+        // specify photo preset
         sessionPreset = AVCaptureSessionPresetPhoto;
     
+        // setup photo settings
         NSDictionary *photoSettings = [[NSDictionary alloc] initWithObjectsAndKeys:
                                         AVVideoCodecJPEG, AVVideoCodecKey,
                                         nil];
@@ -525,9 +537,8 @@ typedef void (^PBJVisionBlock)();
     }
 
     // apply presets
-    if ([_captureSession canSetSessionPreset:sessionPreset]) {
+    if ([_captureSession canSetSessionPreset:sessionPreset])
         [_captureSession setSessionPreset:sessionPreset];
-    }
     
     // enable low light boost
     if ([newCaptureDevice isLowLightBoostSupported]) {
@@ -873,7 +884,7 @@ typedef void (^PBJVisionBlock)();
         
     [self _enqueueBlockInCaptureVideoQueue:^{
 
-        if (_flags.recording || _flags.isPaused)
+        if (_flags.recording || _flags.paused)
             return;
 
         NSString *outputPath = [NSString stringWithFormat:@"%@%@", NSTemporaryDirectory(), @"video.mp4"];
@@ -898,7 +909,7 @@ typedef void (^PBJVisionBlock)();
         _videoTimestamp = kCMTimeZero;
         
         _flags.recording = YES;
-        _flags.isPaused = NO;
+        _flags.paused = NO;
         _flags.interrupted = NO;
         _flags.readyForAudio = NO;
         _flags.readyForVideo = NO;
@@ -934,7 +945,7 @@ typedef void (^PBJVisionBlock)();
 
         DLog(@"pausing video capture");
 
-        _flags.isPaused = YES;
+        _flags.paused = YES;
         _flags.interrupted = YES;
         
         [self _enqueueBlockOnMainQueue:^{
@@ -947,7 +958,7 @@ typedef void (^PBJVisionBlock)();
 - (void)resumeVideoCapture
 {
     [self _enqueueBlockInCaptureVideoQueue:^{
-        if (!_flags.recording || !_flags.isPaused)
+        if (!_flags.recording || !_flags.paused)
             return;
  
         if (!_assetWriter) {
@@ -957,7 +968,7 @@ typedef void (^PBJVisionBlock)();
  
         DLog(@"resuming video capture");
        
-        _flags.isPaused = NO;
+        _flags.paused = NO;
 
         [self _enqueueBlockOnMainQueue:^{
             if ([_delegate respondsToSelector:@selector(visionDidResumeVideoCapture:)])
@@ -985,7 +996,7 @@ typedef void (^PBJVisionBlock)();
         }
         
         _flags.recording = NO;
-        _flags.isPaused = NO;
+        _flags.paused = NO;
         
         void (^finishWritingCompletionHandler)(void) = ^{
             _timeOffset = kCMTimeZero;
@@ -1011,6 +1022,8 @@ typedef void (^PBJVisionBlock)();
         [_assetWriter finishWritingWithCompletionHandler:finishWritingCompletionHandler];
     }];
 }
+
+#pragma mark - sample buffer setup
 
 - (BOOL)_setupAssetWriterAudioInput:(CMFormatDescriptionRef)currentFormatDescription
 {
@@ -1101,8 +1114,6 @@ typedef void (^PBJVisionBlock)();
     
     return YES;
 }
-
-#pragma mark - AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate
 
 - (void)_writeSampleBuffer:(CMSampleBufferRef)sampleBuffer ofType:(NSString *)mediaType
 {
@@ -1199,7 +1210,7 @@ typedef void (^PBJVisionBlock)();
             return;
         }
     
-        if (!_flags.recording || _flags.isPaused) {
+        if (!_flags.recording || _flags.paused) {
             CFRelease(sampleBuffer);
             CFRelease(formatDescription);
             return;
