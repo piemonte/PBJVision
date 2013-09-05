@@ -14,6 +14,12 @@
 		060F7B19179F50B800E27091 /* capture_rec_off@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 060F7B15179F50B800E27091 /* capture_rec_off@2x.png */; };
 		060F7B1A179F50B800E27091 /* capture_yep@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 060F7B16179F50B800E27091 /* capture_yep@2x.png */; };
 		060F7B1D179F550800E27091 /* capture_flip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 060F7B1C179F550800E27091 /* capture_flip@2x.png */; };
+		0624D09717D43BB500665930 /* capture_onion_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0624D09517D43BB500665930 /* capture_onion_selected@2x.png */; };
+		0624D09817D43BB500665930 /* capture_onion@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0624D09617D43BB500665930 /* capture_onion@2x.png */; };
+		0624D09A17D43D5D00665930 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0624D09917D43D5D00665930 /* OpenGLES.framework */; };
+		067D52F817D8574200541B5E /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 067D52F717D8574200541B5E /* GLKit.framework */; };
+		067D52FC17D857DC00541B5E /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 067D52FA17D857AB00541B5E /* Shader.fsh */; };
+		067D52FD17D857DC00541B5E /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 067D52FB17D857AB00541B5E /* Shader.vsh */; };
 		0683D1C2179F2E1700EE66D6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0683D1C1179F2E1700EE66D6 /* Foundation.framework */; };
 		0683D1C4179F2E1700EE66D6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */; };
 		0683D1C6179F2E1700EE66D6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0683D1C5179F2E1700EE66D6 /* UIKit.framework */; };
@@ -45,6 +51,12 @@
 		060F7B15179F50B800E27091 /* capture_rec_off@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_rec_off@2x.png"; path = "UI/capture_rec_off@2x.png"; sourceTree = "<group>"; };
 		060F7B16179F50B800E27091 /* capture_yep@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_yep@2x.png"; path = "UI/capture_yep@2x.png"; sourceTree = "<group>"; };
 		060F7B1C179F550800E27091 /* capture_flip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_flip@2x.png"; path = "UI/capture_flip@2x.png"; sourceTree = "<group>"; };
+		0624D09517D43BB500665930 /* capture_onion_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_onion_selected@2x.png"; path = "UI/capture_onion_selected@2x.png"; sourceTree = "<group>"; };
+		0624D09617D43BB500665930 /* capture_onion@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_onion@2x.png"; path = "UI/capture_onion@2x.png"; sourceTree = "<group>"; };
+		0624D09917D43D5D00665930 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		067D52F717D8574200541B5E /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		067D52FA17D857AB00541B5E /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = ../Source/Shaders/Shader.fsh; sourceTree = "<group>"; };
+		067D52FB17D857AB00541B5E /* Shader.vsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = ../Source/Shaders/Shader.vsh; sourceTree = "<group>"; };
 		0683D1BE179F2E1700EE66D6 /* Vision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vision.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0683D1C1179F2E1700EE66D6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -79,6 +91,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				067D52F817D8574200541B5E /* GLKit.framework in Frameworks */,
+				0624D09A17D43D5D00665930 /* OpenGLES.framework in Frameworks */,
 				060F7B0F179F459900E27091 /* AssetsLibrary.framework in Frameworks */,
 				06B7D031179F33B500F3F527 /* ImageIO.framework in Frameworks */,
 				06B7D02F179F333400F3F527 /* MobileCoreServices.framework in Frameworks */,
@@ -102,8 +116,19 @@
 				060F7B15179F50B800E27091 /* capture_rec_off@2x.png */,
 				060F7B16179F50B800E27091 /* capture_yep@2x.png */,
 				060F7B1C179F550800E27091 /* capture_flip@2x.png */,
+				0624D09517D43BB500665930 /* capture_onion_selected@2x.png */,
+				0624D09617D43BB500665930 /* capture_onion@2x.png */,
 			);
 			name = UI;
+			sourceTree = "<group>";
+		};
+		067D52F917D8577D00541B5E /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				067D52FA17D857AB00541B5E /* Shader.fsh */,
+				067D52FB17D857AB00541B5E /* Shader.vsh */,
+			);
+			name = Shaders;
 			sourceTree = "<group>";
 		};
 		0683D1B5179F2E1700EE66D6 = {
@@ -128,13 +153,15 @@
 			isa = PBXGroup;
 			children = (
 				060F7B0E179F459900E27091 /* AssetsLibrary.framework */,
+				06B7D027179F307D00F3F527 /* AVFoundation.framework */,
+				0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */,
+				06B7D029179F312F00F3F527 /* CoreMedia.framework */,
+				06B7D02B179F313800F3F527 /* CoreVideo.framework */,
+				0683D1C1179F2E1700EE66D6 /* Foundation.framework */,
+				067D52F717D8574200541B5E /* GLKit.framework */,
 				06B7D030179F33B500F3F527 /* ImageIO.framework */,
 				06B7D02D179F330E00F3F527 /* MobileCoreServices.framework */,
-				06B7D02B179F313800F3F527 /* CoreVideo.framework */,
-				06B7D029179F312F00F3F527 /* CoreMedia.framework */,
-				06B7D027179F307D00F3F527 /* AVFoundation.framework */,
-				0683D1C1179F2E1700EE66D6 /* Foundation.framework */,
-				0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */,
+				0624D09917D43D5D00665930 /* OpenGLES.framework */,
 				0683D1C5179F2E1700EE66D6 /* UIKit.framework */,
 			);
 			name = Frameworks;
@@ -176,6 +203,7 @@
 		06B7D026179F2F0800F3F527 /* Vision */ = {
 			isa = PBXGroup;
 			children = (
+				067D52F917D8577D00541B5E /* Shaders */,
 				06B7D01A179F2E7700F3F527 /* PBJVision.h */,
 				06B7D01B179F2E7700F3F527 /* PBJVision.m */,
 				06B7D01C179F2E7700F3F527 /* PBJVisionUtilities.h */,
@@ -237,8 +265,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				067D52FC17D857DC00541B5E /* Shader.fsh in Resources */,
+				067D52FD17D857DC00541B5E /* Shader.vsh in Resources */,
 				06B7D025179F2EDC00F3F527 /* Release.xcconfig in Resources */,
 				060F7B18179F50B800E27091 /* capture_rec_blink@2x.png in Resources */,
+				0624D09717D43BB500665930 /* capture_onion_selected@2x.png in Resources */,
 				06B7D036179F357600F3F527 /* Default.png in Resources */,
 				0683D1CC179F2E1700EE66D6 /* InfoPlist.strings in Resources */,
 				060F7B17179F50B800E27091 /* capture_rec_base@2x.png in Resources */,
@@ -249,6 +280,7 @@
 				06B7D037179F357600F3F527 /* Default@2x.png in Resources */,
 				060F7B19179F50B800E27091 /* capture_rec_off@2x.png in Resources */,
 				06B7D024179F2EDC00F3F527 /* Debug.xcconfig in Resources */,
+				0624D09817D43BB500665930 /* capture_onion@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

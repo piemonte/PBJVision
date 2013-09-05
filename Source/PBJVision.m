@@ -11,6 +11,7 @@
 #import <UIKit/UIDevice.h>
 #import <ImageIO/ImageIO.h>
 #import <MobileCoreServices/UTCoreTypes.h>
+#import <OpenGLES/EAGL.h>
 
 #define LOG_VISION 0
 #if !defined(NDEBUG) && LOG_VISION
@@ -38,6 +39,26 @@ NSString * const PBJVisionPhotoThumbnailKey = @"PBJVisionPhotoThumbnailKey";
 
 NSString * const PBJVisionVideoPathKey = @"PBJVisionVideoPathKey";
 NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
+
+// buffer rendering shader uniforms and attributes
+// TODO: create an abstraction for shaders
+
+enum
+{
+    PBJVisionUniformY,
+    PBJVisionUniformUV,
+    PBJVisionUniformCount
+};
+GLint _uniforms[PBJVisionUniformCount];
+
+enum
+{
+    PBJVisionAttributeVertex,
+    PBJVisionAttributeTextureCoord,
+    PBJVisionAttributeCount
+};
+
+///
 
 @interface PBJVision () <
     AVCaptureAudioDataOutputSampleBufferDelegate,
@@ -84,7 +105,21 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
     CMTime _timeOffset;
     CMTime _audioTimestamp;
 	CMTime _videoTimestamp;
-    
+
+    // sample buffer rendering
+
+    PBJCameraDevice _bufferDevice;
+    PBJCameraOrientation _bufferOrientation;
+    size_t _bufferWidth;
+    size_t _bufferHeight;
+    CGRect _presentationFrame;
+
+    EAGLContext *_context;
+    GLuint _program;
+    CVOpenGLESTextureRef _lumaTexture;
+    CVOpenGLESTextureRef _chromaTexture;
+    CVOpenGLESTextureCacheRef _videoTextureCache;
+
     // flags
     
     struct {
@@ -96,6 +131,7 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
         unsigned int paused:1;
         unsigned int interrupted:1;
         unsigned int videoWritten:1;
+        unsigned int videoRenderingEnabled:1;
     } __block _flags;
 }
 
@@ -110,6 +146,8 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
 @synthesize cameraMode = _cameraMode;
 @synthesize cameraOrientation = _cameraOrientation;
 @synthesize focusMode = _focusMode;
+@synthesize context = _context;
+@synthesize presentationFrame = _presentationFrame;
 
 #pragma mark - singleton
 
@@ -137,6 +175,16 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
         isRecording = (BOOL)_flags.recording;
     }];
     return isRecording;
+}
+
+- (void)setVideoRenderingEnabled:(BOOL)videoRenderingEnabled
+{
+    _flags.videoRenderingEnabled = (unsigned int)videoRenderingEnabled;
+}
+
+- (BOOL)isVideoRenderingEnabled
+{
+    return _flags.videoRenderingEnabled;
 }
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
@@ -219,6 +267,12 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
 {
     self = [super init];
     if (self) {
+        _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+        if (!_context) {
+            DLog(@"failed to create GL context");
+        }
+        [self _setupGL];
+
         _captureSessionDispatchQueue = dispatch_queue_create("PBJVisionSession", DISPATCH_QUEUE_SERIAL); // protects session
         _captureVideoDispatchQueue = dispatch_queue_create("PBJVisionVideo", DISPATCH_QUEUE_SERIAL); // protects capture
         _previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:nil];
@@ -233,6 +287,15 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     _delegate = nil;
+
+    [self _cleanUpTextures];
+    
+    if (_videoTextureCache) {
+        CFRelease(_videoTextureCache);
+        _videoTextureCache = NULL;
+    }
+    
+    [self _destroyGL];
 }
 
 #pragma mark - queue helper methods
@@ -269,6 +332,15 @@ typedef void (^PBJVisionBlock)();
 {
     if (_captureSession)
         return;
+    
+#if COREVIDEO_USE_EAGLCONTEXT_CLASS_IN_API
+    CVReturn cvError = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_videoTextureCache);
+#else
+    CVReturn cvError = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, (__bridge void *)_context, NULL, &_videoTextureCache);
+#endif
+    if (cvError) {
+        NSLog(@"error CVOpenGLESTextureCacheCreate (%d)", cvError);
+    }
 
     _captureSession = [[AVCaptureSession alloc] init];
     
@@ -1220,10 +1292,118 @@ typedef void (^PBJVisionBlock)();
     return outputSampleBuffer;
 }
 
+#pragma mark - sample buffer processing
+
+- (void)_cleanUpTextures
+{
+    CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
+
+    if (_lumaTexture) {
+        CFRelease(_lumaTexture);
+        _lumaTexture = NULL;        
+    }
+    
+    if (_chromaTexture) {
+        CFRelease(_chromaTexture);
+        _chromaTexture = NULL;
+    }
+}
+
+// convert CoreVideo YUV pixel buffer (Y luminance and Cb Cr chroma) into RGB
+// processing is done on the GPU, operation WAY more efficient than converting .on the CPU
+- (void)_processSampleBuffer:(CMSampleBufferRef)sampleBuffer
+{
+    if (!_context)
+        return;
+
+    if (!_videoTextureCache)
+        return;
+
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+
+    if (CVPixelBufferLockBaseAddress(imageBuffer, 0) != kCVReturnSuccess)
+        return;
+
+    [EAGLContext setCurrentContext:_context];
+
+    [self _cleanUpTextures];
+
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+
+    // only bind the vertices once or if parameters change
+    
+    if (_bufferWidth != width ||
+        _bufferHeight != height ||
+        _bufferDevice != _cameraDevice ||
+        _bufferOrientation != _cameraOrientation) {
+        
+        _bufferWidth = width;
+        _bufferHeight = height;
+        _bufferDevice = _cameraDevice;
+        _bufferOrientation = _cameraOrientation;
+        [self _setupBuffers];
+        
+    }
+    
+    // always upload the texturs since the input may be changing
+    
+    CVReturn error = 0;
+    
+    // Y-plane
+    glActiveTexture(GL_TEXTURE0);
+    error = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+                                                        _videoTextureCache,
+                                                        imageBuffer,
+                                                        NULL,
+                                                        GL_TEXTURE_2D,
+                                                        GL_RED_EXT,
+                                                        (GLsizei)_bufferWidth,
+                                                        (GLsizei)_bufferHeight,
+                                                        GL_RED_EXT,
+                                                        GL_UNSIGNED_BYTE,
+                                                        0,
+                                                        &_lumaTexture);
+    if (error) {
+        DLog(@"error CVOpenGLESTextureCacheCreateTextureFromImage (%d)", error);
+    }
+    
+    glBindTexture(CVOpenGLESTextureGetTarget(_lumaTexture), CVOpenGLESTextureGetName(_lumaTexture));
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+    
+    // UV-plane
+    glActiveTexture(GL_TEXTURE1);
+    error = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+                                                         _videoTextureCache,
+                                                         imageBuffer,
+                                                         NULL,
+                                                         GL_TEXTURE_2D,
+                                                         GL_RG_EXT,
+                                                         (GLsizei)(_bufferWidth * 0.5),
+                                                         (GLsizei)(_bufferHeight * 0.5),
+                                                         GL_RG_EXT,
+                                                         GL_UNSIGNED_BYTE,
+                                                         1,
+                                                         &_chromaTexture);
+    if (error) {
+        DLog(@"error CVOpenGLESTextureCacheCreateTextureFromImage (%d)", error);
+    }
+    
+    glBindTexture(CVOpenGLESTextureGetTarget(_chromaTexture), CVOpenGLESTextureGetName(_chromaTexture));
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    if (CVPixelBufferUnlockBaseAddress(imageBuffer, 0) != kCVReturnSuccess)
+        return;
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+#pragma mark - AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate
+
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    // TODO: save the last frame for onion skinning
-
     CMFormatDescriptionRef formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer);
 	CFRetain(sampleBuffer);
 	CFRetain(formatDescription);
@@ -1314,6 +1494,14 @@ typedef void (^PBJVisionBlock)();
                     _videoTimestamp = time;
                     _flags.videoWritten = YES;
                 }
+                
+                // process the sample buffer for rendering
+                if (_flags.videoRenderingEnabled && _flags.videoWritten) {
+                    [self _executeBlockOnMainQueue:^{
+                        [self _processSampleBuffer:bufferToWrite];
+                    }];
+                }
+                
                 CFRelease(bufferToWrite);
             }
             
@@ -1539,6 +1727,189 @@ typedef void (^PBJVisionBlock)();
         }
         
 	}
+}
+
+#pragma mark - OpenGLES context support
+
+- (void)_setupBuffers
+{
+
+// unit square for testing
+//    static const GLfloat unitSquareVertices[] = {
+//        -1.0f, -1.0f,
+//        1.0f, -1.0f,
+//        -1.0f,  1.0f,
+//        1.0f,  1.0f,
+//    };
+    
+    CGSize inputSize = CGSizeMake(_bufferWidth, _bufferHeight);
+    CGRect insetRect = AVMakeRectWithAspectRatioInsideRect(inputSize, _presentationFrame);
+    
+    CGFloat widthScale = CGRectGetHeight(_presentationFrame) / CGRectGetHeight(insetRect);
+    CGFloat heightScale = CGRectGetWidth(_presentationFrame) / CGRectGetWidth(insetRect);
+
+    static GLfloat vertices[8];
+
+    vertices[0] = -widthScale;
+    vertices[1] = -heightScale;
+    vertices[2] = widthScale;
+    vertices[3] = -heightScale;
+    vertices[4] = -widthScale;
+    vertices[5] = heightScale;
+    vertices[6] = widthScale;
+    vertices[7] = heightScale;
+
+    static const GLfloat textureCoordinates[] = {
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+    };
+    
+    static const GLfloat textureCoordinatesVerticalFlip[] = {
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+        1.0f, 0.0f,
+        0.0f, 0.0f,
+    };
+    
+    glEnableVertexAttribArray(PBJVisionAttributeVertex);
+    glVertexAttribPointer(PBJVisionAttributeVertex, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+    
+    if (_cameraDevice == PBJCameraDeviceFront) {
+        glEnableVertexAttribArray(PBJVisionAttributeTextureCoord);
+        glVertexAttribPointer(PBJVisionAttributeTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, textureCoordinatesVerticalFlip);
+    } else {
+        glEnableVertexAttribArray(PBJVisionAttributeTextureCoord);
+        glVertexAttribPointer(PBJVisionAttributeTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, textureCoordinates);
+    }
+}
+
+- (void)_setupGL
+{
+    [EAGLContext setCurrentContext:_context];
+    
+    [self _loadShaders];
+    
+    glUseProgram(_program);
+        
+    glUniform1i(_uniforms[PBJVisionUniformY], 0);
+    glUniform1i(_uniforms[PBJVisionUniformUV], 1);
+}
+
+- (void)_destroyGL
+{
+    [EAGLContext setCurrentContext:_context];
+
+    if (_program) {
+        glDeleteProgram(_program);
+        _program = 0;
+    }
+    
+    if ([EAGLContext currentContext] == _context) {
+        [EAGLContext setCurrentContext:nil];
+    }
+}
+
+#pragma mark - OpenGLES shader support
+// TODO: abstract this in future
+
+- (BOOL)_loadShaders
+{
+    GLuint vertShader;
+    GLuint fragShader;
+    NSString *vertShaderName;
+    NSString *fragShaderName;
+    
+    _program = glCreateProgram();
+    
+    vertShaderName = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"vsh"];
+    if (![self _compileShader:&vertShader type:GL_VERTEX_SHADER file:vertShaderName]) {
+        DLog(@"failed to compile vertex shader");
+        return NO;
+    }
+    
+    fragShaderName = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"fsh"];
+    if (![self _compileShader:&fragShader type:GL_FRAGMENT_SHADER file:fragShaderName]) {
+        DLog(@"failed to compile fragment shader");
+        return NO;
+    }
+    
+    glAttachShader(_program, vertShader);
+    glAttachShader(_program, fragShader);
+    
+    glBindAttribLocation(_program, PBJVisionAttributeVertex, "a_position");
+    glBindAttribLocation(_program, PBJVisionAttributeTextureCoord, "a_texture");
+    
+    if (![self _linkProgram:_program]) {
+        DLog(@"failed to link program, %d", _program);
+        
+        if (vertShader) {
+            glDeleteShader(vertShader);
+            vertShader = 0;
+        }
+        if (fragShader) {
+            glDeleteShader(fragShader);
+            fragShader = 0;
+        }
+        if (_program) {
+            glDeleteProgram(_program);
+            _program = 0;
+        }
+        
+        return NO;
+    }
+    
+    _uniforms[PBJVisionUniformY] = glGetUniformLocation(_program, "u_samplerY");
+    _uniforms[PBJVisionUniformUV] = glGetUniformLocation(_program, "u_samplerUV");
+    
+    if (vertShader) {
+        glDetachShader(_program, vertShader);
+        glDeleteShader(vertShader);
+    }
+    if (fragShader) {
+        glDetachShader(_program, fragShader);
+        glDeleteShader(fragShader);
+    }
+    
+    return YES;
+}
+
+- (BOOL)_compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file
+{
+    GLint status;
+    const GLchar *source;
+    
+    source = (GLchar *)[[NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil] UTF8String];
+    if (!source) {
+        DLog(@"failed to load vertex shader");
+        return NO;
+    }
+    
+    *shader = glCreateShader(type);
+    glShaderSource(*shader, 1, &source, NULL);
+    glCompileShader(*shader);
+    
+    glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
+    if (status == 0) {
+        glDeleteShader(*shader);
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (BOOL)_linkProgram:(GLuint)prog
+{
+    GLint status;
+    glLinkProgram(prog);
+    
+    glGetProgramiv(prog, GL_LINK_STATUS, &status);
+    if (status == 0) {
+        return NO;
+    }
+    
+    return YES;
 }
 
 

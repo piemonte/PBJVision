@@ -45,6 +45,7 @@ extern NSString * const PBJVisionPhotoThumbnailKey; // 160x120
 extern NSString * const PBJVisionVideoPathKey;
 extern NSString * const PBJVisionVideoThumbnailKey;
 
+@class EAGLContext;
 @protocol PBJVisionDelegate;
 @interface PBJVision : NSObject
 {
@@ -89,6 +90,9 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic, readonly) BOOL supportsVideoCapture;
 @property (nonatomic, readonly) BOOL canCaptureVideo;
 
+@property (nonatomic, getter=isVideoRenderingEnabled) BOOL videoRenderingEnabled;
+@property (nonatomic, readonly) EAGLContext *context;
+@property (nonatomic) CGRect presentationFrame;
 
 - (void)startVideoCapture;
 - (void)pauseVideoCapture;

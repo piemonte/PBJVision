@@ -11,6 +11,7 @@
 #import "PBJStrobeView.h"
 
 #import <AssetsLibrary/AssetsLibrary.h>
+#import <GLKit/GLKit.h>
 
 @interface UIButton (ExtendedHit)
 
@@ -37,10 +38,14 @@
 {
     PBJStrobeView *_strobeView;
     UIButton *_doneButton;
+    
     UIButton *_flipButton;
+    UIButton *_onionButton;
 
     UIView *_previewView;
     AVCaptureVideoPreviewLayer *_previewLayer;
+    GLKViewController *_effectsViewController;
+    
     UILabel *_instructionLabel;
     
     UILongPressGestureRecognizer *_longPressGestureRecognizer;
@@ -99,20 +104,27 @@
     // preview
     _previewView = [[UIView alloc] initWithFrame:CGRectZero];
     _previewView.backgroundColor = [UIColor blackColor];
-    CGRect previewFrame = CGRectZero;
-    previewFrame.origin = CGPointMake(0, 60.0f);
-    CGFloat previewWidth = self.view.frame.size.width;
-    previewFrame.size = CGSizeMake(previewWidth, previewWidth);
+    CGRect previewFrame = CGRectMake(0, 60.0f, CGRectGetWidth(self.view.frame), CGRectGetWidth(self.view.frame));
     _previewView.frame = previewFrame;
-
-    // add AV layer
     _previewLayer = [[PBJVision sharedInstance] previewLayer];
-    CGRect previewBounds = _previewView.layer.bounds;
-    _previewLayer.bounds = previewBounds;
+    _previewLayer.frame = _previewView.bounds;
     _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-    _previewLayer.position = CGPointMake(CGRectGetMidX(previewBounds), CGRectGetMidY(previewBounds));
     [_previewView.layer addSublayer:_previewLayer];
     [self.view addSubview:_previewView];
+
+    // onion skin
+    _effectsViewController = [[GLKViewController alloc] init];
+    _effectsViewController.preferredFramesPerSecond = 60;
+    
+    GLKView *view = (GLKView *)_effectsViewController.view;
+    CGRect viewFrame = _previewView.bounds;
+    view.frame = viewFrame;
+    view.context = [[PBJVision sharedInstance] context];
+    view.contentScaleFactor = [[UIScreen mainScreen] scale];
+    view.alpha = 0.5f;
+    view.hidden = YES;
+    [[PBJVision sharedInstance] setPresentationFrame:_previewView.frame];
+    [_previewView addSubview:_effectsViewController.view];
 
     // instruction label
     _instructionLabel = [[UILabel alloc] initWithFrame:self.view.bounds];
@@ -145,17 +157,18 @@
 
     // flip button
     _flipButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    
-    UIImage *flipImage = [UIImage imageNamed:@"capture_flip"];
-    [_flipButton setImage:flipImage forState:UIControlStateNormal];
-    
-    CGRect flipFrame = _flipButton.frame;
-    flipFrame.size = CGSizeMake(25.0f, 20.0f);
-    flipFrame.origin = CGPointMake(10.0f, CGRectGetHeight(self.view.bounds) - 10.0f);
-    _flipButton.frame = flipFrame;
-    
+    [_flipButton setImage:[UIImage imageNamed:@"capture_flip"] forState:UIControlStateNormal];
+    _flipButton.frame = CGRectMake(15.0f, CGRectGetHeight(self.view.bounds) - 15.0f, 30.0f, 25.0f);
     [_flipButton addTarget:self action:@selector(_handleFlipButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_flipButton];
+    
+    // onion button
+    _onionButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_onionButton setImage:[UIImage imageNamed:@"capture_onion"] forState:UIControlStateNormal];
+    [_onionButton setImage:[UIImage imageNamed:@"capture_onion_selected"] forState:UIControlStateSelected];
+    _onionButton.frame = CGRectMake(CGRectGetWidth(self.view.bounds) - 25.0f - 15.0f, CGRectGetHeight(self.view.bounds) - 15.0f, 25.0f, 25.0f);
+    [_onionButton addTarget:self action:@selector(_handleOnionSkinningButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:_onionButton];
 }
 
 #pragma mark - view lifecycle
@@ -194,17 +207,20 @@
 - (void)_pauseCapture
 {
     [[PBJVision sharedInstance] pauseVideoCapture];
+    _effectsViewController.view.hidden = !_onionButton.selected;
 }
 
 - (void)_resumeCapture
 {
     [[PBJVision sharedInstance] resumeVideoCapture];
+    _effectsViewController.view.hidden = YES;
 }
 
 - (void)_endCapture
 {
     [UIApplication sharedApplication].idleTimerDisabled = NO;
     [[PBJVision sharedInstance] endVideoCapture];
+    _effectsViewController.view.hidden = YES;
 }
 
 - (void)_resetCapture
@@ -218,6 +234,7 @@
     [vision setCameraDevice:PBJCameraDeviceBack];
     [vision setCameraOrientation:PBJCameraOrientationPortrait];
     [vision setFocusMode:PBJFocusModeAutoFocus];
+    [vision setVideoRenderingEnabled:YES];
 }
 
 #pragma mark - UIButton
@@ -230,6 +247,13 @@
     } else {
         [vision setCameraDevice:PBJCameraDeviceBack];
     }
+}
+
+- (void)_handleOnionSkinningButton:(UIButton *)button
+{
+    [_onionButton setSelected:!_onionButton.selected];
+    if (_recording)
+        _effectsViewController.view.hidden = !_onionButton.selected;
 }
 
 - (void)_handleDoneButton:(UIButton *)button
@@ -285,16 +309,6 @@
 
 - (void)visionSessionDidStop:(PBJVision *)vision
 {
-}
-
-- (void)visionPreviewDidStart:(PBJVision *)vision
-{
-    _longPressGestureRecognizer.enabled = YES;
-}
-
-- (void)visionPreviewWillStop:(PBJVision *)vision
-{
-    _longPressGestureRecognizer.enabled = NO;
 }
 
 - (void)visionModeWillChange:(PBJVision *)vision
