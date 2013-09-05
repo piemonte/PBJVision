@@ -85,6 +85,7 @@ NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
 	CMTime _videoTimestamp;
     
     // flags
+    
     struct {
         unsigned int previewRunning:1;
         unsigned int changingModes:1;

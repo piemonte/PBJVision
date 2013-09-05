@@ -102,9 +102,6 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionSessionDidStart:(PBJVision *)vision;
 - (void)visionSessionDidStop:(PBJVision *)vision;
 
-- (void)visionPreviewDidStart:(PBJVision *)vision;
-- (void)visionPreviewWillStop:(PBJVision *)vision;
-
 - (void)visionModeWillChange:(PBJVision *)vision;
 - (void)visionModeDidChange:(PBJVision *)vision;
 
