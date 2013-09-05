@@ -873,6 +873,31 @@ typedef void (^PBJVisionBlock)();
     return [self supportsVideoCapture] && [self isActive] && !_flags.changingModes && isDiskSpaceAvailable;
 }
 
+- (NSArray *)_metadataArray
+{
+    UIDevice *currentDevice = [UIDevice currentDevice];
+    
+    // device model
+    AVMutableMetadataItem *modelItem = [[AVMutableMetadataItem alloc] init];
+    [modelItem setKeySpace:AVMetadataKeySpaceCommon];
+    [modelItem setKey:AVMetadataCommonKeyModel];
+    [modelItem setValue:[currentDevice localizedModel]];
+
+    // software
+    AVMutableMetadataItem *softwareItem = [[AVMutableMetadataItem alloc] init];
+    [softwareItem setKeySpace:AVMetadataKeySpaceCommon];
+    [softwareItem setKey:AVMetadataCommonKeySoftware];
+    [softwareItem setValue:[NSString stringWithFormat:@"%@ %@ PBJVision", [currentDevice systemName], [currentDevice systemVersion]]];
+
+    // creation date
+    AVMutableMetadataItem *creationDateItem = [[AVMutableMetadataItem alloc] init];
+    [creationDateItem setKeySpace:AVMetadataKeySpaceCommon];
+    [creationDateItem setKey:AVMetadataCommonKeyCreationDate];
+    [creationDateItem setValue:[NSString PBJformattedTimestampStringFromDate:[NSDate date]]];
+
+    return @[modelItem, softwareItem, creationDateItem];
+}
+
 - (void)startVideoCapture
 {
     if (![self _canSessionCaptureWithOutput:_currentOutput]) {
@@ -923,7 +948,8 @@ typedef void (^PBJVisionBlock)();
             return;
         }
         
-        // TODO: create metadata and add to _assetWriter.metadata
+        NSArray *metadata = [self _metadataArray];
+        _assetWriter.metadata = metadata;
         
         [self _enqueueBlockOnMainQueue:^{                
             if ([_delegate respondsToSelector:@selector(visionDidStartVideoCapture:)])
