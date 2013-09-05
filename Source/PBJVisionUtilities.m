@@ -161,3 +161,27 @@
 }
 
 @end
+
+#pragma mark - NSString Extras
+
+@implementation NSString (PBJExtras)
+
++ (NSString *)PBJformattedTimestampStringFromDate:(NSDate *)date
+{
+    if (!date)
+        return nil;
+    
+    static NSDateFormatter *dateFormatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'"];
+        [dateFormatter setTimeZone:[NSTimeZone timeZoneWithName:@"UTC"]];
+        [dateFormatter setLocale:[NSLocale autoupdatingCurrentLocale]];
+    });
+    
+    return [dateFormatter stringFromDate:date];
+}
+
+@end
+

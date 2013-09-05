@@ -21,3 +21,9 @@
 + (uint64_t)availableDiskSpaceInBytes;
 
 @end
+
+@interface NSString (PBJExtras)
+
++ (NSString *)PBJformattedTimestampStringFromDate:(NSDate *)date;
+
+@end
