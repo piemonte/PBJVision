@@ -8,6 +8,7 @@
 #import "PBJVision.h"
 #import "PBJVisionUtilities.h"
 
+#import <UIKit/UIDevice.h>
 #import <ImageIO/ImageIO.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 
@@ -1265,7 +1266,7 @@ typedef void (^PBJVisionBlock)();
             }
 
             if (bufferToWrite) {
-                // update the last video timestamp
+                // update video and the last timestamp
                 CMTime time = CMSampleBufferGetPresentationTimeStamp(bufferToWrite);
                 CMTime duration = CMSampleBufferGetDuration(bufferToWrite);
                 if (duration.value > 0)

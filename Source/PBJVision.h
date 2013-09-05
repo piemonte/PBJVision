@@ -78,16 +78,17 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 // photo
 
-- (BOOL)canCapturePhoto;
+@property (nonatomic, readonly) BOOL canCapturePhoto;
+
 - (void)capturePhoto;
 
 // video
 // use pause/resume if a session is in progress, end finalizes that recording session
 
 @property (nonatomic, readonly, getter=isRecording) BOOL recording;
+@property (nonatomic, readonly) BOOL supportsVideoCapture;
+@property (nonatomic, readonly) BOOL canCaptureVideo;
 
-- (BOOL)supportsVideoCapture;
-- (BOOL)canCaptureVideo;
 
 - (void)startVideoCapture;
 - (void)pauseVideoCapture;
