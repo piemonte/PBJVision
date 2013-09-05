@@ -5,7 +5,13 @@
 
 We created this at DIY.org as a fun means for kids to author video but also as a way to easily create stop motion. This same concept is used in Vine and Instagram.
 
-I'll be adding more features and documentation in the future.
+### Release History
+
+v0.1.2 addition of onion skinning (ghosting)
+
+v0.1.1 minor bug fixes
+
+v0.1.0 initial release of touch-to-record video
 
 ### Basic Use
 ```objective-c
