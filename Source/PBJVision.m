@@ -148,6 +148,7 @@ enum
 @synthesize focusMode = _focusMode;
 @synthesize context = _context;
 @synthesize presentationFrame = _presentationFrame;
+@synthesize flashMode = _flashMode;
 
 #pragma mark - singleton
 
@@ -251,6 +252,30 @@ enum
     }];
 }
 
+- (void)_setFlashMode:(PBJFlashMode)flashMode cameraDevice:(PBJCameraDevice)cameraDevice
+{
+    BOOL changeFlashMode = (_flashMode != flashMode);
+
+    DLog(@"change flash mode %d", changeFlashMode);
+
+    if (!changeFlashMode)
+        return;
+    
+    _cameraDevice = cameraDevice;
+    _flashMode = flashMode;
+    
+    if (!_captureSession)
+        return;
+
+    [self _enqueueBlockInCaptureSessionQueue:^{
+        [self _setupSession];
+        [self _enqueueBlockOnMainQueue:^{
+            if ([_delegate respondsToSelector:@selector(visionModeDidChange:)])
+                [_delegate visionModeDidChange:self];
+        }];
+    }];
+}
+
 - (void)setCameraDevice:(PBJCameraDevice)cameraDevice
 {
     [self _setCameraMode:_cameraMode cameraDevice:cameraDevice];
@@ -259,6 +284,11 @@ enum
 - (void)setCameraMode:(PBJCameraMode)cameraMode
 {
     [self _setCameraMode:cameraMode cameraDevice:_cameraDevice];
+}
+
+- (void)setFlashMode:(PBJFlashMode)flashMode
+{
+    [self _setFlashMode:flashMode cameraDevice:_cameraDevice];
 }
 
 #pragma mark - init
@@ -467,10 +497,12 @@ typedef void (^PBJVisionBlock)();
     BOOL shouldSwitchMode = (_currentOutput == nil) ||
                             ((_currentOutput == _captureOutputPhoto) && (_cameraMode != PBJCameraModePhoto)) ||
                             ((_currentOutput == _captureOutputVideo) && (_cameraMode != PBJCameraModeVideo));
+    
+    BOOL shouldSwitchFlashMode = (_flashMode != [_currentDevice flashMode]);
 
-    DLog(@"switchDevice %d switchMode %d", shouldSwitchDevice, shouldSwitchMode);
+    DLog(@"switchDevice %d switchMode %d flashMode %d", shouldSwitchDevice, shouldSwitchMode, shouldSwitchFlashMode);
 
-    if (!shouldSwitchDevice && !shouldSwitchMode)
+    if (!shouldSwitchDevice && !shouldSwitchMode && !shouldSwitchFlashMode)
         return;
     
     AVCaptureDeviceInput *newDeviceInput = nil;
@@ -551,6 +583,15 @@ typedef void (^PBJVisionBlock)();
     
     if (!newCaptureDevice)
         newCaptureDevice = _currentDevice;
+
+    if (shouldSwitchFlashMode) {
+        BOOL lockAcquired = [_currentDevice lockForConfiguration:nil];
+
+        if (lockAcquired && [_currentDevice hasFlash] && [_currentDevice isFlashModeSupported:_flashMode])
+            [_currentDevice setFlashMode:_flashMode];
+
+        [_currentDevice unlockForConfiguration];
+    } // shouldSwitchFlashMode
 
     if (!newCaptureOutput)
         newCaptureOutput = _currentOutput;
