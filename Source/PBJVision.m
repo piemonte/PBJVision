@@ -25,7 +25,6 @@ static CGFloat const PBJVisionThumbnailWidth = 160.0f;
 
 // KVO contexts
 
-static NSString * const PBJVisionFocusObserverContext = @"PBJVisionFocusObserverContext";
 static NSString * const PBJVisionCaptureStillImageIsCapturingStillImageObserverContext = @"PBJVisionCaptureStillImageIsCapturingStillImageObserverContext";
 
 // photo dictionary key definitions
@@ -449,6 +448,7 @@ typedef void (^PBJVisionBlock)();
     // only KVO use
     [_captureOutputPhoto removeObserver:self forKeyPath:@"capturingStillImage"];
     [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
+    [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
 
     _captureOutputPhoto = nil;
     _captureOutputAudio = nil;
@@ -668,8 +668,10 @@ typedef void (^PBJVisionBlock)();
     // KVO
     if (newCaptureDevice) {
         [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
+        [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
         _currentDevice = newCaptureDevice;
-        [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
+        [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:0 context:NULL];
+        [_currentDevice addObserver:self forKeyPath:@"adjustingExposure" options:0 context:NULL];
     }
     
     if (newDeviceInput)
@@ -738,11 +740,13 @@ typedef void (^PBJVisionBlock)();
         _previewLayer.connection.enabled = YES;
 }
 
+
 #pragma mark - focus, exposure, white balance
+
 
 - (void)_focusStarted
 {
-//    DLog(@"focus started");
+    DLog(@"focus started");
     if ([_delegate respondsToSelector:@selector(visionWillStartFocus:)])
         [_delegate visionWillStartFocus:self];
 }
@@ -751,7 +755,7 @@ typedef void (^PBJVisionBlock)();
 {
     if ([_delegate respondsToSelector:@selector(visionDidStopFocus:)])
         [_delegate visionDidStopFocus:self];
-//    DLog(@"focus ended");
+    DLog(@"focus ended");
 }
 
 - (void)_focus
@@ -803,11 +807,13 @@ typedef void (^PBJVisionBlock)();
         if (isFocusAtPointSupported && [_currentDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
             [_currentDevice setFocusPointOfInterest:adjustedPoint];
             [_currentDevice setFocusMode:AVCaptureFocusModeAutoFocus];
+            [_currentDevice setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
         }
         
         if (isExposureAtPointSupported && [_currentDevice isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure]) {
             [_currentDevice setExposurePointOfInterest:adjustedPoint];
             [_currentDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+            [_currentDevice setExposureMode:AVCaptureExposureModeLocked];
         }
         
         if (isWhiteBalanceModeSupported) {
@@ -1671,8 +1677,11 @@ typedef void (^PBJVisionBlock)();
                 AVCaptureDevice *device = [_currentInput device];
                 if (device) {
                     [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
+                    [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
+                    
                     _currentDevice = device;
-                    [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
+                    [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:0 context:NULL];
+                    [_currentDevice addObserver:self forKeyPath:@"adjustingExposure" options:0 context:NULL];
                 }
             }
         
@@ -1749,16 +1758,7 @@ typedef void (^PBJVisionBlock)();
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if ( context == (__bridge void *)PBJVisionFocusObserverContext ) {
-    
-        BOOL isFocusing = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
-        if (isFocusing) {
-            [self _focusStarted];
-        } else {
-            [self _focusEnded];
-        }
-        
-	} else if ( context == (__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext) ) {
+    if ( context == (__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext) ) {
     
 		BOOL isCapturingStillImage = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
 		if ( isCapturingStillImage ) {
@@ -1767,7 +1767,22 @@ typedef void (^PBJVisionBlock)();
             [self _didCapturePhoto];
         }
         
-	}
+	} else if ([keyPath isEqualToString:@"adjustingExposure"]) {
+        if (_currentDevice.adjustingExposure && [_delegate respondsToSelector:@selector(visionCameraViewDidBeginAdjustingExposure:)]) {
+            [_delegate visionCameraViewDidBeginAdjustingExposure:self];
+        }
+        else if (!_currentDevice.adjustingExposure && [_delegate respondsToSelector:@selector(visionCameraViewDidFinishAdjustingExposure:)]) {
+            [_delegate visionCameraViewDidFinishAdjustingExposure:self];
+        }
+        
+    } else if ([keyPath isEqualToString:@"adjustingFocus"]) {
+        if (_currentDevice.adjustingFocus) {
+            [self _focusStarted];
+        }
+        else if (!_currentDevice.adjustingFocus) {
+           [self _focusEnded];
+        }
+    }
 }
 
 #pragma mark - OpenGLES context support

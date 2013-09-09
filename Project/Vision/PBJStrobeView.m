@@ -7,6 +7,7 @@
 //
 
 #import "PBJStrobeView.h"
+#import <QuartzCore/QuartzCore.h>
 
 #import <QuartzCore/QuartzCore.h>
 
