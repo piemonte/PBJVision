@@ -7,6 +7,7 @@
 //
 
 #import "PBJStrobeView.h"
+#import <QuartzCore/QuartzCore.h>
 
 static CGFloat const PBJStrobeViewMinDuration = 0.5f;
 

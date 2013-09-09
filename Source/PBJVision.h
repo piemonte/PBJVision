@@ -112,6 +112,10 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionWillStartFocus:(PBJVision *)vision;
 - (void)visionDidStopFocus:(PBJVision *)vision;
 
+
+- (void)visionCameraViewDidBeginAdjustingExposure:(PBJVision *)vision;
+- (void)visionCameraViewDidFinishAdjustingExposure:(PBJVision *)vision;
+
 - (void)visionWillCapturePhoto:(PBJVision *)vision;
 - (void)visionDidCapturePhoto:(PBJVision *)vision;
 - (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error;

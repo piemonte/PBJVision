@@ -9,6 +9,8 @@
 #import "PBJViewController.h"
 #import "PBJVision.h"
 #import "PBJStrobeView.h"
+#import "PBJVisionUtilities.h"
+#import "ZXHVisionCameraTargetView.h"
 
 #import <AssetsLibrary/AssetsLibrary.h>
 
@@ -46,6 +48,11 @@
     UILongPressGestureRecognizer *_longPressGestureRecognizer;
     BOOL _recording;
 
+
+    UITapGestureRecognizer *_tapGestureRecognizer;
+    ZXHVisionCameraTargetView *_cameraTargetView;
+    
+    
     ALAssetsLibrary *_assetLibrary;
     __block NSDictionary *_currentVideo;
 }
@@ -130,9 +137,11 @@
     // press to record gesture
     _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] init];
     _longPressGestureRecognizer.delegate = self;
-    _longPressGestureRecognizer.minimumPressDuration = 0.05f;
+    _longPressGestureRecognizer.minimumPressDuration = 0.15f;
     _longPressGestureRecognizer.allowableMovement = 10.0f;
     [_longPressGestureRecognizer addTarget:self action:@selector(_handleLongPressGestureRecognizer:)];
+    
+    _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_handleTapGestureRecognizer:)];
     
     // gesture view to record
     UIView *gestureView = [[UIView alloc] initWithFrame:CGRectZero];
@@ -142,7 +151,15 @@
     gestureView.frame = gestureFrame;
     [self.view addSubview:gestureView];
     [gestureView addGestureRecognizer:_longPressGestureRecognizer];
-
+    [gestureView addGestureRecognizer:_tapGestureRecognizer];
+    
+    // CameraTargetView
+    _cameraTargetView = [[ZXHVisionCameraTargetView alloc]initWithFrame:CGRectMake(80, 165, 65, 65)];
+    _cameraTargetView.backgroundColor = [UIColor clearColor];
+    [gestureView addSubview:_cameraTargetView];
+    [_cameraTargetView hideAnimated:NO];
+    
+    
     // flip button
     _flipButton = [UIButton buttonWithType:UIButtonTypeCustom];
     
@@ -250,6 +267,20 @@
 
 #pragma mark - UIGestureRecognizer
 
+- (void)_handleTapGestureRecognizer:(UITapGestureRecognizer *)gestureRecognizer {
+    PBJVision *vision = [PBJVision sharedInstance];
+    
+    CGPoint tapPoint = [gestureRecognizer locationInView:_previewView];
+    _cameraTargetView.center = tapPoint;
+    [_cameraTargetView showAnimated:YES];
+    
+    CGPoint adjustPoint = [PBJVisionUtilities convertToPointOfInterestFromViewCoordinates:tapPoint inFrame:_previewView.frame];
+    
+    
+    
+    [vision focusAtAdjustedPoint:adjustPoint];
+}
+
 - (void)_handleLongPressGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
 {
     switch (gestureRecognizer.state) {
@@ -315,6 +346,15 @@
 
 - (void)visionDidStopFocus:(PBJVision *)vision
 {
+    [_cameraTargetView hideAnimated:YES];
+}
+
+- (void)visionCameraViewDidBeginAdjustingExposure:(PBJVision *)vision {
+    
+}
+
+- (void)visionCameraViewDidFinishAdjustingExposure:(PBJVision *)vision {
+    [_cameraTargetView hideAnimated:YES];
 }
 
 // video capture
