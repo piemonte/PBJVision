@@ -514,6 +514,8 @@ typedef void (^PBJVisionBlock)();
     [_captureSession setSessionPreset:AVCaptureSessionPresetMedium];
     NSString *sessionPreset = [_captureSession sessionPreset];
     
+    // setup session device
+    
     if (shouldSwitchDevice) {
         switch (_cameraDevice) {
           case PBJCameraDeviceFront:
@@ -541,6 +543,8 @@ typedef void (^PBJVisionBlock)();
         }
     
     } // shouldSwitchDevice
+    
+    // setup session input/output
     
     if (shouldSwitchMode) {
         [_captureSession removeInput:_captureDeviceInputAudio];
@@ -595,6 +599,8 @@ typedef void (^PBJVisionBlock)();
 
     if (!newCaptureOutput)
         newCaptureOutput = _currentOutput;
+
+    // setup input/output
 
     if (newCaptureOutput == _captureOutputVideo) {
 
@@ -652,17 +658,25 @@ typedef void (^PBJVisionBlock)();
     // apply presets
     if ([_captureSession canSetSessionPreset:sessionPreset])
         [_captureSession setSessionPreset:sessionPreset];
-    
-    // enable low light boost
-    if ([newCaptureDevice isLowLightBoostSupported]) {
-        NSError *error = nil;
-        if ([newCaptureDevice lockForConfiguration:&error]) {
-            BOOL enableLowLightBoost = (newCaptureOutput == _captureOutputPhoto);
-            [newCaptureDevice setAutomaticallyEnablesLowLightBoostWhenAvailable:enableLowLightBoost];
-            [newCaptureDevice unlockForConfiguration];
-        } else {
-            DLog(@"error locking device for low light boost (%@)", error);
+
+    // enable device specific settings
+    NSError *error = nil;
+    if ([newCaptureDevice lockForConfiguration:&error]) {
+
+        // low light boost for photo stills
+        BOOL enableLowLightBoost = (newCaptureOutput == _captureOutputPhoto);
+        [newCaptureDevice setAutomaticallyEnablesLowLightBoostWhenAvailable:enableLowLightBoost];
+        
+        // smooth autofocus for videos
+        if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
+            BOOL enableSmoothAutoFocus = (newCaptureOutput == _captureOutputVideo);
+            [newCaptureDevice setSmoothAutoFocusEnabled:enableSmoothAutoFocus];
         }
+
+        [newCaptureDevice unlockForConfiguration];
+    
+    } else if (error) {
+        DLog(@"error locking device for specific settings (%@)", error);
     }
 
     // KVO
@@ -767,7 +781,7 @@ typedef void (^PBJVisionBlock)();
     [self focusAtAdjustedPoint:focusPoint];
 }
 
-// TODO: should add in  exposure and white balance locks for completeness one day
+// TODO: should add in exposure and white balance locks for completeness one day
 - (void)_setFocusLocked:(BOOL)focusLocked
 {
     NSError *error = nil;
