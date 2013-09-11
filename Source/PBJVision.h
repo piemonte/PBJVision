@@ -68,7 +68,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic) PBJCameraDevice cameraDevice;
 @property (nonatomic) PBJCameraMode cameraMode;
 @property (nonatomic) PBJFocusMode focusMode;
-@property (nonatomic) PBJFlashMode flashMode;
+@property (nonatomic) PBJFlashMode flashMode; // flash and torch
 
 // preview
 

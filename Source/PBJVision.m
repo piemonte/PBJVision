@@ -92,6 +92,9 @@ enum
     PBJCameraDevice _cameraDevice;
     PBJCameraMode _cameraMode;
     PBJCameraOrientation _cameraOrientation;
+    
+    PBJFocusMode _focusMode;
+    PBJFlashMode _flashMode;
 
     AVCaptureDevice *_currentDevice;
     AVCaptureDeviceInput *_currentInput;
@@ -142,13 +145,13 @@ enum
 @synthesize delegate = _delegate;
 @synthesize previewLayer = _previewLayer;
 @synthesize cleanAperture = _cleanAperture;
+@synthesize cameraOrientation = _cameraOrientation;
 @synthesize cameraDevice = _cameraDevice;
 @synthesize cameraMode = _cameraMode;
-@synthesize cameraOrientation = _cameraOrientation;
 @synthesize focusMode = _focusMode;
+@synthesize flashMode = _flashMode;
 @synthesize context = _context;
 @synthesize presentationFrame = _presentationFrame;
-@synthesize flashMode = _flashMode;
 
 #pragma mark - singleton
 
@@ -252,28 +255,7 @@ enum
     }];
 }
 
-- (void)_setFlashMode:(PBJFlashMode)flashMode cameraDevice:(PBJCameraDevice)cameraDevice
 {
-    BOOL changeFlashMode = (_flashMode != flashMode);
-
-    DLog(@"change flash mode %d", changeFlashMode);
-
-    if (!changeFlashMode)
-        return;
-    
-    _cameraDevice = cameraDevice;
-    _flashMode = flashMode;
-    
-    if (!_captureSession)
-        return;
-
-    [self _enqueueBlockInCaptureSessionQueue:^{
-        [self _setupSession];
-        [self _enqueueBlockOnMainQueue:^{
-            if ([_delegate respondsToSelector:@selector(visionModeDidChange:)])
-                [_delegate visionModeDidChange:self];
-        }];
-    }];
 }
 
 - (void)setCameraDevice:(PBJCameraDevice)cameraDevice
@@ -288,7 +270,46 @@ enum
 
 - (void)setFlashMode:(PBJFlashMode)flashMode
 {
-    [self _setFlashMode:flashMode cameraDevice:_cameraDevice];
+    BOOL shouldChangeFlashMode = (_flashMode != flashMode);
+    if (![_currentDevice hasFlash] || !shouldChangeFlashMode)
+        return;
+
+    NSError *error = nil;
+    if (_currentDevice && [_currentDevice lockForConfiguration:&error]) {
+        
+        switch (_cameraMode) {
+          case PBJCameraModePhoto:
+          {
+            if ([_currentDevice isFlashModeSupported:(AVCaptureFlashMode)_flashMode]) {
+                [_currentDevice setFlashMode:(AVCaptureFlashMode)_flashMode];
+            }
+            break;
+          }
+          case PBJCameraModeVideo:
+          {
+            if ([_currentDevice isFlashModeSupported:(AVCaptureFlashMode)_flashMode]) {
+                [_currentDevice setFlashMode:AVCaptureFlashModeOff];
+            }
+            
+            if ([_currentDevice isTorchModeSupported:(AVCaptureTorchMode)_flashMode]) {
+                [_currentDevice setTorchMode:(AVCaptureTorchMode)_flashMode];
+            }
+            break;
+          }
+          default:
+            break;
+        }
+    
+        [_currentDevice unlockForConfiguration];
+    
+    } else if (error) {
+        DLog(@"error locking device for flash mode change (%@)", error);
+    }
+}
+
+- (PBJFlashMode)flashMode
+{
+    return _flashMode;
 }
 
 #pragma mark - init
@@ -498,11 +519,9 @@ typedef void (^PBJVisionBlock)();
                             ((_currentOutput == _captureOutputPhoto) && (_cameraMode != PBJCameraModePhoto)) ||
                             ((_currentOutput == _captureOutputVideo) && (_cameraMode != PBJCameraModeVideo));
     
-    BOOL shouldSwitchFlashMode = (_flashMode != [_currentDevice flashMode]);
+    DLog(@"switchDevice %d switchMode %d", shouldSwitchDevice, shouldSwitchMode);
 
-    DLog(@"switchDevice %d switchMode %d flashMode %d", shouldSwitchDevice, shouldSwitchMode, shouldSwitchFlashMode);
-
-    if (!shouldSwitchDevice && !shouldSwitchMode && !shouldSwitchFlashMode)
+    if (!shouldSwitchDevice && !shouldSwitchMode)
         return;
     
     AVCaptureDeviceInput *newDeviceInput = nil;
@@ -587,15 +606,6 @@ typedef void (^PBJVisionBlock)();
     
     if (!newCaptureDevice)
         newCaptureDevice = _currentDevice;
-
-    if (shouldSwitchFlashMode) {
-        BOOL lockAcquired = [_currentDevice lockForConfiguration:nil];
-
-        if (lockAcquired && [_currentDevice hasFlash] && [_currentDevice isFlashModeSupported:_flashMode])
-            [_currentDevice setFlashMode:_flashMode];
-
-        [_currentDevice unlockForConfiguration];
-    } // shouldSwitchFlashMode
 
     if (!newCaptureOutput)
         newCaptureOutput = _currentOutput;
