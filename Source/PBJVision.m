@@ -96,6 +96,8 @@ enum
     PBJFocusMode _focusMode;
     PBJFlashMode _flashMode;
 
+    PBJOutputFormat _outputFormat;
+
     AVCaptureDevice *_currentDevice;
     AVCaptureDeviceInput *_currentInput;
     AVCaptureOutput *_currentOutput;
@@ -150,6 +152,7 @@ enum
 @synthesize cameraMode = _cameraMode;
 @synthesize focusMode = _focusMode;
 @synthesize flashMode = _flashMode;
+@synthesize outputFormat = _outputFormat;
 @synthesize context = _context;
 @synthesize presentationFrame = _presentationFrame;
 
@@ -216,14 +219,15 @@ enum
     [connection setVideoOrientation:orientation];
 }
 
-- (void)_setCameraMode:(PBJCameraMode)cameraMode cameraDevice:(PBJCameraDevice)cameraDevice
+- (void)_setCameraMode:(PBJCameraMode)cameraMode cameraDevice:(PBJCameraDevice)cameraDevice outputFormat:(PBJOutputFormat)outputFormat
 {
     BOOL changeDevice = (_cameraDevice != cameraDevice);
     BOOL changeMode = (_cameraMode != cameraMode);
+    BOOL changeOutputFormat = (_outputFormat != outputFormat);
     
-    DLog(@"change device %d mode %d", changeDevice, changeMode);
+    DLog(@"change device (%d) mode (%d) format (%d)", changeDevice, changeMode, changeOutputFormat);
     
-    if (!changeMode && !changeDevice)
+    if (!changeMode && !changeDevice && !changeOutputFormat)
         return;
     
     if ([_delegate respondsToSelector:@selector(visionModeWillChange:)])
@@ -233,6 +237,8 @@ enum
     
     _cameraDevice = cameraDevice;
     _cameraMode = cameraMode;
+    
+    _outputFormat = outputFormat;
     
     // since there is no session in progress, set and bail
     if (!_captureSession) {
@@ -255,17 +261,19 @@ enum
     }];
 }
 
-{
-}
-
 - (void)setCameraDevice:(PBJCameraDevice)cameraDevice
 {
-    [self _setCameraMode:_cameraMode cameraDevice:cameraDevice];
+    [self _setCameraMode:_cameraMode cameraDevice:cameraDevice outputFormat:_outputFormat];
 }
 
 - (void)setCameraMode:(PBJCameraMode)cameraMode
 {
-    [self _setCameraMode:cameraMode cameraDevice:_cameraDevice];
+    [self _setCameraMode:cameraMode cameraDevice:_cameraDevice outputFormat:_outputFormat];
+}
+
+- (void)setOutputFormat:(PBJOutputFormat)outputFormat
+{
+    [self _setCameraMode:_cameraMode cameraDevice:_cameraDevice outputFormat:outputFormat];
 }
 
 - (void)setFlashMode:(PBJFlashMode)flashMode
@@ -1243,23 +1251,43 @@ typedef void (^PBJVisionBlock)();
     // 437500, good for 640 x 480
 	float bitRate = 87500.0f * 8.0f;
 	NSInteger frameInterval = 30;
+
+    CMVideoDimensions videoDimensions = dimensions;
+    switch (_outputFormat) {
+      case PBJOutputFormatSquare:
+      {
+        int32_t min = MIN(dimensions.width, dimensions.height);
+        videoDimensions.width = min;
+        videoDimensions.height = min;
+        break;
+      }
+      case PBJOutputFormatWidescreen:
+      {
+        videoDimensions.width = dimensions.width;
+        videoDimensions.height = (int32_t)(dimensions.width / 1.5f);
+        break;
+      }
+      case PBJOutputFormatPreset:
+      default:
+        break;
+    }
     
     NSDictionary *compressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
                                         [NSNumber numberWithFloat:bitRate], AVVideoAverageBitRateKey,
                                         [NSNumber numberWithInteger:frameInterval], AVVideoMaxKeyFrameIntervalKey,
                                         nil];
     
-	NSDictionary *videoCompressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+	NSDictionary *videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:
 											  AVVideoCodecH264, AVVideoCodecKey,
                                               AVVideoScalingModeResizeAspectFill, AVVideoScalingModeKey,
-											  [NSNumber numberWithInteger:dimensions.width], AVVideoWidthKey,
-											  [NSNumber numberWithInteger:dimensions.width], AVVideoHeightKey, // square format
+											  [NSNumber numberWithInteger:videoDimensions.width], AVVideoWidthKey,
+											  [NSNumber numberWithInteger:videoDimensions.height], AVVideoHeightKey,
 											  compressionSettings, AVVideoCompressionPropertiesKey,
 											  nil];
     
-	if ([_assetWriter canApplyOutputSettings:videoCompressionSettings forMediaType:AVMediaTypeVideo]) {
+	if ([_assetWriter canApplyOutputSettings:videoSettings forMediaType:AVMediaTypeVideo]) {
     
-		_assetWriterVideoIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeVideo outputSettings:videoCompressionSettings];
+		_assetWriterVideoIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeVideo outputSettings:videoSettings];
 		_assetWriterVideoIn.expectsMediaDataInRealTime = YES;
 		_assetWriterVideoIn.transform = CGAffineTransformIdentity;
         DLog(@"prepared video-in with compression settings bps (%f) frameInterval (%d)", bitRate, frameInterval);

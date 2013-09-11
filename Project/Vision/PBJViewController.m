@@ -233,6 +233,7 @@
     [vision setCameraMode:PBJCameraModeVideo];
     [vision setCameraDevice:PBJCameraDeviceBack];
     [vision setCameraOrientation:PBJCameraOrientationPortrait];
+    [vision setOutputFormat:PBJOutputFormatSquare];
     [vision setFocusMode:PBJFocusModeAutoFocus];
     [vision setVideoRenderingEnabled:YES];
 }

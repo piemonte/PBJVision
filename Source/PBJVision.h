@@ -39,6 +39,12 @@ typedef NS_ENUM(NSInteger, PBJFlashMode) {
     PBJFlashModeAuto = AVCaptureFlashModeAuto
 };
 
+typedef NS_ENUM(NSInteger, PBJOutputFormat) {
+    PBJOutputFormatPreset = 0,
+    PBJOutputFormatSquare,
+    PBJOutputFormatWidescreen
+};
+
 // photo dictionary keys
 
 extern NSString * const PBJVisionPhotoMetadataKey;
@@ -67,8 +73,11 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic) PBJCameraOrientation cameraOrientation;
 @property (nonatomic) PBJCameraDevice cameraDevice;
 @property (nonatomic) PBJCameraMode cameraMode;
+
 @property (nonatomic) PBJFocusMode focusMode;
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
+
+@property (nonatomic) PBJOutputFormat outputFormat;
 
 // preview
 
