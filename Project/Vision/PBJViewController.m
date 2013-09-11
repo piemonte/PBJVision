@@ -81,7 +81,7 @@
 {
     self.view.backgroundColor = [UIColor blackColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    
+        
     CGFloat viewWidth = CGRectGetWidth(self.view.frame);
     
     // done button
@@ -158,7 +158,7 @@
     // flip button
     _flipButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_flipButton setImage:[UIImage imageNamed:@"capture_flip"] forState:UIControlStateNormal];
-    _flipButton.frame = CGRectMake(15.0f, CGRectGetHeight(self.view.bounds) - 15.0f, 30.0f, 25.0f);
+    _flipButton.frame = CGRectMake(15.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 30.0f, 25.0f);
     [_flipButton addTarget:self action:@selector(_handleFlipButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_flipButton];
     
@@ -166,7 +166,7 @@
     _onionButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_onionButton setImage:[UIImage imageNamed:@"capture_onion"] forState:UIControlStateNormal];
     [_onionButton setImage:[UIImage imageNamed:@"capture_onion_selected"] forState:UIControlStateSelected];
-    _onionButton.frame = CGRectMake(CGRectGetWidth(self.view.bounds) - 25.0f - 15.0f, CGRectGetHeight(self.view.bounds) - 15.0f, 25.0f, 25.0f);
+    _onionButton.frame = CGRectMake(CGRectGetWidth(self.view.bounds) - 25.0f - 15.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 25.0f, 25.0f);
     [_onionButton addTarget:self action:@selector(_handleOnionSkinningButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_onionButton];
 }
@@ -233,8 +233,8 @@
     [vision setCameraMode:PBJCameraModeVideo];
     [vision setCameraDevice:PBJCameraDeviceBack];
     [vision setCameraOrientation:PBJCameraOrientationPortrait];
-    [vision setOutputFormat:PBJOutputFormatSquare];
     [vision setFocusMode:PBJFocusModeAutoFocus];
+    [vision setOutputFormat:PBJOutputFormatSquare];
     [vision setVideoRenderingEnabled:YES];
 }
 
