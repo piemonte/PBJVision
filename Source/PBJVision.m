@@ -665,12 +665,14 @@ typedef void (^PBJVisionBlock)();
 
         // low light boost for photo stills
         BOOL enableLowLightBoost = (newCaptureOutput == _captureOutputPhoto);
-        [newCaptureDevice setAutomaticallyEnablesLowLightBoostWhenAvailable:enableLowLightBoost];
+        if ([newCaptureDevice isLowLightBoostSupported])
+            [newCaptureDevice setAutomaticallyEnablesLowLightBoostWhenAvailable:enableLowLightBoost];
         
         // smooth autofocus for videos
         if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
             BOOL enableSmoothAutoFocus = (newCaptureOutput == _captureOutputVideo);
-            [newCaptureDevice setSmoothAutoFocusEnabled:enableSmoothAutoFocus];
+            if ([newCaptureDevice isSmoothAutoFocusSupported])
+                [newCaptureDevice setSmoothAutoFocusEnabled:enableSmoothAutoFocus];
         }
 
         [newCaptureDevice unlockForConfiguration];
