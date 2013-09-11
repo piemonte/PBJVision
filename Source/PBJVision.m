@@ -625,18 +625,12 @@ typedef void (^PBJVisionBlock)();
         // setup video connection
         AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
         
+        // setup video orientation
         [self _setOrientationForConnection:videoConnection];
         
-        // setup stabilization, if available
+        // setup video stabilization, if available
         if ([videoConnection isVideoStabilizationSupported])
             [videoConnection setEnablesVideoStabilizationWhenAvailable:YES];
-
-        // setup framerate
-        CMTime frameDuration = CMTimeMake( 1, 30 );
-        if ( videoConnection.supportsVideoMinFrameDuration )
-            videoConnection.videoMinFrameDuration = frameDuration; // needs to be applied to session in iOS 7
-        if ( videoConnection.supportsVideoMaxFrameDuration )
-            videoConnection.videoMaxFrameDuration = frameDuration; // needs to be applied to session in iOS 7
 
         // discard late frames
         [_captureOutputVideo setAlwaysDiscardsLateVideoFrames:NO];
@@ -645,7 +639,6 @@ typedef void (^PBJVisionBlock)();
         sessionPreset = AVCaptureSessionPreset640x480;
 
         // setup video settings
-        
         // kCVPixelFormatType_420YpCbCr8BiPlanarFullRange Bi-Planar Component Y'CbCr 8-bit 4:2:0, full-range (luma=[0,255] chroma=[1,255])
         // baseAddr points to a big-endian CVPlanarPixelBufferInfo_YCbCrBiPlanar struct
         BOOL supportsFullRangeYUV = NO;
@@ -660,6 +653,42 @@ typedef void (^PBJVisionBlock)();
                 [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
         [_captureOutputVideo setVideoSettings:videoSettings];
         
+        // setup video device configuration
+        if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
+
+            NSError *error = nil;
+            if ([newCaptureDevice lockForConfiguration:&error]) {
+            
+                // smooth autofocus for videos
+                if ([newCaptureDevice isSmoothAutoFocusSupported])
+                    [newCaptureDevice setSmoothAutoFocusEnabled:YES];
+
+                // setup framerate range
+                // TODO: seek best framerate range for slow-motion recording
+                CMTime frameDuration = CMTimeMake( 1, 30 );
+                newCaptureDevice.activeVideoMinFrameDuration = frameDuration;
+                newCaptureDevice.activeVideoMaxFrameDuration = frameDuration;
+                
+                [newCaptureDevice unlockForConfiguration];
+        
+            } else if (error) {
+                DLog(@"error locking device for video device configuration (%@)", error);
+            }
+        
+        } else {
+        
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            // setup framerate
+            CMTime frameDuration = CMTimeMake( 1, 30 );
+            if ( videoConnection.supportsVideoMinFrameDuration )
+                videoConnection.videoMinFrameDuration = frameDuration;
+            if ( videoConnection.supportsVideoMaxFrameDuration )
+                videoConnection.videoMaxFrameDuration = frameDuration;
+#pragma clang diagnostic pop
+        
+        }
+        
     } else if (newCaptureOutput == _captureOutputPhoto) {
     
         // specify photo preset
@@ -671,33 +700,24 @@ typedef void (^PBJVisionBlock)();
                                         nil];
         [_captureOutputPhoto setOutputSettings:photoSettings];
         
+        // setup photo device configuration
+        NSError *error = nil;
+        if ([newCaptureDevice lockForConfiguration:&error]) {
+            
+            if ([newCaptureDevice isLowLightBoostSupported])
+                [newCaptureDevice setAutomaticallyEnablesLowLightBoostWhenAvailable:YES];
+            
+            [newCaptureDevice unlockForConfiguration];
+        
+        } else if (error) {
+            DLog(@"error locking device for photo device configuration (%@)", error);
+        }
+            
     }
 
     // apply presets
     if ([_captureSession canSetSessionPreset:sessionPreset])
         [_captureSession setSessionPreset:sessionPreset];
-
-    // enable device specific settings
-    NSError *error = nil;
-    if ([newCaptureDevice lockForConfiguration:&error]) {
-
-        // low light boost for photo stills
-        BOOL enableLowLightBoost = (newCaptureOutput == _captureOutputPhoto);
-        if ([newCaptureDevice isLowLightBoostSupported])
-            [newCaptureDevice setAutomaticallyEnablesLowLightBoostWhenAvailable:enableLowLightBoost];
-        
-        // smooth autofocus for videos
-        if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
-            BOOL enableSmoothAutoFocus = (newCaptureOutput == _captureOutputVideo);
-            if ([newCaptureDevice isSmoothAutoFocusSupported])
-                [newCaptureDevice setSmoothAutoFocusEnabled:enableSmoothAutoFocus];
-        }
-
-        [newCaptureDevice unlockForConfiguration];
-    
-    } else if (error) {
-        DLog(@"error locking device for specific settings (%@)", error);
-    }
 
     // KVO
     if (newCaptureDevice) {
