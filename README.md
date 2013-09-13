@@ -1,13 +1,15 @@
 ![PBJVision](https://raw.github.com/piemonte/PBJVision/master/pbj.gif)
 
 ## PBJVision
-'PBJVision' is an iOS camera engine that supports touch-to-record video and photo capture. It supports both iOS 6 and iOS 7 as well as 64-bit.
+'PBJVision' is an iOS camera engine that supports touch-to-record video and photo capture.
+
+It supports both iOS 6 and iOS 7 as well as 64-bit.
 
 We created this at DIY.org as a fun means for kids to author video but also as a way to easily create stop motion. This same concept is used in Vine and Instagram.
 
 ### Release History
 
-v0.1.2 addition of onion skinning (ghosting)
+v0.1.2 addition of onion skinning (ghosting), http://en.wikipedia.org/wiki/Onion_skinning
 
 v0.1.1 minor bug fixes
 
