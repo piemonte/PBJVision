@@ -5,7 +5,7 @@
 
 It supports both iOS 6 and iOS 7 as well as 64-bit.
 
-We created this at DIY.org as a fun means for kids to author video but also as a way to easily create stop motion. This same concept is used in Vine and Instagram.
+We created this at DIY.org as a fun means for kids to author video but also as a way to easily create stop motion. This same recording interaction was pioneered by Vine and later by Instagram.
 
 ### Release History
 
