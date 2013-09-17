@@ -419,17 +419,20 @@ typedef void (^PBJVisionBlock)();
         error = nil;
     }
     
-    _captureDeviceAudio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
+    if (self.cameraMode != PBJCameraModePhoto)
+	_captureDeviceAudio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
     _captureDeviceInputAudio = [AVCaptureDeviceInput deviceInputWithDevice:_captureDeviceAudio error:&error];
     if (error) {
         DLog(@"error setting up audio input (%@)", error);
     }
     
     _captureOutputPhoto = [[AVCaptureStillImageOutput alloc] init];
-    _captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
+    if (self.cameraMode != PBJCameraModePhoto)
+    	_captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
     _captureOutputVideo = [[AVCaptureVideoDataOutput alloc] init];
     
-    [_captureOutputAudio setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
+    if (self.cameraMode != PBJCameraModePhoto)
+    	[_captureOutputAudio setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
     [_captureOutputVideo setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
     
     // add notification observers
@@ -574,8 +577,10 @@ typedef void (^PBJVisionBlock)();
     // setup session input/output
     
     if (shouldSwitchMode) {
-        [_captureSession removeInput:_captureDeviceInputAudio];
-        [_captureSession removeOutput:_captureOutputAudio];
+    	if (self.cameraMode == PBJCameraModePhoto) {
+        	[_captureSession removeInput:_captureDeviceInputAudio];
+        	[_captureSession removeOutput:_captureOutputAudio];
+    	}
         [_captureSession removeOutput:_captureOutputVideo];
         [_captureSession removeOutput:_captureOutputPhoto];
         
@@ -1543,7 +1548,7 @@ typedef void (^PBJVisionBlock)();
             return;
         }
      
-        BOOL isAudio = (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
+        BOOL isAudio = (self.cameraMode != PBJCameraModePhoto) && (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
         BOOL isVideo = (connection == [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo]);
         BOOL wasReadyToRecord = (_flags.readyForAudio && _flags.readyForVideo);
 
