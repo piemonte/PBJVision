@@ -15,7 +15,17 @@ v0.1.1 minor bug fixes
 
 v0.1.0 initial release of touch-to-record video
 
-### Basic Use
+## Installation
+
+[CocoaPods](http://cocoapods.org) is the recommended method of installing PBJVision, just add the following line to your `Podfile`:
+
+#### Podfile
+
+```ruby
+pod 'PBJVision'
+```
+
+### Usage
 ```objective-c
 #import "PBJVision.h"
 ```
