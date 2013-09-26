@@ -318,7 +318,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 06B7D021179F2EDC00F3F527 /* Debug.xcconfig */;
 			buildSettings = {
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -327,7 +326,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 06B7D022179F2EDC00F3F527 /* Release.xcconfig */;
 			buildSettings = {
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				SDKROOT = iphoneos;
 			};
 			name = Release;
