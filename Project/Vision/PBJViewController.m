@@ -59,6 +59,13 @@
 
 @implementation PBJViewController
 
+#pragma mark - UIViewController
+
+- (BOOL)prefersStatusBarHidden
+{
+    return YES;
+}
+
 #pragma mark - init
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
