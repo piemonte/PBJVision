@@ -889,16 +889,31 @@ typedef void (^PBJVisionBlock)();
     return [self isActive] && !_flags.changingModes && isDiskSpaceAvailable;
 }
 
-- (UIImage *)_imageFromJPEGData:(NSData *)jpegData
+- (UIImage *)_uiimageFromJPEGData:(NSData *)jpegData
 {
     CGImageRef jpegCGImage = NULL;
     CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)jpegData);
+    UIImageOrientation imageOrientation;
+    CGFloat imageScale = 1.0;
     
     if (provider) {
         CGImageSourceRef imageSource = CGImageSourceCreateWithDataProvider(provider, NULL);
         if (imageSource) {
             if (CGImageSourceGetCount(imageSource) > 0) {
                 jpegCGImage = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+                
+                // extract the cgImage properties
+                CFDictionaryRef properties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, NULL);
+                if (properties) {
+                    // set orientation
+                    CFNumberRef orientationProperty = CFDictionaryGetValue(properties, kCGImagePropertyOrientation);
+                    if (orientationProperty) {
+                        CFNumberGetValue(orientationProperty, kCFNumberIntType, &imageOrientation);
+                    }
+                    
+                    CFRelease(properties);
+                }
+                
             }
             CFRelease(imageSource);
         }
@@ -907,7 +922,7 @@ typedef void (^PBJVisionBlock)();
     
     UIImage *image = nil;
     if (jpegCGImage) {
-        image = [[UIImage alloc] initWithCGImage:jpegCGImage];
+        image = [[UIImage alloc] initWithCGImage:jpegCGImage scale:imageScale orientation:imageOrientation];
         CGImageRelease(jpegCGImage);
     }
     return image;
@@ -966,7 +981,6 @@ typedef void (^PBJVisionBlock)();
     }
 
     AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
-    
     [self _setOrientationForConnection:connection];
     
     [_captureOutputPhoto captureStillImageAsynchronouslyFromConnection:connection completionHandler:
@@ -985,7 +999,6 @@ typedef void (^PBJVisionBlock)();
             return;
         }
     
-        // TODO: return delegate on error
         NSMutableDictionary *photoDict = [[NSMutableDictionary alloc] init];
         NSDictionary *metadata = nil;
 
@@ -1005,11 +1018,12 @@ typedef void (^PBJVisionBlock)();
             [photoDict setObject:jpegData forKey:PBJVisionPhotoJPEGKey];
             
             // add image
-            UIImage *image = [self _imageFromJPEGData:jpegData];
+            UIImage *image = [self _uiimageFromJPEGData:jpegData];
             if (image) {
                 [photoDict setObject:image forKey:PBJVisionPhotoImageKey];
             } else {
                 DLog(@"failed to create image from JPEG");
+                // TODO: return delegate on error
             }
             
             // add thumbnail
@@ -1018,10 +1032,12 @@ typedef void (^PBJVisionBlock)();
                 [photoDict setObject:thumbnail forKey:PBJVisionPhotoThumbnailKey];
             } else {
                 DLog(@"failed to create a thumnbail");
+                // TODO: return delegate on error
             }
             
         } else {
             DLog(@"failed to create jpeg still image data");
+            // TODO: return delegate on error
         }
         
         if ([_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {
