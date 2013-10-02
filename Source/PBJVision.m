@@ -893,7 +893,8 @@ typedef void (^PBJVisionBlock)();
 {
     CGImageRef jpegCGImage = NULL;
     CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)jpegData);
-    UIImageOrientation imageOrientation;
+    
+    UIImageOrientation imageOrientation = UIImageOrientationUp;
     CGFloat imageScale = 1.0;
     
     if (provider) {
