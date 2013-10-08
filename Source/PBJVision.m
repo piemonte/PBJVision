@@ -625,7 +625,7 @@ typedef void (^PBJVisionBlock)();
 
     // setup input/output
 
-    if (newCaptureOutput == _captureOutputVideo) {
+    if (newCaptureOutput && newCaptureOutput == _captureOutputVideo) {
 
         // setup video connection
         AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
@@ -694,7 +694,7 @@ typedef void (^PBJVisionBlock)();
         
         }
         
-    } else if (newCaptureOutput == _captureOutputPhoto) {
+    } else if (newCaptureOutput && newCaptureOutput == _captureOutputPhoto) {
     
         // specify photo preset
         sessionPreset = AVCaptureSessionPresetPhoto;
