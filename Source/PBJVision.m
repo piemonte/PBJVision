@@ -184,6 +184,13 @@ enum
     return isRecording;
 }
 
+- (void)setCameraOrientation:(PBJCameraOrientation)cameraOrientation
+{
+    if (cameraOrientation == _cameraOrientation) return;
+    _cameraOrientation = cameraOrientation;
+    if ([_previewLayer.connection isVideoOrientationSupported]) [self _setOrientationForConnection:_previewLayer.connection];
+}
+
 - (void)setVideoRenderingEnabled:(BOOL)videoRenderingEnabled
 {
     _flags.videoRenderingEnabled = (unsigned int)videoRenderingEnabled;
@@ -196,7 +203,7 @@ enum
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
 {
-    if (!connection)
+    if (!connection || ![connection isVideoOrientationSupported])
         return;
 
     AVCaptureVideoOrientation orientation = AVCaptureVideoOrientationPortrait;
