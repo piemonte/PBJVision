@@ -355,6 +355,7 @@ enum
     }
     
     [self _destroyGL];
+    [self _destroyCamera];
 }
 
 #pragma mark - queue helper methods
