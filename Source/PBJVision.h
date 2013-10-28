@@ -115,6 +115,10 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)resumeVideoCapture;
 - (void)endVideoCapture;
 
+// Capture progress
+- (Float64) getCapturedAudioSeconds;
+- (Float64) getCapturedVideoSeconds;
+
 @end
 
 @protocol PBJVisionDelegate <NSObject>
@@ -138,5 +142,9 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionDidPauseVideoCapture:(PBJVision *)vision; // stopped but not ended
 - (void)visionDidResumeVideoCapture:(PBJVision *)vision;
 - (void)vision:(PBJVision *)vision capturedVideo:(NSDictionary *)videoDict error:(NSError *)error;
+
+// Capture progress
+- (void)visionDidCaptureVideoSample:(PBJVision *) vision;
+- (void)visionDidCaptureAudioSample:(PBJVision *) vision;
 
 @end
