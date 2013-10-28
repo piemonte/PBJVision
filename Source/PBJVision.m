@@ -1664,13 +1664,13 @@ typedef void (^PBJVisionBlock)();
                     }];
                 }
                 
+                CFRelease(bufferToWrite);
+
                 [self _enqueueBlockOnMainQueue:^{
                     if ([_delegate respondsToSelector:@selector(visionDidCaptureVideoSample:)]) {
                         [_delegate visionDidCaptureVideoSample:self];
                     }
                 }];
-                
-                CFRelease(bufferToWrite);
             }
             
         } else if (isAudio && isReadyToRecord && !_flags.interrupted) {
@@ -1699,13 +1699,13 @@ typedef void (^PBJVisionBlock)();
                     _audioTimestamp = time;
                 }
                 
+                CFRelease(bufferToWrite);
+
                 [self _enqueueBlockOnMainQueue:^{
                     if ([_delegate respondsToSelector:@selector(visionDidCaptureAudioSample:)]) {
                         [_delegate visionDidCaptureAudioSample:self];
                     }
                 }];
-                
-                CFRelease(bufferToWrite);
             }
         }
         
