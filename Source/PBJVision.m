@@ -108,8 +108,9 @@ enum
     NSURL *_outputURL;
     
     CMTime _timeOffset;
+    CMTime _startTimestamp;
     CMTime _audioTimestamp;
-	CMTime _videoTimestamp;
+    CMTime _videoTimestamp;
 
     // sample buffer rendering
 
@@ -193,6 +194,25 @@ enum
 {
     return _flags.videoRenderingEnabled;
 }
+
+- (Float64) getCapturedAudioSeconds
+{
+    if (_audioTimestamp.value > 0) {
+        return CMTimeGetSeconds(CMTimeSubtract(_audioTimestamp, _startTimestamp));
+    } else {
+        return 0.0;
+    }
+}
+
+- (Float64) getCapturedVideoSeconds
+{
+    if (_videoTimestamp.value > 0) {
+        return CMTimeGetSeconds(CMTimeSubtract(_videoTimestamp, _startTimestamp));
+    } else {
+        return 0.0;
+    }
+}
+
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
 {
@@ -1123,6 +1143,8 @@ typedef void (^PBJVisionBlock)();
         _timeOffset = kCMTimeZero;
         _audioTimestamp = kCMTimeZero;
         _videoTimestamp = kCMTimeZero;
+        _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
+
         
         _flags.recording = YES;
         _flags.paused = NO;
@@ -1219,6 +1241,7 @@ typedef void (^PBJVisionBlock)();
             _timeOffset = kCMTimeZero;
             _audioTimestamp = kCMTimeZero;
             _videoTimestamp = kCMTimeZero;
+            _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
             _flags.interrupted = NO;
             _flags.readyForAudio = NO;
             _flags.readyForVideo = NO;
@@ -1641,6 +1664,12 @@ typedef void (^PBJVisionBlock)();
                     }];
                 }
                 
+                [self _enqueueBlockOnMainQueue:^{
+                    if ([_delegate respondsToSelector:@selector(visionDidCaptureVideoSample:)]) {
+                        [_delegate visionDidCaptureVideoSample:self];
+                    }
+                }];
+                
                 CFRelease(bufferToWrite);
             }
             
@@ -1669,6 +1698,13 @@ typedef void (^PBJVisionBlock)();
                     [self _writeSampleBuffer:bufferToWrite ofType:AVMediaTypeAudio];
                     _audioTimestamp = time;
                 }
+                
+                [self _enqueueBlockOnMainQueue:^{
+                    if ([_delegate respondsToSelector:@selector(visionDidCaptureAudioSample:)]) {
+                        [_delegate visionDidCaptureAudioSample:self];
+                    }
+                }];
+                
                 CFRelease(bufferToWrite);
             }
         }
