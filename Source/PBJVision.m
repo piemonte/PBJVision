@@ -184,6 +184,13 @@ enum
     return isRecording;
 }
 
+- (void)setCameraOrientation:(PBJCameraOrientation)cameraOrientation
+{
+    if (cameraOrientation == _cameraOrientation) return;
+    _cameraOrientation = cameraOrientation;
+    if ([_previewLayer.connection isVideoOrientationSupported]) [self _setOrientationForConnection:_previewLayer.connection];
+}
+
 - (void)setVideoRenderingEnabled:(BOOL)videoRenderingEnabled
 {
     _flags.videoRenderingEnabled = (unsigned int)videoRenderingEnabled;
@@ -196,7 +203,7 @@ enum
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
 {
-    if (!connection)
+    if (!connection || ![connection isVideoOrientationSupported])
         return;
 
     AVCaptureVideoOrientation orientation = AVCaptureVideoOrientationPortrait;
@@ -215,7 +222,6 @@ enum
             orientation = AVCaptureVideoOrientationPortrait;
             break;
     }
-
     [connection setVideoOrientation:orientation];
 }
 
@@ -890,46 +896,6 @@ typedef void (^PBJVisionBlock)();
     return [self isActive] && !_flags.changingModes && isDiskSpaceAvailable;
 }
 
-- (UIImage *)_uiimageFromJPEGData:(NSData *)jpegData
-{
-    CGImageRef jpegCGImage = NULL;
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)jpegData);
-    
-    UIImageOrientation imageOrientation = UIImageOrientationUp;
-    CGFloat imageScale = 1.0;
-    
-    if (provider) {
-        CGImageSourceRef imageSource = CGImageSourceCreateWithDataProvider(provider, NULL);
-        if (imageSource) {
-            if (CGImageSourceGetCount(imageSource) > 0) {
-                jpegCGImage = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
-                
-                // extract the cgImage properties
-                CFDictionaryRef properties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, NULL);
-                if (properties) {
-                    // set orientation
-                    CFNumberRef orientationProperty = CFDictionaryGetValue(properties, kCGImagePropertyOrientation);
-                    if (orientationProperty) {
-                        CFNumberGetValue(orientationProperty, kCFNumberIntType, &imageOrientation);
-                    }
-                    
-                    CFRelease(properties);
-                }
-                
-            }
-            CFRelease(imageSource);
-        }
-        CGDataProviderRelease(provider);
-    }
-    
-    UIImage *image = nil;
-    if (jpegCGImage) {
-        image = [[UIImage alloc] initWithCGImage:jpegCGImage scale:imageScale orientation:imageOrientation];
-        CGImageRelease(jpegCGImage);
-    }
-    return image;
-}
-
 - (UIImage *)_thumbnailJPEGData:(NSData *)jpegData
 {
     CGImageRef thumbnailCGImage = NULL;
@@ -942,7 +908,7 @@ typedef void (^PBJVisionBlock)();
                 NSMutableDictionary *options = [[NSMutableDictionary alloc] initWithCapacity:3];
                 [options setObject:[NSNumber numberWithBool:YES] forKey:(id)kCGImageSourceCreateThumbnailFromImageAlways];
                 [options setObject:[NSNumber numberWithFloat:PBJVisionThumbnailWidth] forKey:(id)kCGImageSourceThumbnailMaxPixelSize];
-                [options setObject:[NSNumber numberWithBool:NO] forKey:(id)kCGImageSourceCreateThumbnailWithTransform];
+                [options setObject:[NSNumber numberWithBool:YES] forKey:(id)kCGImageSourceCreateThumbnailWithTransform];
                 thumbnailCGImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, (__bridge CFDictionaryRef)options);
             }
             CFRelease(imageSource);
@@ -1020,7 +986,7 @@ typedef void (^PBJVisionBlock)();
             [photoDict setObject:jpegData forKey:PBJVisionPhotoJPEGKey];
             
             // add image
-            UIImage *image = [self _uiimageFromJPEGData:jpegData];
+            UIImage *image = [UIImage imageWithData:jpegData];
             if (image) {
                 [photoDict setObject:image forKey:PBJVisionPhotoImageKey];
             } else {
