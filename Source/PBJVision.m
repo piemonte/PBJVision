@@ -1313,30 +1313,37 @@ typedef void (^PBJVisionBlock)();
 {
 	CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(currentFormatDescription);
     
-    // lower the bitRate, higher the compression, lets compress for 480 x 360 even though we record at 640 x 480
+    // Average bytes per second based on video dimensions
+    // lower the bitRate, higher the compression, by default PBJVision compresses for 480 x 360 even though we record at 640 x 480    
     // 87500, good for 480 x 360
     // 437500, good for 640 x 480
-	float bitRate = 87500.0f * 8.0f;
-	NSInteger frameInterval = 30;
+    // 1312500, good for 1280 x 720
+    // 2975000, good for 1920 x 1080
+    // 3750000, good for iFrame 960 x 540
+    // 5000000, good for iFrame 1280 x 720
+    
+    float bytesPerSecond = 87500.0f;
+    float bitRate = bytesPerSecond * 8.0f;
+    NSInteger frameInterval = 30;
 
     CMVideoDimensions videoDimensions = dimensions;
     switch (_outputFormat) {
-      case PBJOutputFormatSquare:
-      {
-        int32_t min = MIN(dimensions.width, dimensions.height);
-        videoDimensions.width = min;
-        videoDimensions.height = min;
-        break;
-      }
-      case PBJOutputFormatWidescreen:
-      {
-        videoDimensions.width = dimensions.width;
-        videoDimensions.height = (int32_t)(dimensions.width / 1.5f);
-        break;
-      }
-      case PBJOutputFormatPreset:
-      default:
-        break;
+        case PBJOutputFormatSquare:
+        {
+            int32_t min = MIN(dimensions.width, dimensions.height);
+            videoDimensions.width = min;
+            videoDimensions.height = min;
+            break;
+        }
+        case PBJOutputFormatWidescreen:
+        {
+            videoDimensions.width = dimensions.width;
+            videoDimensions.height = (int32_t)(dimensions.width / 1.5f);
+            break;
+        }
+        case PBJOutputFormatPreset:
+        default:
+            break;
     }
     
     NSDictionary *compressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
