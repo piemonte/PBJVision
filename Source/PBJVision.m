@@ -668,16 +668,27 @@ typedef void (^PBJVisionBlock)();
         // kCVPixelFormatType_420YpCbCr8BiPlanarFullRange Bi-Planar Component Y'CbCr 8-bit 4:2:0, full-range (luma=[0,255] chroma=[1,255])
         // baseAddr points to a big-endian CVPlanarPixelBufferInfo_YCbCrBiPlanar struct
         BOOL supportsFullRangeYUV = NO;
+        BOOL supportsVideoRangeYUV = NO;
         NSArray *supportedPixelFormats = _captureOutputVideo.availableVideoCVPixelFormatTypes;
         for (NSNumber *currentPixelFormat in supportedPixelFormats) {
             if ([currentPixelFormat intValue] == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) {
                 supportsFullRangeYUV = YES;
             }
+            if ([currentPixelFormat intValue] == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
+                supportsVideoRangeYUV = YES;
+            }
         }
-        NSMutableDictionary *videoSettings = supportsFullRangeYUV ?
-                [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey] :
-                [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
-        [_captureOutputVideo setVideoSettings:videoSettings];
+        
+        NSDictionary *videoSettings = nil;
+        
+        if (supportsFullRangeYUV) {
+            videoSettings = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+        } else if (supportsVideoRangeYUV) {
+            videoSettings = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+        }
+        
+        if (videoSettings)
+            [_captureOutputVideo setVideoSettings:videoSettings];
         
         // setup video device configuration
         if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
