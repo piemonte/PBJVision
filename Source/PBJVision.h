@@ -45,6 +45,7 @@ typedef NS_ENUM(NSInteger, PBJOutputFormat) {
     PBJOutputFormatWidescreen
 };
 
+
 // photo dictionary keys
 
 extern NSString * const PBJVisionPhotoMetadataKey;
@@ -78,6 +79,11 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
 
 @property (nonatomic) PBJOutputFormat outputFormat;
+
+@property (nonatomic) float videoAssetBitRate;
+@property (nonatomic) NSInteger audioAssetBitRate;
+@property (nonatomic) NSInteger videoAssetFrameInterval;
+@property (nonatomic, strong) NSString *captureSessionPreset;
 
 // preview
 

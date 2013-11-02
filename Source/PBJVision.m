@@ -156,6 +156,10 @@ enum
 @synthesize outputFormat = _outputFormat;
 @synthesize context = _context;
 @synthesize presentationFrame = _presentationFrame;
+@synthesize audioAssetBitRate = _audioAssetBitRate;
+@synthesize videoAssetBitRate = _videoAssetBitRate;
+@synthesize videoAssetFrameInterval = _videoAssetFrameInterval;
+@synthesize captureSessionPreset = _captureSessionPreset;
 
 #pragma mark - singleton
 
@@ -351,6 +355,16 @@ enum
             DLog(@"failed to create GL context");
         }
         [self _setupGL];
+
+        _audioAssetBitRate = 64000;
+
+        // lower the bitRate, higher the compression, lets compress for 480 x 360 even though we record at 640 x 480
+        // 87500, good for 480 x 360
+        // 437500, good for 640 x 480
+        _videoAssetBitRate = 87500.0f * 8.0f;
+        _videoAssetFrameInterval = 30;
+
+        _captureSessionPreset = AVCaptureSessionPreset640x480;
 
         _captureSessionDispatchQueue = dispatch_queue_create("PBJVisionSession", DISPATCH_QUEUE_SERIAL); // protects session
         _captureVideoDispatchQueue = dispatch_queue_create("PBJVisionVideo", DISPATCH_QUEUE_SERIAL); // protects capture
@@ -1275,7 +1289,6 @@ typedef void (^PBJVisionBlock)();
     
 	unsigned int channels = asbd->mChannelsPerFrame;
     double sampleRate = asbd->mSampleRate;
-    int bitRate = 64000;
 
     DLog(@"audio stream setup, channels (%d) sampleRate (%f)", channels, sampleRate);
     
@@ -1287,7 +1300,7 @@ typedef void (^PBJVisionBlock)();
                                               [NSNumber numberWithInt:kAudioFormatMPEG4AAC], AVFormatIDKey,
                                               [NSNumber numberWithUnsignedInt:channels], AVNumberOfChannelsKey,
                                               [NSNumber numberWithDouble:sampleRate], AVSampleRateKey,
-                                              [NSNumber numberWithInt:bitRate], AVEncoderBitRateKey,
+                                              [NSNumber numberWithInt:_audioAssetBitRate], AVEncoderBitRateKey,
                                               currentChannelLayoutData, AVChannelLayoutKey, nil];
 
 	if ([_assetWriter canApplyOutputSettings:audioCompressionSettings forMediaType:AVMediaTypeAudio]) {
@@ -1313,12 +1326,6 @@ typedef void (^PBJVisionBlock)();
 {
 	CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(currentFormatDescription);
     
-    // lower the bitRate, higher the compression, lets compress for 480 x 360 even though we record at 640 x 480
-    // 87500, good for 480 x 360
-    // 437500, good for 640 x 480
-	float bitRate = 87500.0f * 8.0f;
-	NSInteger frameInterval = 30;
-
     CMVideoDimensions videoDimensions = dimensions;
     switch (_outputFormat) {
       case PBJOutputFormatSquare:
@@ -1340,8 +1347,8 @@ typedef void (^PBJVisionBlock)();
     }
     
     NSDictionary *compressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
-                                        [NSNumber numberWithFloat:bitRate], AVVideoAverageBitRateKey,
-                                        [NSNumber numberWithInteger:frameInterval], AVVideoMaxKeyFrameIntervalKey,
+                                        [NSNumber numberWithFloat:_videoAssetBitRate], AVVideoAverageBitRateKey,
+                                        [NSNumber numberWithInteger:_videoAssetFrameInterval], AVVideoMaxKeyFrameIntervalKey,
                                         nil];
     
 	NSDictionary *videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:
