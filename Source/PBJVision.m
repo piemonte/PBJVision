@@ -358,10 +358,17 @@ enum
 
         _audioAssetBitRate = 64000;
 
-        // lower the bitRate, higher the compression, lets compress for 480 x 360 even though we record at 640 x 480
+        // Average bytes per second based on video dimensions
+        // lower the bitRate, higher the compression, by default PBJVision compresses for 480 x 360 even though we record at 640 x 480    
         // 87500, good for 480 x 360
         // 437500, good for 640 x 480
-        _videoAssetBitRate = 87500.0f * 8.0f;
+        // 1312500, good for 1280 x 720
+        // 2975000, good for 1920 x 1080
+        // 3750000, good for iFrame 960 x 540
+        // 5000000, good for iFrame 1280 x 720
+
+        float bytesPerSecond = 87500.0f;
+        _videoAssetBitRate = bytesPerSecond * 8.0f;
         _videoAssetFrameInterval = 30;
 
         _captureSessionPreset = AVCaptureSessionPreset640x480;
@@ -682,16 +689,27 @@ typedef void (^PBJVisionBlock)();
         // kCVPixelFormatType_420YpCbCr8BiPlanarFullRange Bi-Planar Component Y'CbCr 8-bit 4:2:0, full-range (luma=[0,255] chroma=[1,255])
         // baseAddr points to a big-endian CVPlanarPixelBufferInfo_YCbCrBiPlanar struct
         BOOL supportsFullRangeYUV = NO;
+        BOOL supportsVideoRangeYUV = NO;
         NSArray *supportedPixelFormats = _captureOutputVideo.availableVideoCVPixelFormatTypes;
         for (NSNumber *currentPixelFormat in supportedPixelFormats) {
             if ([currentPixelFormat intValue] == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) {
                 supportsFullRangeYUV = YES;
             }
+            if ([currentPixelFormat intValue] == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
+                supportsVideoRangeYUV = YES;
+            }
         }
-        NSMutableDictionary *videoSettings = supportsFullRangeYUV ?
-                [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey] :
-                [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
-        [_captureOutputVideo setVideoSettings:videoSettings];
+        
+        NSDictionary *videoSettings = nil;
+        
+        if (supportsFullRangeYUV) {
+            videoSettings = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+        } else if (supportsVideoRangeYUV) {
+            videoSettings = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+        }
+        
+        if (videoSettings)
+            [_captureOutputVideo setVideoSettings:videoSettings];
         
         // setup video device configuration
         if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
@@ -1328,22 +1346,22 @@ typedef void (^PBJVisionBlock)();
     
     CMVideoDimensions videoDimensions = dimensions;
     switch (_outputFormat) {
-      case PBJOutputFormatSquare:
-      {
-        int32_t min = MIN(dimensions.width, dimensions.height);
-        videoDimensions.width = min;
-        videoDimensions.height = min;
-        break;
-      }
-      case PBJOutputFormatWidescreen:
-      {
-        videoDimensions.width = dimensions.width;
-        videoDimensions.height = (int32_t)(dimensions.width / 1.5f);
-        break;
-      }
-      case PBJOutputFormatPreset:
-      default:
-        break;
+        case PBJOutputFormatSquare:
+        {
+            int32_t min = MIN(dimensions.width, dimensions.height);
+            videoDimensions.width = min;
+            videoDimensions.height = min;
+            break;
+        }
+        case PBJOutputFormatWidescreen:
+        {
+            videoDimensions.width = dimensions.width;
+            videoDimensions.height = (int32_t)(dimensions.width / 1.5f);
+            break;
+        }
+        case PBJOutputFormatPreset:
+        default:
+            break;
     }
     
     NSDictionary *compressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
