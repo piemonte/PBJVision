@@ -321,14 +321,13 @@
 
 - (void)visionDidCaptureAudioSample:(PBJVision *)vision
 {
-    NSLog(@"captured audio %f", [vision getCapturedAudioSeconds]);
+    NSLog(@"captured audio %f", vision.capturedAudioSeconds);
 }
 
 - (void)visionDidCaptureVideoSample:(PBJVision *)vision
 {
-    NSLog(@"captured video %f", [vision getCapturedVideoSeconds]);
+    NSLog(@"captured video %f", vision.capturedVideoSeconds);
 }
-
 
 - (void)visionModeWillChange:(PBJVision *)vision
 {

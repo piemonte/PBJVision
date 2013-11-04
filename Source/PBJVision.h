@@ -80,7 +80,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 @property (nonatomic) PBJOutputFormat outputFormat;
 
-@property (nonatomic) float videoAssetBitRate;
+@property (nonatomic) CGFloat videoAssetBitRate;
 @property (nonatomic) NSInteger audioAssetBitRate;
 @property (nonatomic) NSInteger videoAssetFrameInterval;
 @property (nonatomic, strong) NSString *captureSessionPreset;
@@ -116,14 +116,13 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic, readonly) EAGLContext *context;
 @property (nonatomic) CGRect presentationFrame;
 
+@property (nonatomic, readonly) Float64 capturedAudioSeconds;
+@property (nonatomic, readonly) Float64 capturedVideoSeconds;
+
 - (void)startVideoCapture;
 - (void)pauseVideoCapture;
 - (void)resumeVideoCapture;
 - (void)endVideoCapture;
-
-// Capture progress
-- (Float64) getCapturedAudioSeconds;
-- (Float64) getCapturedVideoSeconds;
 
 @end
 
@@ -137,19 +136,25 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionModeDidChange:(PBJVision *)vision;
 
 - (void)vision:(PBJVision *)vision cleanApertureDidChange:(CGRect)cleanAperture;
+
 - (void)visionWillStartFocus:(PBJVision *)vision;
 - (void)visionDidStopFocus:(PBJVision *)vision;
+
+// photo
 
 - (void)visionWillCapturePhoto:(PBJVision *)vision;
 - (void)visionDidCapturePhoto:(PBJVision *)vision;
 - (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error;
+
+// video
 
 - (void)visionDidStartVideoCapture:(PBJVision *)vision;
 - (void)visionDidPauseVideoCapture:(PBJVision *)vision; // stopped but not ended
 - (void)visionDidResumeVideoCapture:(PBJVision *)vision;
 - (void)vision:(PBJVision *)vision capturedVideo:(NSDictionary *)videoDict error:(NSError *)error;
 
-// Capture progress
+// video capture progress
+
 - (void)visionDidCaptureVideoSample:(PBJVision *) vision;
 - (void)visionDidCaptureAudioSample:(PBJVision *) vision;
 

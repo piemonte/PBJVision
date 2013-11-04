@@ -97,6 +97,11 @@ enum
     PBJFlashMode _flashMode;
 
     PBJOutputFormat _outputFormat;
+    
+    NSInteger _audioAssetBitRate;
+    CGFloat _videoAssetBitRate;
+    NSInteger _videoAssetFrameInterval;
+    NSString *_captureSessionPreset;
 
     AVCaptureDevice *_currentDevice;
     AVCaptureDeviceInput *_currentInput;
@@ -199,7 +204,7 @@ enum
     return _flags.videoRenderingEnabled;
 }
 
-- (Float64) getCapturedAudioSeconds
+- (Float64)capturedAudioSeconds
 {
     if (_audioTimestamp.value > 0) {
         return CMTimeGetSeconds(CMTimeSubtract(_audioTimestamp, _startTimestamp));
@@ -208,7 +213,7 @@ enum
     }
 }
 
-- (Float64) getCapturedVideoSeconds
+- (Float64)capturedVideoSeconds
 {
     if (_videoTimestamp.value > 0) {
         return CMTimeGetSeconds(CMTimeSubtract(_videoTimestamp, _startTimestamp));
@@ -216,7 +221,6 @@ enum
         return 0.0;
     }
 }
-
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
 {
@@ -367,7 +371,7 @@ enum
         // 3750000, good for iFrame 960 x 540
         // 5000000, good for iFrame 1280 x 720
 
-        float bytesPerSecond = 87500.0f;
+        CGFloat bytesPerSecond = 87500.0f;
         _videoAssetBitRate = bytesPerSecond * 8.0f;
         _videoAssetFrameInterval = 30;
 
@@ -703,9 +707,9 @@ typedef void (^PBJVisionBlock)();
         NSDictionary *videoSettings = nil;
         
         if (supportsFullRangeYUV) {
-            videoSettings = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+            videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) };
         } else if (supportsVideoRangeYUV) {
-            videoSettings = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+            videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) };
         }
         
         if (videoSettings)
@@ -992,9 +996,9 @@ typedef void (^PBJVisionBlock)();
         if (imageSource) {
             if (CGImageSourceGetCount(imageSource) > 0) {
                 NSMutableDictionary *options = [[NSMutableDictionary alloc] initWithCapacity:3];
-                [options setObject:[NSNumber numberWithBool:YES] forKey:(id)kCGImageSourceCreateThumbnailFromImageAlways];
-                [options setObject:[NSNumber numberWithFloat:PBJVisionThumbnailWidth] forKey:(id)kCGImageSourceThumbnailMaxPixelSize];
-                [options setObject:[NSNumber numberWithBool:NO] forKey:(id)kCGImageSourceCreateThumbnailWithTransform];
+                [options setObject:@(YES) forKey:(id)kCGImageSourceCreateThumbnailFromImageAlways];
+                [options setObject:@(PBJVisionThumbnailWidth) forKey:(id)kCGImageSourceThumbnailMaxPixelSize];
+                [options setObject:@(NO) forKey:(id)kCGImageSourceCreateThumbnailWithTransform];
                 thumbnailCGImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, (__bridge CFDictionaryRef)options);
             }
             CFRelease(imageSource);
@@ -1314,12 +1318,11 @@ typedef void (^PBJVisionBlock)();
 	const AudioChannelLayout *currentChannelLayout = CMAudioFormatDescriptionGetChannelLayout(currentFormatDescription, &aclSize);
 	NSData *currentChannelLayoutData = ( currentChannelLayout && aclSize > 0 ) ? [NSData dataWithBytes:currentChannelLayout length:aclSize] : [NSData data];
     
-    NSDictionary *audioCompressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
-                                              [NSNumber numberWithInt:kAudioFormatMPEG4AAC], AVFormatIDKey,
-                                              [NSNumber numberWithUnsignedInt:channels], AVNumberOfChannelsKey,
-                                              [NSNumber numberWithDouble:sampleRate], AVSampleRateKey,
-                                              [NSNumber numberWithInt:_audioAssetBitRate], AVEncoderBitRateKey,
-                                              currentChannelLayoutData, AVChannelLayoutKey, nil];
+    NSDictionary *audioCompressionSettings = @{ AVFormatIDKey : @(kAudioFormatMPEG4AAC),
+                                                AVNumberOfChannelsKey : @(channels),
+                                                AVSampleRateKey :  @(sampleRate),
+                                                AVEncoderBitRateKey : @(_audioAssetBitRate),
+                                                AVChannelLayoutKey : currentChannelLayoutData };
 
 	if ([_assetWriter canApplyOutputSettings:audioCompressionSettings forMediaType:AVMediaTypeAudio]) {
 		_assetWriterAudioIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeAudio outputSettings:audioCompressionSettings];
@@ -1364,18 +1367,14 @@ typedef void (^PBJVisionBlock)();
             break;
     }
     
-    NSDictionary *compressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
-                                        [NSNumber numberWithFloat:_videoAssetBitRate], AVVideoAverageBitRateKey,
-                                        [NSNumber numberWithInteger:_videoAssetFrameInterval], AVVideoMaxKeyFrameIntervalKey,
-                                        nil];
-    
-	NSDictionary *videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:
-											  AVVideoCodecH264, AVVideoCodecKey,
-                                              AVVideoScalingModeResizeAspectFill, AVVideoScalingModeKey,
-											  [NSNumber numberWithInteger:videoDimensions.width], AVVideoWidthKey,
-											  [NSNumber numberWithInteger:videoDimensions.height], AVVideoHeightKey,
-											  compressionSettings, AVVideoCompressionPropertiesKey,
-											  nil];
+    NSDictionary *compressionSettings = @{ AVVideoAverageBitRateKey : @(_videoAssetBitRate),
+                                           AVVideoMaxKeyFrameIntervalKey : @(_videoAssetFrameInterval) };
+
+	NSDictionary *videoSettings = @{ AVVideoCodecKey : AVVideoCodecH264,
+                                     AVVideoScalingModeKey : AVVideoScalingModeResizeAspectFill,
+                                     AVVideoWidthKey : @(videoDimensions.width),
+                                     AVVideoHeightKey : @(videoDimensions.height),
+                                     AVVideoCompressionPropertiesKey : compressionSettings };
     
 	if ([_assetWriter canApplyOutputSettings:videoSettings forMediaType:AVMediaTypeVideo]) {
     
