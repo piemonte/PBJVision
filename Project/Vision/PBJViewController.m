@@ -319,16 +319,6 @@
 {
 }
 
-- (void)visionDidCaptureAudioSample:(PBJVision *)vision
-{
-    NSLog(@"captured audio %f", vision.capturedAudioSeconds);
-}
-
-- (void)visionDidCaptureVideoSample:(PBJVision *)vision
-{
-    NSLog(@"captured video %f", vision.capturedVideoSeconds);
-}
-
 - (void)visionModeWillChange:(PBJVision *)vision
 {
 }
@@ -346,6 +336,20 @@
 }
 
 - (void)visionDidStopFocus:(PBJVision *)vision
+{
+}
+
+// photo
+
+- (void)visionWillCapturePhoto:(PBJVision *)vision
+{
+}
+
+- (void)visionDidCapturePhoto:(PBJVision *)vision
+{
+}
+
+- (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error
 {
 }
 
@@ -386,6 +390,18 @@
                                               otherButtonTitles:@"OK", nil];
         [alert show];
     }];
+}
+
+// progress
+
+- (void)visionDidCaptureAudioSample:(PBJVision *)vision
+{
+//    NSLog(@"captured audio (%f) seconds", vision.capturedAudioSeconds);
+}
+
+- (void)visionDidCaptureVideoSample:(PBJVision *)vision
+{
+//    NSLog(@"captured video (%f) seconds", vision.capturedVideoSeconds);
 }
 
 @end
