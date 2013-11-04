@@ -7,14 +7,6 @@ It supports both iOS 6 and iOS 7 as well as 64-bit.
 
 We created this at DIY.org as a fun means for kids to author video but also as a way to easily create stop motion. This same recording interaction was pioneered by Vine and later by Instagram.
 
-## Release History
-
-v0.1.2 addition of onion skinning (ghosting), http://en.wikipedia.org/wiki/Onion_skinning
-
-v0.1.1 minor bug fixes
-
-v0.1.0 initial release of touch-to-record video
-
 ## Installation
 
 [CocoaPods](http://cocoapods.org) is the recommended method of installing PBJVision, just add the following line to your `Podfile`:
