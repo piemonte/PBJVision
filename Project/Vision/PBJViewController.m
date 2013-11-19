@@ -237,8 +237,14 @@
 
     PBJVision *vision = [PBJVision sharedInstance];
     vision.delegate = self;
+
+    if ([vision isCameraDeviceAvailable:PBJCameraDeviceBack]) {
+        [vision setCameraDevice:PBJCameraDeviceBack];
+    } else {
+        [vision setCameraDevice:PBJCameraDeviceFront];
+        _flipButton.hidden = YES;
+    }
     [vision setCameraMode:PBJCameraModeVideo];
-    [vision setCameraDevice:PBJCameraDeviceBack];
     [vision setCameraOrientation:PBJCameraOrientationPortrait];
     [vision setFocusMode:PBJFocusModeAutoFocus];
     [vision setOutputFormat:PBJOutputFormatSquare];
