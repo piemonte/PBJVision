@@ -9,6 +9,8 @@ We created this at DIY.org as a fun means for kids to author video but also as a
 
 Please review the [release history](https://github.com/piemonte/PBJVision/releases) for more information.
 
+If you need a video player, check out [PBJVideoPlayer](https://github.com/piemonte/PBJVideoPlayer).
+
 ## Installation
 
 [CocoaPods](http://cocoapods.org) is the recommended method of installing PBJVision, just add the following line to your `Podfile`:
