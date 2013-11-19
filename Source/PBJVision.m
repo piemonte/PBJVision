@@ -304,6 +304,11 @@ enum
     [self _setCameraMode:_cameraMode cameraDevice:_cameraDevice outputFormat:outputFormat];
 }
 
+- (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice
+{
+    return [UIImagePickerController isCameraDeviceAvailable:(UIImagePickerControllerCameraDevice)cameraDevice];
+}
+
 - (void)setFlashMode:(PBJFlashMode)flashMode
 {
     BOOL shouldChangeFlashMode = (_flashMode != flashMode);
