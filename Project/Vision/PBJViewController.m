@@ -117,7 +117,6 @@
     _previewLayer.frame = _previewView.bounds;
     _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [_previewView.layer addSublayer:_previewLayer];
-    [self.view addSubview:_previewView];
 
     // onion skin
     _effectsViewController = [[GLKViewController alloc] init];
@@ -319,10 +318,13 @@
 
 - (void)visionSessionDidStart:(PBJVision *)vision
 {
+    if (![_previewView superview])
+        [self.view addSubview:_previewView];
 }
 
 - (void)visionSessionDidStop:(PBJVision *)vision
 {
+    [_previewView removeFromSuperview];
 }
 
 - (void)visionModeWillChange:(PBJVision *)vision
