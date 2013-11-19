@@ -669,12 +669,12 @@ typedef void (^PBJVisionBlock)();
     if (!newCaptureOutput)
         newCaptureOutput = _currentOutput;
 
+    // setup video connection
+    AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
+
     // setup input/output
 
-    if (newCaptureOutput && newCaptureOutput == _captureOutputVideo) {
-
-        // setup video connection
-        AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
+    if (newCaptureOutput && newCaptureOutput == _captureOutputVideo && videoConnection) {
         
         // setup video orientation
         [self _setOrientationForConnection:videoConnection];
