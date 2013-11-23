@@ -113,6 +113,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic, readonly, getter=isRecording) BOOL recording;
 @property (nonatomic, readonly) BOOL supportsVideoCapture;
 @property (nonatomic, readonly) BOOL canCaptureVideo;
+@property (nonatomic, getter=isMute)BOOL mute;
 
 @property (nonatomic, getter=isVideoRenderingEnabled) BOOL videoRenderingEnabled;
 @property (nonatomic, readonly) EAGLContext *context;
