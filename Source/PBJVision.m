@@ -315,6 +315,8 @@ enum
     if (![_currentDevice hasFlash] || !shouldChangeFlashMode)
         return;
 
+    _flashMode = flashMode;
+    
     NSError *error = nil;
     if (_currentDevice && [_currentDevice lockForConfiguration:&error]) {
         
