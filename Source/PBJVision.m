@@ -630,10 +630,28 @@ typedef void (^PBJVisionBlock)();
     // setup session input/output
     
     if (shouldSwitchMode) {
+    
+        // disable audio when in use for photos, otherwise enable it
+        
     	if (self.cameraMode == PBJCameraModePhoto) {
+        
         	[_captureSession removeInput:_captureDeviceInputAudio];
         	[_captureSession removeOutput:_captureOutputAudio];
-    	}
+    	
+        } else if (!_captureDeviceAudio && !_captureDeviceInputAudio && !_captureOutputAudio) {
+        
+            NSError *error = nil;
+            _captureDeviceAudio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
+            _captureDeviceInputAudio = [AVCaptureDeviceInput deviceInputWithDevice:_captureDeviceAudio error:&error];
+            if (error) {
+                DLog(@"error setting up audio input (%@)", error);
+            }
+
+            _captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
+            [_captureOutputAudio setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
+            
+        }
+        
         [_captureSession removeOutput:_captureOutputVideo];
         [_captureSession removeOutput:_captureOutputPhoto];
         
