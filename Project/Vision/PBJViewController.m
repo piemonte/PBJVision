@@ -46,6 +46,7 @@
 
     UIView *_previewView;
     AVCaptureVideoPreviewLayer *_previewLayer;
+    UIView *_gestureView;
     GLKViewController *_effectsViewController;
     
     UILabel *_instructionLabel;
@@ -148,20 +149,19 @@
     [self.view addSubview:_instructionLabel];
     
     // press to record gesture
-    _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] init];
+    _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(_handleLongPressGestureRecognizer:)];
     _longPressGestureRecognizer.delegate = self;
     _longPressGestureRecognizer.minimumPressDuration = 0.05f;
     _longPressGestureRecognizer.allowableMovement = 10.0f;
-    [_longPressGestureRecognizer addTarget:self action:@selector(_handleLongPressGestureRecognizer:)];
     
     // gesture view to record
-    UIView *gestureView = [[UIView alloc] initWithFrame:CGRectZero];
+    _gestureView = [[UIView alloc] initWithFrame:CGRectZero];
     CGRect gestureFrame = self.view.bounds;
     gestureFrame.origin = CGPointMake(0, 60.0f);
     gestureFrame.size.height -= 10.0f;
-    gestureView.frame = gestureFrame;
-    [self.view addSubview:gestureView];
-    [gestureView addGestureRecognizer:_longPressGestureRecognizer];
+    _gestureView.frame = gestureFrame;
+    [self.view addSubview:_gestureView];
+    [_gestureView addGestureRecognizer:_longPressGestureRecognizer];
 
     // flip button
     _flipButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -320,8 +320,10 @@
 
 - (void)visionSessionDidStart:(PBJVision *)vision
 {
-    if (![_previewView superview])
+    if (![_previewView superview]) {
         [self.view addSubview:_previewView];
+        [self.view bringSubviewToFront:_gestureView];
+    }
 }
 
 - (void)visionSessionDidStop:(PBJVision *)vision
@@ -337,7 +339,7 @@
 {
 }
 
-- (void)vision:(PBJVision *)vision cleanApertureDidChange:(CGRect)cleanAperture
+- (void)vision:(PBJVision *)vision didChangeCleanAperture:(CGRect)cleanAperture
 {
 }
 
