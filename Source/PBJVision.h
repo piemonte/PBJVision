@@ -142,6 +142,8 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionWillStartFocus:(PBJVision *)vision;
 - (void)visionDidStopFocus:(PBJVision *)vision;
 
+- (void)visionDidChangeFlashAvailablility:(PBJVision *)vision; // flash and torch
+
 // photo
 
 - (void)visionWillCapturePhoto:(PBJVision *)vision;

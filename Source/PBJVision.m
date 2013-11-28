@@ -26,6 +26,8 @@ static CGFloat const PBJVisionThumbnailWidth = 160.0f;
 // KVO contexts
 
 static NSString * const PBJVisionFocusObserverContext = @"PBJVisionFocusObserverContext";
+static NSString * const PBJVisionFlashAvailabilityObserverContext = @"PBJVisionFlashAvailabilityObserverContext";
+static NSString * const PBJVisionTorchAvailabilityObserverContext = @"PBJVisionTorchAvailabilityObserverContext";
 static NSString * const PBJVisionCaptureStillImageIsCapturingStillImageObserverContext = @"PBJVisionCaptureStillImageIsCapturingStillImageObserverContext";
 
 // photo dictionary key definitions
@@ -809,8 +811,13 @@ typedef void (^PBJVisionBlock)();
     // KVO
     if (newCaptureDevice) {
         [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
+        [_currentDevice removeObserver:self forKeyPath:@"flashAvailable"];
+        [_currentDevice removeObserver:self forKeyPath:@"torchAvailable"];
+        
         _currentDevice = newCaptureDevice;
         [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
+        [_currentDevice addObserver:self forKeyPath:@"flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
+        [_currentDevice addObserver:self forKeyPath:@"torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
     }
     
     if (newDeviceInput)
@@ -1854,8 +1861,13 @@ typedef void (^PBJVisionBlock)();
                 AVCaptureDevice *device = [_currentInput device];
                 if (device) {
                     [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
+                    [_currentDevice removeObserver:self forKeyPath:@"flashAvailable"];
+                    [_currentDevice removeObserver:self forKeyPath:@"torchAvailable"];
+                    
                     _currentDevice = device;
                     [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
+                    [_currentDevice addObserver:self forKeyPath:@"flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
+                    [_currentDevice addObserver:self forKeyPath:@"torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
                 }
             }
         
@@ -1940,7 +1952,14 @@ typedef void (^PBJVisionBlock)();
         } else {
             [self _focusEnded];
         }
-        
+    
+    } else if ( context == (__bridge void *)PBJVisionFlashAvailabilityObserverContext ||
+                context == (__bridge void *)PBJVisionTorchAvailabilityObserverContext ) {
+    
+//        DLog(@"flash/torch availability did change");
+        if ([_delegate respondsToSelector:@selector(visionDidChangeFlashAvailablility:)])
+            [_delegate visionDidChangeFlashAvailablility:self];
+    
 	} else if ( context == (__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext) ) {
     
 		BOOL isCapturingStillImage = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
@@ -1950,7 +1969,9 @@ typedef void (^PBJVisionBlock)();
             [self _didCapturePhoto];
         }
         
-	}
+	} else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 #pragma mark - OpenGLES context support
