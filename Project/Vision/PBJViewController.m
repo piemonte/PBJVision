@@ -7,8 +7,10 @@
 //
 
 #import "PBJViewController.h"
-#import "PBJVision.h"
 #import "PBJStrobeView.h"
+
+#import "PBJVision.h"
+#import "PBJVisionUtilities.h"
 
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <GLKit/GLKit.h>
