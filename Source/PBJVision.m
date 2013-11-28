@@ -1914,8 +1914,8 @@ typedef void (^PBJVisionBlock)();
         CMFormatDescriptionRef formatDescription = [inputPort formatDescription];
         if (formatDescription) {
             _cleanAperture = CMVideoFormatDescriptionGetCleanAperture(formatDescription, YES);
-            if ([_delegate respondsToSelector:@selector(vision:cleanApertureDidChange:)]) {
-                [_delegate vision:self cleanApertureDidChange:_cleanAperture];
+            if ([_delegate respondsToSelector:@selector(vision:didChangeCleanAperture:)]) {
+                [_delegate vision:self didChangeCleanAperture:_cleanAperture];
             }
         }
     }

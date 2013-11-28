@@ -130,6 +130,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 @protocol PBJVisionDelegate <NSObject>
 @optional
+
 - (void)visionSessionWillStart:(PBJVision *)vision;
 - (void)visionSessionDidStart:(PBJVision *)vision;
 - (void)visionSessionDidStop:(PBJVision *)vision;
@@ -137,7 +138,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionModeWillChange:(PBJVision *)vision;
 - (void)visionModeDidChange:(PBJVision *)vision;
 
-- (void)vision:(PBJVision *)vision cleanApertureDidChange:(CGRect)cleanAperture;
+- (void)vision:(PBJVision *)vision didChangeCleanAperture:(CGRect)cleanAperture;
 
 - (void)visionWillStartFocus:(PBJVision *)vision;
 - (void)visionDidStopFocus:(PBJVision *)vision;
