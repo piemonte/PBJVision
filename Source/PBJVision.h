@@ -74,14 +74,14 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic) PBJCameraOrientation cameraOrientation;
 @property (nonatomic) PBJCameraDevice cameraDevice;
 @property (nonatomic) PBJCameraMode cameraMode;
-
+@property (nonatomic) PBJFocusMode focusMode;
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice;
 
-@property (nonatomic) PBJFocusMode focusMode;
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
 
-@property (nonatomic) PBJOutputFormat outputFormat;
+// video out settings
 
+@property (nonatomic) PBJOutputFormat outputFormat;
 @property (nonatomic) CGFloat videoAssetBitRate;
 @property (nonatomic) NSInteger audioAssetBitRate;
 @property (nonatomic) NSInteger videoAssetFrameInterval;
@@ -104,7 +104,6 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 // photo
 
 @property (nonatomic, readonly) BOOL canCapturePhoto;
-
 - (void)capturePhoto;
 
 // video
