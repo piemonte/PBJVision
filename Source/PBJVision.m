@@ -357,6 +357,11 @@ enum
     return _flashMode;
 }
 
+- (BOOL)isFlashAvailable
+{
+    return (_currentDevice && [_currentDevice hasFlash]);
+}
+
 #pragma mark - init
 
 - (id)init

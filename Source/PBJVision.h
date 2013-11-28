@@ -81,8 +81,9 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice;
 
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
+@property (nonatomic, readonly, getter=isFlashAvailable) BOOL flashAvailable;
 
-// video out settings
+// video output/compression settings
 
 @property (nonatomic) PBJOutputFormat outputFormat;
 @property (nonatomic) CGFloat videoAssetBitRate;
