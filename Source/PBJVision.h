@@ -67,7 +67,10 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 + (PBJVision *)sharedInstance;
 
 @property (nonatomic, weak) id<PBJVisionDelegate> delegate;
-@property (nonatomic, readonly, getter=isActive) BOOL active;
+
+// session
+
+@property (nonatomic, readonly, getter=isCaptureSessionActive) BOOL captureSessionActive;
 
 // setup
 

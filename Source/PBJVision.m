@@ -182,7 +182,7 @@ enum
 
 #pragma mark - getters/setters
 
-- (BOOL)isActive
+- (BOOL)isCaptureSessionActive
 {
     return ([_captureSession isRunning]);
 }
@@ -975,7 +975,7 @@ typedef void (^PBJVisionBlock)();
 - (BOOL)canCapturePhoto
 {
     BOOL isDiskSpaceAvailable = [PBJVisionUtilities availableDiskSpaceInBytes] > PBJVisionRequiredMinimumDiskSpaceInBytes;
-    return [self isActive] && !_flags.changingModes && isDiskSpaceAvailable;
+    return [self isCaptureSessionActive] && !_flags.changingModes && isDiskSpaceAvailable;
 }
 
 - (UIImage *)_uiimageFromJPEGData:(NSData *)jpegData
@@ -1149,7 +1149,7 @@ typedef void (^PBJVisionBlock)();
 - (BOOL)canCaptureVideo
 {
     BOOL isDiskSpaceAvailable = [PBJVisionUtilities availableDiskSpaceInBytes] > PBJVisionRequiredMinimumDiskSpaceInBytes;
-    return [self supportsVideoCapture] && [self isActive] && !_flags.changingModes && isDiskSpaceAvailable;
+    return [self supportsVideoCapture] && [self isCaptureSessionActive] && !_flags.changingModes && isDiskSpaceAvailable;
 }
 
 - (NSArray *)_metadataArray
