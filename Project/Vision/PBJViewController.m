@@ -8,6 +8,7 @@
 
 #import "PBJViewController.h"
 #import "PBJStrobeView.h"
+#import "PBJFocusView.h"
 
 #import "PBJVision.h"
 #import "PBJVisionUtilities.h"
@@ -42,16 +43,20 @@
     UIButton *_doneButton;
     
     UIButton *_flipButton;
+    UIButton *_focusButton;
     UIButton *_onionButton;
 
     UIView *_previewView;
     AVCaptureVideoPreviewLayer *_previewLayer;
+    PBJFocusView *_focusView;
     UIView *_gestureView;
     GLKViewController *_effectsViewController;
     
     UILabel *_instructionLabel;
     
     UILongPressGestureRecognizer *_longPressGestureRecognizer;
+    UITapGestureRecognizer *_tapGestureRecognizer;
+    
     BOOL _recording;
 
     ALAssetsLibrary *_assetLibrary;
@@ -120,7 +125,10 @@
     _previewLayer.frame = _previewView.bounds;
     _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [_previewView.layer addSublayer:_previewLayer];
-
+    
+    // focus view
+    _focusView = [[PBJFocusView alloc] initWithFrame:CGRectZero];
+    
     // onion skin
     _effectsViewController = [[GLKViewController alloc] init];
     _effectsViewController.preferredFramesPerSecond = 60;
@@ -154,12 +162,19 @@
     _longPressGestureRecognizer.minimumPressDuration = 0.05f;
     _longPressGestureRecognizer.allowableMovement = 10.0f;
     
+    // tap to focus
+    _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_handleFocusTapGesterRecognizer:)];
+    _tapGestureRecognizer.delegate = self;
+    _tapGestureRecognizer.numberOfTapsRequired = 1;
+    [_previewView addGestureRecognizer:_tapGestureRecognizer];
+    
     // gesture view to record
     _gestureView = [[UIView alloc] initWithFrame:CGRectZero];
     CGRect gestureFrame = self.view.bounds;
     gestureFrame.origin = CGPointMake(0, 60.0f);
-    gestureFrame.size.height -= 10.0f;
+    gestureFrame.size.height -= (40.0f + 85.0f);
     _gestureView.frame = gestureFrame;
+    
     [self.view addSubview:_gestureView];
     [_gestureView addGestureRecognizer:_longPressGestureRecognizer];
 
@@ -169,6 +184,16 @@
     _flipButton.frame = CGRectMake(15.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 30.0f, 25.0f);
     [_flipButton addTarget:self action:@selector(_handleFlipButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_flipButton];
+    
+    // focus mode button
+    _focusButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_focusButton setImage:[UIImage imageNamed:@"capture_onion"] forState:UIControlStateNormal];
+    [_focusButton setImage:[UIImage imageNamed:@"capture_onion_selected"] forState:UIControlStateSelected];
+    _focusButton.frame = CGRectMake( (CGRectGetWidth(self.view.bounds) * 0.5f) - 10.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 25.0f, 25.0f);
+    [_focusButton addTarget:self action:@selector(_handleFocusButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:_focusButton];
+    
+    _tapGestureRecognizer.enabled = _focusButton.selected;
     
     // onion button
     _onionButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -264,6 +289,21 @@
     }
 }
 
+- (void)_handleFocusButton:(UIButton *)button
+{
+    _focusButton.selected = !_focusButton.selected;
+    
+    if (_focusButton.selected) {
+        _tapGestureRecognizer.enabled = YES;
+        _longPressGestureRecognizer.enabled = NO;
+        [self.view bringSubviewToFront:_previewView];
+    } else {
+        _tapGestureRecognizer.enabled = NO;
+        _longPressGestureRecognizer.enabled = YES;
+        [self.view bringSubviewToFront:_gestureView];
+    }
+}
+
 - (void)_handleOnionSkinningButton:(UIButton *)button
 {
     [_onionButton setSelected:!_onionButton.selected];
@@ -312,6 +352,25 @@
     }
 }
 
+- (void)_handleFocusTapGesterRecognizer:(UIGestureRecognizer *)gestureRecognizer
+{
+    CGPoint tapPoint = [gestureRecognizer locationInView:_previewView];
+
+    // auto focus is occuring, display focus view
+    CGPoint point = tapPoint;
+    
+    CGRect focusFrame = _focusView.frame;
+    focusFrame.origin.x = rint(point.x - (focusFrame.size.width * 0.5f));
+    focusFrame.origin.y = rint(point.y - (focusFrame.size.height * 0.5f));
+    [_focusView setFrame:focusFrame];
+    
+    [_previewView addSubview:_focusView];
+    [_focusView startAnimation];
+
+    CGPoint adjustPoint = [PBJVisionUtilities convertToPointOfInterestFromViewCoordinates:tapPoint inFrame:_previewView.frame];
+    [[PBJVision sharedInstance] focusAtAdjustedPoint:adjustPoint];
+}
+
 #pragma mark - PBJVisionDelegate
 
 - (void)visionSessionWillStart:(PBJVision *)vision
@@ -345,10 +404,26 @@
 
 - (void)visionWillStartFocus:(PBJVision *)vision
 {
+    // auto focus is occuring, display focus view
+    if (_tapGestureRecognizer.enabled && ![_focusView superview]) {
+        
+        CGPoint point = _previewView.center;
+        
+        CGRect focusFrame = _focusView.frame;
+        focusFrame.origin.x = rint(point.x - (focusFrame.size.width * 0.5f));
+        focusFrame.origin.y = rint(point.y - (focusFrame.size.height * 0.5f));
+        [_focusView setFrame:focusFrame];
+        
+        [self.view addSubview:_focusView];
+        [_focusView startAnimation];
+    }
 }
 
 - (void)visionDidStopFocus:(PBJVision *)vision
 {
+    if (_focusView && [_focusView superview]) {
+        [_focusView stopAnimation];
+    }
 }
 
 // photo
