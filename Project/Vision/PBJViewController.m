@@ -76,24 +76,26 @@
 
 #pragma mark - init
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        _assetLibrary = [[ALAssetsLibrary alloc] init];
-        [self _setup];
-    }
-    return self;
-}
-
 - (void)dealloc
 {
     [UIApplication sharedApplication].idleTimerDisabled = NO;
     _longPressGestureRecognizer.delegate = nil;
 }
 
-- (void)_setup
+#pragma mark - view lifecycle
+
+- (void)viewDidLoad
 {
+    [super viewDidLoad];
+
+    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
+    _assetLibrary = [[ALAssetsLibrary alloc] init];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+
     self.view.backgroundColor = [UIColor blackColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         
@@ -187,8 +189,8 @@
     
     // focus mode button
     _focusButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [_focusButton setImage:[UIImage imageNamed:@"capture_onion"] forState:UIControlStateNormal];
-    [_focusButton setImage:[UIImage imageNamed:@"capture_onion_selected"] forState:UIControlStateSelected];
+    [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button"] forState:UIControlStateNormal];
+    [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button_selected"] forState:UIControlStateSelected];
     _focusButton.frame = CGRectMake( (CGRectGetWidth(self.view.bounds) * 0.5f) - 10.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 25.0f, 25.0f);
     [_focusButton addTarget:self action:@selector(_handleFocusButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_focusButton];
@@ -202,14 +204,6 @@
     _onionButton.frame = CGRectMake(CGRectGetWidth(self.view.bounds) - 25.0f - 15.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 25.0f, 25.0f);
     [_onionButton addTarget:self action:@selector(_handleOnionSkinningButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_onionButton];
-}
-
-#pragma mark - view lifecycle
-
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
     
     [self _resetCapture];
     [[PBJVision sharedInstance] startPreview];
@@ -360,8 +354,8 @@
     CGPoint point = tapPoint;
     
     CGRect focusFrame = _focusView.frame;
-    focusFrame.origin.x = rint(point.x - (focusFrame.size.width * 0.5f));
-    focusFrame.origin.y = rint(point.y - (focusFrame.size.height * 0.5f));
+    focusFrame.origin.x = rintf(point.x - (focusFrame.size.width * 0.5f));
+    focusFrame.origin.y = rintf(point.y - (focusFrame.size.height * 0.5f));
     [_focusView setFrame:focusFrame];
     
     [_previewView addSubview:_focusView];
@@ -410,8 +404,8 @@
         CGPoint point = _previewView.center;
         
         CGRect focusFrame = _focusView.frame;
-        focusFrame.origin.x = rint(point.x - (focusFrame.size.width * 0.5f));
-        focusFrame.origin.y = rint(point.y - (focusFrame.size.height * 0.5f));
+        focusFrame.origin.x = rintf(point.x - (focusFrame.size.width * 0.5f));
+        focusFrame.origin.y = rintf(point.y - (focusFrame.size.height * 0.5f));
         [_focusView setFrame:focusFrame];
         
         [self.view addSubview:_focusView];
