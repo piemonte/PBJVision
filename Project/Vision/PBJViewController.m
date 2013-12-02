@@ -354,8 +354,13 @@
     CGPoint point = tapPoint;
     
     CGRect focusFrame = _focusView.frame;
+#if defined(__LP64__) && __LP64__
+    focusFrame.origin.x = rint(point.x - (focusFrame.size.width * 0.5));
+    focusFrame.origin.y = rint(point.y - (focusFrame.size.height * 0.5));
+#else
     focusFrame.origin.x = rintf(point.x - (focusFrame.size.width * 0.5f));
     focusFrame.origin.y = rintf(point.y - (focusFrame.size.height * 0.5f));
+#endif
     [_focusView setFrame:focusFrame];
     
     [_previewView addSubview:_focusView];
@@ -404,8 +409,13 @@
         CGPoint point = _previewView.center;
         
         CGRect focusFrame = _focusView.frame;
+#if defined(__LP64__) && __LP64__
+        focusFrame.origin.x = rint(point.x - (focusFrame.size.width * 0.5));
+        focusFrame.origin.y = rint(point.y - (focusFrame.size.height * 0.5));
+#else
         focusFrame.origin.x = rintf(point.x - (focusFrame.size.width * 0.5f));
         focusFrame.origin.y = rintf(point.y - (focusFrame.size.height * 0.5f));
+#endif
         [_focusView setFrame:focusFrame];
         
         [self.view addSubview:_focusView];
