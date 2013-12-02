@@ -989,7 +989,6 @@ typedef void (^PBJVisionBlock)();
     CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)jpegData);
     
     UIImageOrientation imageOrientation = UIImageOrientationUp;
-    CGFloat imageScale = 1.0;
     
     if (provider) {
         CGImageSourceRef imageSource = CGImageSourceCreateWithDataProvider(provider, NULL);
@@ -1003,7 +1002,9 @@ typedef void (^PBJVisionBlock)();
                     // set orientation
                     CFNumberRef orientationProperty = CFDictionaryGetValue(properties, kCGImagePropertyOrientation);
                     if (orientationProperty) {
-                        CFNumberGetValue(orientationProperty, kCFNumberIntType, &imageOrientation);
+                        NSInteger exifOrientation = 1;
+                        CFNumberGetValue(orientationProperty, kCFNumberIntType, &exifOrientation);
+                        imageOrientation = [self _imageOrientationFromExifOrientation:exifOrientation];
                     }
                     
                     CFRelease(properties);
@@ -1017,7 +1018,7 @@ typedef void (^PBJVisionBlock)();
     
     UIImage *image = nil;
     if (jpegCGImage) {
-        image = [[UIImage alloc] initWithCGImage:jpegCGImage scale:imageScale orientation:imageOrientation];
+        image = [[UIImage alloc] initWithCGImage:jpegCGImage scale:1.0 orientation:imageOrientation];
         CGImageRelease(jpegCGImage);
     }
     return image;
@@ -1049,6 +1050,43 @@ typedef void (^PBJVisionBlock)();
         CGImageRelease(thumbnailCGImage);
     }
     return thumbnail;
+}
+
+
+- (UIImageOrientation)_imageOrientationFromExifOrientation:(NSInteger)exifOrientation
+{
+    UIImageOrientation imageOrientation = UIImageOrientationUp;
+    
+    switch (exifOrientation) {
+        case 1:
+            imageOrientation = UIImageOrientationUp;
+            break;
+        case 2:
+            imageOrientation = UIImageOrientationUpMirrored;
+            break;
+        case 3:
+            imageOrientation = UIImageOrientationDown;
+            break;
+        case 4:
+            imageOrientation = UIImageOrientationDownMirrored;
+            break;
+        case 5:
+            imageOrientation = UIImageOrientationLeftMirrored;
+            break;
+        case 6:
+           imageOrientation = UIImageOrientationRight;
+           break;
+        case 7:
+            imageOrientation = UIImageOrientationRightMirrored;
+            break;
+        case 8:
+            imageOrientation = UIImageOrientationLeft;
+            break;
+        default:
+            break;
+    }
+    
+    return exifOrientation;
 }
 
 - (void)_willCapturePhoto
