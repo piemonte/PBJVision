@@ -1118,7 +1118,7 @@ typedef void (^PBJVisionBlock)();
 
 - (void)capturePhoto
 {
-    if (![self _canSessionCaptureWithOutput:_currentOutput]) {
+    if (![self _canSessionCaptureWithOutput:_currentOutput] || _cameraMode != PBJCameraModePhoto) {
         DLog(@"session is not setup properly for capture");
         return;
     }
