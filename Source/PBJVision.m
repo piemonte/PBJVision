@@ -1096,7 +1096,7 @@ typedef void (^PBJVisionBlock)();
             break;
     }
     
-    return exifOrientation;
+    return imageOrientation;
 }
 
 - (void)_willCapturePhoto
