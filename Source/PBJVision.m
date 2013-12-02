@@ -1083,7 +1083,6 @@ typedef void (^PBJVisionBlock)();
         
         if (!imageDataSampleBuffer) {
             DLog(@"failed to obtain image data sample buffer");
-            // TODO: return delegate error
             return;
         }
     
@@ -1106,7 +1105,7 @@ typedef void (^PBJVisionBlock)();
             DLog(@"failed to generate metadata for photo");
         }
         
-        // add JPEG and image data
+        // add JPEG, UIImage, thumbnail
         NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
         if (jpegData) {
             // add JPEG
@@ -1123,16 +1122,9 @@ typedef void (^PBJVisionBlock)();
             
             // add thumbnail
             UIImage *thumbnail = [self _thumbnailJPEGData:jpegData];
-            if (thumbnail) {
+            if (thumbnail)
                 [photoDict setObject:thumbnail forKey:PBJVisionPhotoThumbnailKey];
-            } else {
-                DLog(@"failed to create a thumnbail");
-                // TODO: return delegate on error
-            }
-            
-        } else {
-            DLog(@"failed to create jpeg still image data");
-            // TODO: return delegate on error
+
         }
         
         if ([_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {
