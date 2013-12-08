@@ -189,11 +189,7 @@ enum
 
 - (BOOL)isRecording
 {
-    __block BOOL isRecording = NO;
-    [self _enqueueBlockInCaptureVideoQueue:^{
-        isRecording = (BOOL)_flags.recording;
-    }];
-    return isRecording;
+    return _flags.recording;
 }
 
 - (void)setVideoRenderingEnabled:(BOOL)videoRenderingEnabled
