@@ -19,11 +19,11 @@
 		0624D09717D43BB500665930 /* capture_onion_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0624D09517D43BB500665930 /* capture_onion_selected@2x.png */; };
 		0624D09817D43BB500665930 /* capture_onion@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0624D09617D43BB500665930 /* capture_onion@2x.png */; };
 		0624D09A17D43D5D00665930 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0624D09917D43D5D00665930 /* OpenGLES.framework */; };
+		0679DF03185539CC00A831EF /* capture_focus_button_active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0679DF01185539CC00A831EF /* capture_focus_button_active@2x.png */; };
+		0679DF04185539CC00A831EF /* capture_focus_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0679DF02185539CC00A831EF /* capture_focus_button@2x.png */; };
 		067D52F817D8574200541B5E /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 067D52F717D8574200541B5E /* GLKit.framework */; };
 		067D52FC17D857DC00541B5E /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 067D52FA17D857AB00541B5E /* Shader.fsh */; };
 		067D52FD17D857DC00541B5E /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 067D52FB17D857AB00541B5E /* Shader.vsh */; };
-		0683468E184A575800CEC81D /* capture_focus_button_selected.png in Resources */ = {isa = PBXBuildFile; fileRef = 0683468C184A575800CEC81D /* capture_focus_button_selected.png */; };
-		0683468F184A575800CEC81D /* capture_focus_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 0683468D184A575800CEC81D /* capture_focus_button.png */; };
 		0683D1C2179F2E1700EE66D6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0683D1C1179F2E1700EE66D6 /* Foundation.framework */; };
 		0683D1C4179F2E1700EE66D6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */; };
 		0683D1C6179F2E1700EE66D6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0683D1C5179F2E1700EE66D6 /* UIKit.framework */; };
@@ -61,11 +61,11 @@
 		0624D09517D43BB500665930 /* capture_onion_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_onion_selected@2x.png"; path = "UI/capture_onion_selected@2x.png"; sourceTree = "<group>"; };
 		0624D09617D43BB500665930 /* capture_onion@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_onion@2x.png"; path = "UI/capture_onion@2x.png"; sourceTree = "<group>"; };
 		0624D09917D43D5D00665930 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		0679DF01185539CC00A831EF /* capture_focus_button_active@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_focus_button_active@2x.png"; path = "UI/capture_focus_button_active@2x.png"; sourceTree = "<group>"; };
+		0679DF02185539CC00A831EF /* capture_focus_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_focus_button@2x.png"; path = "UI/capture_focus_button@2x.png"; sourceTree = "<group>"; };
 		067D52F717D8574200541B5E /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		067D52FA17D857AB00541B5E /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = ../Source/Shaders/Shader.fsh; sourceTree = "<group>"; };
 		067D52FB17D857AB00541B5E /* Shader.vsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = ../Source/Shaders/Shader.vsh; sourceTree = "<group>"; };
-		0683468C184A575800CEC81D /* capture_focus_button_selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = capture_focus_button_selected.png; path = UI/capture_focus_button_selected.png; sourceTree = "<group>"; };
-		0683468D184A575800CEC81D /* capture_focus_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = capture_focus_button.png; path = UI/capture_focus_button.png; sourceTree = "<group>"; };
 		0683D1BE179F2E1700EE66D6 /* Vision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vision.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0683D1C1179F2E1700EE66D6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -120,16 +120,16 @@
 		060F7B1B179F50C300E27091 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				060F7B1C179F550800E27091 /* capture_flip@2x.png */,
+				061858EC1846B05300DEC416 /* capture_focus@2x.png */,
+				0679DF02185539CC00A831EF /* capture_focus_button@2x.png */,
+				0679DF01185539CC00A831EF /* capture_focus_button_active@2x.png */,
+				0624D09617D43BB500665930 /* capture_onion@2x.png */,
+				0624D09517D43BB500665930 /* capture_onion_selected@2x.png */,
 				060F7B13179F50B800E27091 /* capture_rec_base@2x.png */,
 				060F7B14179F50B800E27091 /* capture_rec_blink@2x.png */,
 				060F7B15179F50B800E27091 /* capture_rec_off@2x.png */,
-				0683468C184A575800CEC81D /* capture_focus_button_selected.png */,
-				0683468D184A575800CEC81D /* capture_focus_button.png */,
 				060F7B16179F50B800E27091 /* capture_yep@2x.png */,
-				060F7B1C179F550800E27091 /* capture_flip@2x.png */,
-				061858EC1846B05300DEC416 /* capture_focus@2x.png */,
-				0624D09517D43BB500665930 /* capture_onion_selected@2x.png */,
-				0624D09617D43BB500665930 /* capture_onion@2x.png */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -279,14 +279,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0683468F184A575800CEC81D /* capture_focus_button.png in Resources */,
 				067D52FC17D857DC00541B5E /* Shader.fsh in Resources */,
+				0679DF04185539CC00A831EF /* capture_focus_button@2x.png in Resources */,
 				067D52FD17D857DC00541B5E /* Shader.vsh in Resources */,
 				06B7D025179F2EDC00F3F527 /* Release.xcconfig in Resources */,
 				060F7B18179F50B800E27091 /* capture_rec_blink@2x.png in Resources */,
+				0679DF03185539CC00A831EF /* capture_focus_button_active@2x.png in Resources */,
 				0624D09717D43BB500665930 /* capture_onion_selected@2x.png in Resources */,
 				06B7D036179F357600F3F527 /* Default.png in Resources */,
-				0683468E184A575800CEC81D /* capture_focus_button_selected.png in Resources */,
 				0683D1CC179F2E1700EE66D6 /* InfoPlist.strings in Resources */,
 				060F7B17179F50B800E27091 /* capture_rec_base@2x.png in Resources */,
 				06B7D023179F2EDC00F3F527 /* Base.xcconfig in Resources */,

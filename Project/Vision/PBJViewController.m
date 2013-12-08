@@ -168,6 +168,7 @@
     _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_handleFocusTapGesterRecognizer:)];
     _tapGestureRecognizer.delegate = self;
     _tapGestureRecognizer.numberOfTapsRequired = 1;
+    _tapGestureRecognizer.enabled = NO;
     [_previewView addGestureRecognizer:_tapGestureRecognizer];
     
     // gesture view to record
@@ -190,12 +191,11 @@
     // focus mode button
     _focusButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button"] forState:UIControlStateNormal];
-    [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button_selected"] forState:UIControlStateSelected];
+    [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button_active"] forState:UIControlStateSelected];
     _focusButton.frame = CGRectMake( (CGRectGetWidth(self.view.bounds) * 0.5f) - 10.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 25.0f, 25.0f);
+    _focusButton.imageView.frame = _focusButton.bounds;
     [_focusButton addTarget:self action:@selector(_handleFocusButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_focusButton];
-    
-    _tapGestureRecognizer.enabled = _focusButton.selected;
     
     // onion button
     _onionButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -226,19 +226,28 @@
     [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
         _instructionLabel.alpha = 0;
     } completion:^(BOOL finished) {
-        [_instructionLabel removeFromSuperview];
     }];
     [[PBJVision sharedInstance] startVideoCapture];
 }
 
 - (void)_pauseCapture
 {
+    [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+        _instructionLabel.alpha = 1;
+    } completion:^(BOOL finished) {
+    }];
+
     [[PBJVision sharedInstance] pauseVideoCapture];
     _effectsViewController.view.hidden = !_onionButton.selected;
 }
 
 - (void)_resumeCapture
 {
+    [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+        _instructionLabel.alpha = 0;
+    } completion:^(BOOL finished) {
+    }];
+    
     [[PBJVision sharedInstance] resumeVideoCapture];
     _effectsViewController.view.hidden = YES;
 }
@@ -263,7 +272,9 @@
     } else {
         [vision setCameraDevice:PBJCameraDeviceFront];
         _flipButton.hidden = YES;
+        _focusButton.hidden = YES;
     }
+    
     [vision setCameraMode:PBJCameraModeVideo];
     [vision setCameraOrientation:PBJCameraOrientationPortrait];
     [vision setFocusMode:PBJFocusModeContinuousAutoFocus];
@@ -277,8 +288,10 @@
 {
     PBJVision *vision = [PBJVision sharedInstance];
     if (vision.cameraDevice == PBJCameraDeviceBack) {
+        _focusButton.hidden = YES;
         [vision setCameraDevice:PBJCameraDeviceFront];
     } else {
+        _focusButton.hidden = NO;
         [vision setCameraDevice:PBJCameraDeviceBack];
     }
 }
@@ -289,13 +302,26 @@
     
     if (_focusButton.selected) {
         _tapGestureRecognizer.enabled = YES;
-        _longPressGestureRecognizer.enabled = NO;
-        [self.view bringSubviewToFront:_previewView];
+        _gestureView.hidden = YES;
+
     } else {
+        if (_focusView && [_focusView superview]) {
+            [_focusView stopAnimation];
+        }
         _tapGestureRecognizer.enabled = NO;
-        _longPressGestureRecognizer.enabled = YES;
-        [self.view bringSubviewToFront:_gestureView];
+        _gestureView.hidden = NO;
     }
+    
+    [UIView animateWithDuration:0.15f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+        _instructionLabel.alpha = 0;
+    } completion:^(BOOL finished) {
+        _instructionLabel.text = _focusButton.selected ? NSLocalizedString(@"Touch to focus", @"Touch to focus") :
+                                                         NSLocalizedString(@"Touch and hold to record", @"Touch and hold to record");
+        [UIView animateWithDuration:0.15f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+            _instructionLabel.alpha = 1;
+        } completion:^(BOOL finished1) {
+        }];
+    }];
 }
 
 - (void)_handleOnionSkinningButton:(UIButton *)button
@@ -403,24 +429,6 @@
 
 - (void)visionWillStartFocus:(PBJVision *)vision
 {
-    // auto focus is occuring, display focus view
-    if (_tapGestureRecognizer.enabled && ![_focusView superview]) {
-        
-        CGPoint point = _previewView.center;
-        
-        CGRect focusFrame = _focusView.frame;
-#if defined(__LP64__) && __LP64__
-        focusFrame.origin.x = rint(point.x - (focusFrame.size.width * 0.5));
-        focusFrame.origin.y = rint(point.y - (focusFrame.size.height * 0.5));
-#else
-        focusFrame.origin.x = rintf(point.x - (focusFrame.size.width * 0.5f));
-        focusFrame.origin.y = rintf(point.y - (focusFrame.size.height * 0.5f));
-#endif
-        [_focusView setFrame:focusFrame];
-        
-        [self.view addSubview:_focusView];
-        [_focusView startAnimation];
-    }
 }
 
 - (void)visionDidStopFocus:(PBJVision *)vision
