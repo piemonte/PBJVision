@@ -1689,7 +1689,6 @@ typedef void (^PBJVisionBlock)();
      
         BOOL isAudio = (self.cameraMode != PBJCameraModePhoto) && (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
         BOOL isVideo = (connection == [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo]);
-        BOOL wasReadyToRecord = (_flags.readyForAudio && _flags.readyForVideo);
 
         if (isAudio && !_flags.readyForAudio) {
             _flags.readyForAudio = (unsigned int)[self _setupAssetWriterAudioInput:formatDescription];
@@ -1804,13 +1803,6 @@ typedef void (^PBJVisionBlock)();
                     }
                 }];
             }
-        }
-        
-        if ( !wasReadyToRecord && isReadyToRecord ) {
-            [self _enqueueBlockOnMainQueue:^{
-                if ([_delegate respondsToSelector:@selector(visionDidStartVideoCapture:)])
-                    [_delegate visionDidStartVideoCapture:self];
-            }];
         }
         
         CFRelease(sampleBuffer);
