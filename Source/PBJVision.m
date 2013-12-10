@@ -383,7 +383,7 @@ enum
         _audioAssetBitRate = 64000;
 
         // Average bytes per second based on video dimensions
-        // lower the bitRate, higher the compression, by default PBJVision compresses for 480 x 360 even though we record at 640 x 480    
+        // lower the bitRate, higher the compression
         // 87500, good for 480 x 360
         // 437500, good for 640 x 480
         // 1312500, good for 1280 x 720
@@ -391,8 +391,8 @@ enum
         // 3750000, good for iFrame 960 x 540
         // 5000000, good for iFrame 1280 x 720
 
-        CGFloat bytesPerSecond = 87500.0f;
-        _videoAssetBitRate = bytesPerSecond * 8.0f;
+        CGFloat bytesPerSecond = 437500;
+        _videoAssetBitRate = bytesPerSecond * 8;
         _videoAssetFrameInterval = 30;
 
         _captureSessionPreset = AVCaptureSessionPreset640x480;
