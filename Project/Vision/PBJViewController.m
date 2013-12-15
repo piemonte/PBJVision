@@ -16,13 +16,20 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <GLKit/GLKit.h>
 
-@interface UIButton (ExtendedHit)
+@interface ExtendedHitButton: UIButton
+
++ (instancetype) extendedHitButton;
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event;
 
 @end
 
-@implementation UIButton (ExtendedHit)
+@implementation ExtendedHitButton
+
++ (instancetype) extendedHitButton
+{
+    return (ExtendedHitButton *) [ExtendedHitButton buttonWithType:UIButtonTypeCustom];
+}
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
 {
@@ -102,7 +109,7 @@
     CGFloat viewWidth = CGRectGetWidth(self.view.frame);
     
     // done button
-    _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _doneButton = [ExtendedHitButton extendedHitButton];
     _doneButton.frame = CGRectMake(viewWidth - 20.0f - 20.0f, 20.0f, 20.0f, 20.0f);
     
     UIImage *buttonImage = [UIImage imageNamed:@"capture_yep"];
@@ -182,14 +189,14 @@
     [_gestureView addGestureRecognizer:_longPressGestureRecognizer];
 
     // flip button
-    _flipButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _flipButton = [ExtendedHitButton extendedHitButton];
     [_flipButton setImage:[UIImage imageNamed:@"capture_flip"] forState:UIControlStateNormal];
     _flipButton.frame = CGRectMake(15.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 30.0f, 25.0f);
     [_flipButton addTarget:self action:@selector(_handleFlipButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_flipButton];
     
     // focus mode button
-    _focusButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _focusButton = [ExtendedHitButton extendedHitButton];
     [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button"] forState:UIControlStateNormal];
     [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button_active"] forState:UIControlStateSelected];
     _focusButton.frame = CGRectMake( (CGRectGetWidth(self.view.bounds) * 0.5f) - 10.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 25.0f, 25.0f);
@@ -198,7 +205,7 @@
     [self.view addSubview:_focusButton];
     
     // onion button
-    _onionButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _onionButton = [ExtendedHitButton extendedHitButton];
     [_onionButton setImage:[UIImage imageNamed:@"capture_onion"] forState:UIControlStateNormal];
     [_onionButton setImage:[UIImage imageNamed:@"capture_onion_selected"] forState:UIControlStateSelected];
     _onionButton.frame = CGRectMake(CGRectGetWidth(self.view.bounds) - 25.0f - 15.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 25.0f, 25.0f);
