@@ -145,6 +145,7 @@ enum
         unsigned int interrupted:1;
         unsigned int videoWritten:1;
         unsigned int videoRenderingEnabled:1;
+        unsigned int thumbnailEnabled:1;
     } __block _flags;
 }
 
@@ -200,6 +201,16 @@ enum
 - (BOOL)isVideoRenderingEnabled
 {
     return _flags.videoRenderingEnabled;
+}
+
+- (void)setThumbnailEnabled:(BOOL)thumbnailEnabled
+{
+    _flags.thumbnailEnabled = (unsigned int)thumbnailEnabled;
+}
+
+- (BOOL)thumbnailEnabled
+{
+    return _flags.thumbnailEnabled;
 }
 
 - (Float64)capturedAudioSeconds
@@ -374,12 +385,15 @@ enum
 {
     self = [super init];
     if (self) {
+        
+        // setup GLES
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
         if (!_context) {
             DLog(@"failed to create GL context");
         }
         [self _setupGL];
 
+        // default audio/video configuration
         _audioAssetBitRate = 64000;
 
         // Average bytes per second based on video dimensions
@@ -397,10 +411,15 @@ enum
 
         _captureSessionPreset = AVCaptureSessionPreset640x480;
 
+        // default flags
+        _flags.thumbnailEnabled = YES;
+
+        // setup queues
         _captureSessionDispatchQueue = dispatch_queue_create("PBJVisionSession", DISPATCH_QUEUE_SERIAL); // protects session
         _captureVideoDispatchQueue = dispatch_queue_create("PBJVisionVideo", DISPATCH_QUEUE_SERIAL); // protects capture
+        
         _previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:nil];
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationWillEnterForeground:) name:@"UIApplicationWillEnterForegroundNotification" object:[UIApplication sharedApplication]];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationDidEnterBackground:) name:@"UIApplicationDidEnterBackgroundNotification" object:[UIApplication sharedApplication]];
     }
@@ -1165,10 +1184,12 @@ typedef void (^PBJVisionBlock)();
             }
             
             // add thumbnail
-            UIImage *thumbnail = [self _thumbnailJPEGData:jpegData];
-            if (thumbnail)
-                [photoDict setObject:thumbnail forKey:PBJVisionPhotoThumbnailKey];
-
+            if (_flags.thumbnailEnabled) {
+                UIImage *thumbnail = [self _thumbnailJPEGData:jpegData];
+                if (thumbnail)
+                    [photoDict setObject:thumbnail forKey:PBJVisionPhotoThumbnailKey];
+            }
+            
         }
         
         if ([_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {

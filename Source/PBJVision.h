@@ -110,6 +110,8 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic, readonly) BOOL canCapturePhoto;
 - (void)capturePhoto;
 
+@property (nonatomic) BOOL thumbnailEnabled; // thumbnail generation, disabling reduces processing time for an photo
+
 // video
 // use pause/resume if a session is in progress, end finalizes that recording session
 
