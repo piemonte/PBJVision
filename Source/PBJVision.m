@@ -1521,7 +1521,7 @@ typedef void (^PBJVisionBlock)();
 				}
 			}
 		} else if (mediaType == AVMediaTypeAudio) {
-			if (_assetWriterAudioIn.readyForMoreMediaData) {
+			if (!self.isMute && _assetWriterAudioIn.readyForMoreMediaData) {
 				if (![_assetWriterAudioIn appendSampleBuffer:sampleBuffer]) {
 					DLog(@"asset writer error appending audio (%@)", [_assetWriter error]);
 				}
