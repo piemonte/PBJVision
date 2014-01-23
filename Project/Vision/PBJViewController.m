@@ -214,6 +214,7 @@
     
     [self _resetCapture];
     [[PBJVision sharedInstance] startPreview];
+    
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -333,9 +334,10 @@
 
 - (void)_handleOnionSkinningButton:(UIButton *)button
 {
-    [_onionButton setSelected:!_onionButton.selected];
-    if (_recording)
-        _effectsViewController.view.hidden = !_onionButton.selected;
+//    [_onionButton setSelected:!_onionButton.selected];
+//    if (_recording)
+//        _effectsViewController.view.hidden = !_onionButton.selected;
+    [[PBJVision sharedInstance] capturePreviewPhoto];
 }
 
 - (void)_handleDoneButton:(UIButton *)button
@@ -404,6 +406,11 @@
 }
 
 #pragma mark - PBJVisionDelegate
+
+-(void)vision:(PBJVision *)vision capturedLivePhotoFromBuffer:(CGImageRef)imageRef {
+    UIImage *image = [UIImage imageWithCGImage:imageRef];
+    NSLog(@"image is %@", image);
+}
 
 - (void)visionSessionWillStart:(PBJVision *)vision
 {

@@ -109,7 +109,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 @property (nonatomic, readonly) BOOL canCapturePhoto;
 - (void)capturePhoto;
-
+- (void)capturePreviewPhoto;
 @property (nonatomic) BOOL thumbnailEnabled; // thumbnail generation, disabling reduces processing time for an photo
 
 // video
@@ -155,6 +155,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionWillCapturePhoto:(PBJVision *)vision;
 - (void)visionDidCapturePhoto:(PBJVision *)vision;
 - (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error;
+- (void)vision:(PBJVision *)vision capturedLivePhotoFromBuffer:(CGImageRef)imageRef;
 
 // video
 
