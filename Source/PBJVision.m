@@ -621,10 +621,8 @@ typedef void (^PBJVisionBlock)();
     NSDictionary *videoSettings = nil;
     
     if (supportsFullRangeYUV) {
-        NSLog(@"in first one");
         videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) };
     } else if (supportsVideoRangeYUV) {
-        NSLog(@"in second one");
         videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) };
     }
     
