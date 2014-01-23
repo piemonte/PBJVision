@@ -779,6 +779,7 @@ typedef void (^PBJVisionBlock)();
         // specify video preset
         sessionPreset = AVCaptureSessionPreset640x480;
 
+        [self _setupVideoSettings];
         
         // setup video device configuration
         if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
@@ -1856,38 +1857,6 @@ typedef void (^PBJVisionBlock)();
 }
 
 - (CGImageRef)cgImageFromSampleBuffer:(CMSampleBufferRef)sampleBuffer {
-//    // Get a CMSampleBuffer's Core Video image buffer for the media data
-//    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-//
-//    //Lock the base address of the pixel buffer
-//    CVPixelBufferLockBaseAddress(imageBuffer, 0);
-//    
-//    //Get the number of bytes per row for the pixel buffer
-//    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
-//
-//    // Get the pixel buffer width and height
-//    size_t width = CVPixelBufferGetWidth(imageBuffer);
-//    size_t height = CVPixelBufferGetHeight(imageBuffer);
-//    
-//    // Create a device-dependent RGB color space
-//    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-//    
-//    // baseAddress = CVPixelBufferGetBaseAddress(imageBuffer)
-//    //Create a bitmap graphics context with the sample buffer data
-//    CGContextRef context = CGBitmapContextCreate(CVPixelBufferGetBaseAddress(imageBuffer), width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
-//
-//    // Create a Quartz image from the pixel data in the bitmap graphics context
-//    CGImageRef cgImage = CGBitmapContextCreateImage(context);
-//
-//    // Unlock the pixel buffer
-//    CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
-//    
-//    // Free up the context and color space
-//    //CGContextRelease(context)
-//    CGColorSpaceRelease(colorSpace);
-    
-    
-    
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     CVPixelBufferLockBaseAddress(imageBuffer,0);
     uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(imageBuffer);
@@ -1904,7 +1873,6 @@ typedef void (^PBJVisionBlock)();
     CGColorSpaceRelease(colorSpace);
     return newImage;
 }
-
 
 
 #pragma mark - App NSNotifications
