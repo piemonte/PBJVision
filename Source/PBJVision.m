@@ -880,8 +880,8 @@ typedef void (^PBJVisionBlock)();
             [_captureSession startRunning];
             
             [self _enqueueBlockOnMainQueue:^{
-                if ([_delegate respondsToSelector:@selector(visionSessionDidStart:)]) {
-                    [_delegate visionSessionDidStart:self];
+                if ([_delegate respondsToSelector:@selector(visionSessionDidStartPreview:)]) {
+                    [_delegate visionSessionDidStartPreview:self];
                 }
             }];
             DLog(@"capture session running");
@@ -902,8 +902,8 @@ typedef void (^PBJVisionBlock)();
         [_captureSession stopRunning];
 
         [self _executeBlockOnMainQueue:^{
-            if ([_delegate respondsToSelector:@selector(visionSessionDidStop:)]) {
-                [_delegate visionSessionDidStop:self];
+            if ([_delegate respondsToSelector:@selector(visionSessionDidStopPreview:)]) {
+                [_delegate visionSessionDidStopPreview:self];
             }
         }];
         DLog(@"capture session stopped");
