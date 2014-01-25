@@ -1285,6 +1285,7 @@ typedef void (^PBJVisionBlock)();
 
         NSError *error = nil;
         _assetWriter = [[AVAssetWriter alloc] initWithURL:_outputURL fileType:(NSString *)kUTTypeQuickTimeMovie error:&error];
+        _assetWriter.shouldOptimizeForNetworkUse = YES;
         if (error) {
             DLog(@"error setting up the asset writer (%@)", error);
             _assetWriter = nil;
