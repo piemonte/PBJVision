@@ -1422,7 +1422,7 @@ typedef void (^PBJVisionBlock)();
 	if ([_assetWriter canApplyOutputSettings:audioCompressionSettings forMediaType:AVMediaTypeAudio]) {
 		_assetWriterAudioIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeAudio outputSettings:audioCompressionSettings];
 		_assetWriterAudioIn.expectsMediaDataInRealTime = YES;
-        DLog(@"prepared audio-in with compression settings sampleRate (%f) channels (%d) bitRate (%d)", sampleRate, channels, _audioAssetBitRate);
+        DLog(@"prepared audio-in with compression settings sampleRate (%f) channels (%d) bitRate (%ld)", sampleRate, channels, (long)_audioAssetBitRate);
 		if ([_assetWriter canAddInput:_assetWriterAudioIn]) {
 			[_assetWriter addInput:_assetWriterAudioIn];
 		} else {
@@ -1476,7 +1476,7 @@ typedef void (^PBJVisionBlock)();
 		_assetWriterVideoIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeVideo outputSettings:videoSettings];
 		_assetWriterVideoIn.expectsMediaDataInRealTime = YES;
 		_assetWriterVideoIn.transform = CGAffineTransformIdentity;
-        DLog(@"prepared video-in with compression settings bps (%f) frameInterval (%d)", _videoAssetBitRate, _videoAssetFrameInterval);
+        DLog(@"prepared video-in with compression settings bps (%f) frameInterval (%ld)", _videoAssetBitRate, (long)_videoAssetFrameInterval);
 		if ([_assetWriter canAddInput:_assetWriterVideoIn]) {
 			[_assetWriter addInput:_assetWriterVideoIn];
 		} else {
@@ -1501,7 +1501,7 @@ typedef void (^PBJVisionBlock)();
         if ([_assetWriter startWriting]) {
             CMTime startTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
 			[_assetWriter startSessionAtSourceTime:startTime];
-            DLog(@"asset writer started writing with status (%d)", _assetWriter.status);
+            DLog(@"asset writer started writing with status (%ld)", (long)_assetWriter.status);
 		} else {
 			DLog(@"asset writer error when starting to write (%@)", [_assetWriter error]);
 		}
