@@ -7,10 +7,9 @@
 
 #import "PBJVision.h"
 #import "PBJVisionUtilities.h"
+#import "PBJVideoWriter.h"
 
-#import <UIKit/UIDevice.h>
 #import <ImageIO/ImageIO.h>
-#import <MobileCoreServices/UTCoreTypes.h>
 #import <OpenGLES/EAGL.h>
 
 #define LOG_VISION 0
@@ -82,11 +81,9 @@ enum
     AVCaptureAudioDataOutput *_captureOutputAudio;
     AVCaptureVideoDataOutput *_captureOutputVideo;
 
-	__block AVAssetWriter *_assetWriter;
-	__block AVAssetWriterInput *_assetWriterAudioIn;
-	__block AVAssetWriterInput *_assetWriterVideoIn;
-
     // vision core
+
+    PBJVideoWriter *_videoWriter;
 
     dispatch_queue_t _captureSessionDispatchQueue;
     dispatch_queue_t _captureVideoDispatchQueue;
@@ -112,8 +109,6 @@ enum
     AVCaptureVideoPreviewLayer *_previewLayer;
     CGRect _cleanAperture;
 
-    NSURL *_outputURL;
-    
     CMTime _timeOffset;
     CMTime _startTimestamp;
     CMTime _audioTimestamp;
@@ -1214,31 +1209,6 @@ typedef void (^PBJVisionBlock)();
     return [self supportsVideoCapture] && [self isCaptureSessionActive] && !_flags.changingModes && isDiskSpaceAvailable;
 }
 
-- (NSArray *)_metadataArray
-{
-    UIDevice *currentDevice = [UIDevice currentDevice];
-    
-    // device model
-    AVMutableMetadataItem *modelItem = [[AVMutableMetadataItem alloc] init];
-    [modelItem setKeySpace:AVMetadataKeySpaceCommon];
-    [modelItem setKey:AVMetadataCommonKeyModel];
-    [modelItem setValue:[currentDevice localizedModel]];
-
-    // software
-    AVMutableMetadataItem *softwareItem = [[AVMutableMetadataItem alloc] init];
-    [softwareItem setKeySpace:AVMetadataKeySpaceCommon];
-    [softwareItem setKey:AVMetadataCommonKeySoftware];
-    [softwareItem setValue:[NSString stringWithFormat:@"%@ %@ PBJVision", [currentDevice systemName], [currentDevice systemVersion]]];
-
-    // creation date
-    AVMutableMetadataItem *creationDateItem = [[AVMutableMetadataItem alloc] init];
-    [creationDateItem setKeySpace:AVMetadataKeySpaceCommon];
-    [creationDateItem setKey:AVMetadataCommonKeyCreationDate];
-    [creationDateItem setValue:[NSString PBJformattedTimestampStringFromDate:[NSDate date]]];
-
-    return @[modelItem, softwareItem, creationDateItem];
-}
-
 - (void)startVideoCapture
 {
     if (![self _canSessionCaptureWithOutput:_currentOutput]) {
@@ -1254,18 +1224,19 @@ typedef void (^PBJVisionBlock)();
             return;
 
         NSString *outputPath = [NSString stringWithFormat:@"%@%@", NSTemporaryDirectory(), @"video.mp4"];
-        _outputURL = [NSURL fileURLWithPath:outputPath];
+        NSURL *outputURL = [NSURL fileURLWithPath:outputPath];
         if ([[NSFileManager defaultManager] fileExistsAtPath:outputPath]) {
             NSError *error = nil;
             if (![[NSFileManager defaultManager] removeItemAtPath:outputPath error:&error]) {
                 DLog(@"could not setup an output file");
-                _outputURL = nil;
                 return;
             }
         }
 
         if (!outputPath || [outputPath length] == 0)
             return;
+            
+        _videoWriter = [[PBJVideoWriter alloc] initWithOutputURL:outputURL];
 
         AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
         [self _setOrientationForConnection:videoConnection];
@@ -1274,7 +1245,6 @@ typedef void (^PBJVisionBlock)();
         _audioTimestamp = kCMTimeZero;
         _videoTimestamp = kCMTimeZero;
         _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
-
         
         _flags.recording = YES;
         _flags.paused = NO;
@@ -1282,18 +1252,6 @@ typedef void (^PBJVisionBlock)();
         _flags.readyForAudio = NO;
         _flags.readyForVideo = NO;
         _flags.videoWritten = NO;
-
-        NSError *error = nil;
-        _assetWriter = [[AVAssetWriter alloc] initWithURL:_outputURL fileType:(NSString *)kUTTypeQuickTimeMovie error:&error];
-        _assetWriter.shouldOptimizeForNetworkUse = YES;
-        if (error) {
-            DLog(@"error setting up the asset writer (%@)", error);
-            _assetWriter = nil;
-            return;
-        }
-        
-        NSArray *metadata = [self _metadataArray];
-        _assetWriter.metadata = metadata;
         
         [self _enqueueBlockOnMainQueue:^{                
             if ([_delegate respondsToSelector:@selector(visionDidStartVideoCapture:)])
@@ -1308,7 +1266,7 @@ typedef void (^PBJVisionBlock)();
         if (!_flags.recording)
             return;
 
-        if (!_assetWriter) {
+        if (!_videoWriter) {
             DLog(@"assetWriter unavailable to stop");
             return;
         }
@@ -1331,7 +1289,7 @@ typedef void (^PBJVisionBlock)();
         if (!_flags.recording || !_flags.paused)
             return;
  
-        if (!_assetWriter) {
+        if (!_videoWriter) {
             DLog(@"assetWriter unavailable to resume");
             return;
         }
@@ -1355,13 +1313,8 @@ typedef void (^PBJVisionBlock)();
         if (!_flags.recording)
             return;
         
-        if (!_assetWriter) {
+        if (!_videoWriter) {
             DLog(@"assetWriter unavailable to end");
-            return;
-        }
-
-        if (_assetWriter.status == AVAssetWriterStatusUnknown) {
-            DLog(@"asset writer is in an unknown state, wasn't recording");
             return;
         }
         
@@ -1379,18 +1332,17 @@ typedef void (^PBJVisionBlock)();
 
             [self _enqueueBlockOnMainQueue:^{
                 NSMutableDictionary *videoDict = [[NSMutableDictionary alloc] init];
-                [videoDict setObject:[_outputURL path] forKey:PBJVisionVideoPathKey];
+                NSString *path = [_videoWriter.outputURL path];
+                if (path)
+                    [videoDict setObject:path forKey:PBJVisionVideoPathKey];
 
-                NSError *error = [_assetWriter error];
+                NSError *error = [_videoWriter error];
                 if ([_delegate respondsToSelector:@selector(vision:capturedVideo:error:)]) {
                     [_delegate vision:self capturedVideo:videoDict error:error];
                 }
             }];
-            
-            _assetWriterAudioIn = nil;
-            _assetWriterVideoIn = nil;
         };
-        [_assetWriter finishWritingWithCompletionHandler:finishWritingCompletionHandler];
+        [_videoWriter finishWritingWithCompletionHandler:finishWritingCompletionHandler];
     }];
 }
 
@@ -1419,23 +1371,7 @@ typedef void (^PBJVisionBlock)();
                                                 AVEncoderBitRateKey : @(_audioAssetBitRate),
                                                 AVChannelLayoutKey : currentChannelLayoutData };
 
-	if ([_assetWriter canApplyOutputSettings:audioCompressionSettings forMediaType:AVMediaTypeAudio]) {
-		_assetWriterAudioIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeAudio outputSettings:audioCompressionSettings];
-		_assetWriterAudioIn.expectsMediaDataInRealTime = YES;
-        DLog(@"prepared audio-in with compression settings sampleRate (%f) channels (%d) bitRate (%ld)", sampleRate, channels, (long)_audioAssetBitRate);
-		if ([_assetWriter canAddInput:_assetWriterAudioIn]) {
-			[_assetWriter addInput:_assetWriterAudioIn];
-		} else {
-			DLog(@"couldn't add asset writer audio input");
-            return NO;
-		}
-	} else {
-		DLog(@"couldn't apply audio output settings");
-        return NO;
-	}
-    
-    return YES;
-
+    return [_videoWriter setupAudioOutputDeviceWithSettings:audioCompressionSettings];
 }
 
 - (BOOL)_setupAssetWriterVideoInput:(CMFormatDescriptionRef)currentFormatDescription
@@ -1471,66 +1407,7 @@ typedef void (^PBJVisionBlock)();
                                      AVVideoHeightKey : @(videoDimensions.height),
                                      AVVideoCompressionPropertiesKey : compressionSettings };
     
-	if ([_assetWriter canApplyOutputSettings:videoSettings forMediaType:AVMediaTypeVideo]) {
-    
-		_assetWriterVideoIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeVideo outputSettings:videoSettings];
-		_assetWriterVideoIn.expectsMediaDataInRealTime = YES;
-		_assetWriterVideoIn.transform = CGAffineTransformIdentity;
-        DLog(@"prepared video-in with compression settings bps (%f) frameInterval (%ld)", _videoAssetBitRate, (long)_videoAssetFrameInterval);
-		if ([_assetWriter canAddInput:_assetWriterVideoIn]) {
-			[_assetWriter addInput:_assetWriterVideoIn];
-		} else {
-			DLog(@"couldn't add asset writer video input");
-            return NO;
-		}
-        
-	} else {
-    
-		DLog(@"couldn't apply video output settings");
-        return NO;
-        
-	}
-    
-    return YES;
-}
-
-- (void)_writeSampleBuffer:(CMSampleBufferRef)sampleBuffer ofType:(NSString *)mediaType
-{
-	if ( _assetWriter.status == AVAssetWriterStatusUnknown ) {
-    
-        if ([_assetWriter startWriting]) {
-            CMTime startTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-			[_assetWriter startSessionAtSourceTime:startTime];
-            DLog(@"asset writer started writing with status (%ld)", (long)_assetWriter.status);
-		} else {
-			DLog(@"asset writer error when starting to write (%@)", [_assetWriter error]);
-		}
-        
-	}
-    
-    if ( _assetWriter.status == AVAssetWriterStatusFailed ) {
-        DLog(@"asset writer failure, (%@)", _assetWriter.error.localizedDescription);
-        return;
-    }
-	
-	if ( _assetWriter.status == AVAssetWriterStatusWriting ) {
-		
-		if (mediaType == AVMediaTypeVideo) {
-			if (_assetWriterVideoIn.readyForMoreMediaData) {
-				if (![_assetWriterVideoIn appendSampleBuffer:sampleBuffer]) {
-					DLog(@"asset writer error appending video (%@)", [_assetWriter error]);
-				}
-			}
-		} else if (mediaType == AVMediaTypeAudio) {
-			if (_assetWriterAudioIn.readyForMoreMediaData) {
-				if (![_assetWriterAudioIn appendSampleBuffer:sampleBuffer]) {
-					DLog(@"asset writer error appending audio (%@)", [_assetWriter error]);
-				}
-			}
-		}
-        
-	}
-    
+    return [_videoWriter setupVideoOutputDeviceWithSettings:videoSettings];
 }
 
 - (CMSampleBufferRef)_createOffsetSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset
@@ -1703,7 +1580,7 @@ typedef void (^PBJVisionBlock)();
             return;
         }
 
-        if (!_assetWriter) {
+        if (!_videoWriter) {
             CFRelease(sampleBuffer);
             CFRelease(formatDescription);
             return;
@@ -1770,7 +1647,7 @@ typedef void (^PBJVisionBlock)();
                     time = CMTimeAdd(time, duration);
                 
                 if (time.value > _videoTimestamp.value) {
-                    [self _writeSampleBuffer:bufferToWrite ofType:AVMediaTypeVideo];
+                    [_videoWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeVideo];
                     _videoTimestamp = time;
                     _flags.videoWritten = YES;
                 }
@@ -1813,7 +1690,7 @@ typedef void (^PBJVisionBlock)();
                     time = CMTimeAdd(time, duration);
 
                 if (time.value > _audioTimestamp.value) {
-                    [self _writeSampleBuffer:bufferToWrite ofType:AVMediaTypeAudio];
+                    [_videoWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeAudio];
                     _audioTimestamp = time;
                 }
                 
