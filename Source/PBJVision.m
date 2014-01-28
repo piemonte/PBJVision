@@ -581,8 +581,6 @@ typedef void (^PBJVisionBlock)();
     _currentInput = nil;
     _currentOutput = nil;
     
-    _previewLayer.session = nil;
-    
     DLog(@"camera destroyed");
 }
 
