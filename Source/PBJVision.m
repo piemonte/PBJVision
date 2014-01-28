@@ -1223,7 +1223,7 @@ typedef void (^PBJVisionBlock)();
         if (_flags.recording || _flags.paused)
             return;
 	
-	NSString *guid = [[NSUUID new] UUIDString];
+        NSString *guid = [[NSUUID new] UUIDString];
         NSString *outputPath = [NSString stringWithFormat:@"%@video_%@.mp4", NSTemporaryDirectory(), guid];
         NSURL *outputURL = [NSURL fileURLWithPath:outputPath];
         if ([[NSFileManager defaultManager] fileExistsAtPath:outputPath]) {
