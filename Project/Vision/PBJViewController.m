@@ -100,7 +100,6 @@
 
     _assetLibrary = [[ALAssetsLibrary alloc] init];
     
-    CGFloat statusBarHeight = CGRectGetHeight([[UIApplication sharedApplication] statusBarFrame]);
     CGFloat viewWidth = CGRectGetWidth(self.view.frame);
 
     // elapsed time and red dot
@@ -181,37 +180,45 @@
     [_gestureView addGestureRecognizer:_longPressGestureRecognizer];
 
     // bottom dock
-    _captureDock = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.view.bounds) + statusBarHeight - 60.0f, CGRectGetWidth(self.view.bounds), 60.0f)];
-    _captureDock.backgroundColor = [UIColor blackColor];
+    _captureDock = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.view.bounds) - 60.0f, CGRectGetWidth(self.view.bounds), 60.0f)];
+    _captureDock.backgroundColor = [UIColor clearColor];
     _captureDock.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
     [self.view addSubview:_captureDock];
     
     // flip button
     _flipButton = [ExtendedHitButton extendedHitButton];
-    [_flipButton setImage:[UIImage imageNamed:@"capture_flip"] forState:UIControlStateNormal];
+    UIImage *flipImage = [UIImage imageNamed:@"capture_flip"];
+    [_flipButton setImage:flipImage forState:UIControlStateNormal];
     CGRect flipFrame = _flipButton.frame;
     flipFrame.origin = CGPointMake(20.0f, 16.0f);
+    flipFrame.size = flipImage.size;
     _flipButton.frame = flipFrame;
     [_flipButton addTarget:self action:@selector(_handleFlipButton:) forControlEvents:UIControlEventTouchUpInside];
     [_captureDock addSubview:_flipButton];
-        
+    
     // focus mode button
     _focusButton = [ExtendedHitButton extendedHitButton];
-    [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button"] forState:UIControlStateNormal];
+    UIImage *focusImage = [UIImage imageNamed:@"capture_focus_button"];
+    [_focusButton setImage:focusImage forState:UIControlStateNormal];
     [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button_active"] forState:UIControlStateSelected];
     CGRect focusFrame = _focusButton.frame;
-    focusFrame.origin = CGPointMake((CGRectGetWidth(self.view.bounds) * 0.5f) - (CGRectGetWidth(_focusButton.frame) * 0.5f), 16.0f);
+    focusFrame.origin = CGPointMake((CGRectGetWidth(self.view.bounds) * 0.5f) - (focusImage.size.width * 0.5f), 16.0f);
+    focusFrame.size = focusImage.size;
     _focusButton.frame = focusFrame;
+    
     [_focusButton addTarget:self action:@selector(_handleFocusButton:) forControlEvents:UIControlEventTouchUpInside];
     [_captureDock addSubview:_focusButton];
     
     // onion button
     _onionButton = [ExtendedHitButton extendedHitButton];
-    [_onionButton setImage:[UIImage imageNamed:@"capture_onion"] forState:UIControlStateNormal];
+    UIImage *onionImage = [UIImage imageNamed:@"capture_onion"];
+    [_onionButton setImage:onionImage forState:UIControlStateNormal];
     [_onionButton setImage:[UIImage imageNamed:@"capture_onion_selected"] forState:UIControlStateSelected];
     CGRect onionFrame = _onionButton.frame;
-    onionFrame.origin = CGPointMake(CGRectGetWidth(self.view.bounds) - CGRectGetWidth(_onionButton.frame) - 20.0f, 16.0f);
+    onionFrame.origin = CGPointMake(CGRectGetWidth(self.view.bounds) - onionImage.size.width - 20.0f, 16.0f);
+    onionFrame.size = onionImage.size;
     _onionButton.frame = onionFrame;
+    _onionButton.imageView.frame = _onionButton.bounds;
     [_onionButton addTarget:self action:@selector(_handleOnionSkinningButton:) forControlEvents:UIControlEventTouchUpInside];
     [_captureDock addSubview:_onionButton];
 }
@@ -289,6 +296,8 @@
 
     if ([vision isCameraDeviceAvailable:PBJCameraDeviceBack]) {
         [vision setCameraDevice:PBJCameraDeviceBack];
+        _flipButton.hidden = NO;
+        _focusButton.hidden = NO;
     } else {
         [vision setCameraDevice:PBJCameraDeviceFront];
         _flipButton.hidden = YES;
