@@ -16,9 +16,9 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <GLKit/GLKit.h>
 
-@interface ExtendedHitButton: UIButton
+@interface ExtendedHitButton : UIButton
 
-+ (instancetype) extendedHitButton;
++ (instancetype)extendedHitButton;
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event;
 
@@ -26,9 +26,9 @@
 
 @implementation ExtendedHitButton
 
-+ (instancetype) extendedHitButton
++ (instancetype)extendedHitButton
 {
-    return (ExtendedHitButton *) [ExtendedHitButton buttonWithType:UIButtonTypeCustom];
+    return (ExtendedHitButton *)[ExtendedHitButton buttonWithType:UIButtonTypeCustom];
 }
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
@@ -52,15 +52,15 @@
     UIButton *_flipButton;
     UIButton *_focusButton;
     UIButton *_onionButton;
+    UIView *_captureDock;
 
     UIView *_previewView;
     AVCaptureVideoPreviewLayer *_previewLayer;
     PBJFocusView *_focusView;
-    UIView *_gestureView;
     GLKViewController *_effectsViewController;
     
     UILabel *_instructionLabel;
-    
+    UIView *_gestureView;
     UILongPressGestureRecognizer *_longPressGestureRecognizer;
     UITapGestureRecognizer *_tapGestureRecognizer;
     
@@ -95,29 +95,14 @@
 {
     [super viewDidLoad];
 
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
-    _assetLibrary = [[ALAssetsLibrary alloc] init];
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-
     self.view.backgroundColor = [UIColor blackColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        
+
+    _assetLibrary = [[ALAssetsLibrary alloc] init];
+    
+    CGFloat statusBarHeight = CGRectGetHeight([[UIApplication sharedApplication] statusBarFrame]);
     CGFloat viewWidth = CGRectGetWidth(self.view.frame);
-    
-    // done button
-    _doneButton = [ExtendedHitButton extendedHitButton];
-    _doneButton.frame = CGRectMake(viewWidth - 20.0f - 20.0f, 20.0f, 20.0f, 20.0f);
-    
-    UIImage *buttonImage = [UIImage imageNamed:@"capture_yep"];
-    [_doneButton setImage:buttonImage forState:UIControlStateNormal];
-    
-    [_doneButton addTarget:self action:@selector(_handleDoneButton:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_doneButton];
-    
+
     // elapsed time and red dot
     _strobeView = [[PBJStrobeView alloc] initWithFrame:CGRectZero];
     CGRect strobeFrame = _strobeView.frame;
@@ -125,7 +110,15 @@
     _strobeView.frame = strobeFrame;
     [self.view addSubview:_strobeView];
 
-    // preview
+    // done button
+    _doneButton = [ExtendedHitButton extendedHitButton];
+    _doneButton.frame = CGRectMake(viewWidth - 20.0f - 20.0f, 20.0f, 20.0f, 20.0f);
+    UIImage *buttonImage = [UIImage imageNamed:@"capture_yep"];
+    [_doneButton setImage:buttonImage forState:UIControlStateNormal];
+    [_doneButton addTarget:self action:@selector(_handleDoneButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:_doneButton];
+
+    // preview and AV layer
     _previewView = [[UIView alloc] initWithFrame:CGRectZero];
     _previewView.backgroundColor = [UIColor blackColor];
     CGRect previewFrame = CGRectMake(0, 60.0f, CGRectGetWidth(self.view.frame), CGRectGetWidth(self.view.frame));
@@ -134,9 +127,6 @@
     _previewLayer.frame = _previewView.bounds;
     _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [_previewView.layer addSublayer:_previewLayer];
-    
-    // focus view
-    _focusView = [[PBJFocusView alloc] initWithFrame:CGRectZero];
     
     // onion skin
     _effectsViewController = [[GLKViewController alloc] init];
@@ -152,6 +142,9 @@
     [[PBJVision sharedInstance] setPresentationFrame:_previewView.frame];
     [_previewView addSubview:_effectsViewController.view];
 
+    // focus view
+    _focusView = [[PBJFocusView alloc] initWithFrame:CGRectZero];
+
     // instruction label
     _instructionLabel = [[UILabel alloc] initWithFrame:self.view.bounds];
     _instructionLabel.textAlignment = NSTextAlignmentCenter;
@@ -165,7 +158,7 @@
     _instructionLabel.center = labelCenter;
     [self.view addSubview:_instructionLabel];
     
-    // press to record gesture
+    // touch to record
     _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(_handleLongPressGestureRecognizer:)];
     _longPressGestureRecognizer.delegate = self;
     _longPressGestureRecognizer.minimumPressDuration = 0.05f;
@@ -184,33 +177,51 @@
     gestureFrame.origin = CGPointMake(0, 60.0f);
     gestureFrame.size.height -= (40.0f + 85.0f);
     _gestureView.frame = gestureFrame;
-    
     [self.view addSubview:_gestureView];
     [_gestureView addGestureRecognizer:_longPressGestureRecognizer];
 
+    // bottom dock
+    _captureDock = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.view.bounds) + statusBarHeight - 60.0f, CGRectGetWidth(self.view.bounds), 60.0f)];
+    _captureDock.backgroundColor = [UIColor blackColor];
+    _captureDock.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+    [self.view addSubview:_captureDock];
+    
     // flip button
     _flipButton = [ExtendedHitButton extendedHitButton];
     [_flipButton setImage:[UIImage imageNamed:@"capture_flip"] forState:UIControlStateNormal];
-    _flipButton.frame = CGRectMake(15.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 30.0f, 25.0f);
+    CGRect flipFrame = _flipButton.frame;
+    flipFrame.origin = CGPointMake(20.0f, 16.0f);
+    _flipButton.frame = flipFrame;
     [_flipButton addTarget:self action:@selector(_handleFlipButton:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_flipButton];
-    
+    [_captureDock addSubview:_flipButton];
+        
     // focus mode button
     _focusButton = [ExtendedHitButton extendedHitButton];
     [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button"] forState:UIControlStateNormal];
     [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button_active"] forState:UIControlStateSelected];
-    _focusButton.frame = CGRectMake( (CGRectGetWidth(self.view.bounds) * 0.5f) - 10.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 25.0f, 25.0f);
-    _focusButton.imageView.frame = _focusButton.bounds;
+    CGRect focusFrame = _focusButton.frame;
+    focusFrame.origin = CGPointMake((CGRectGetWidth(self.view.bounds) * 0.5f) - (CGRectGetWidth(_focusButton.frame) * 0.5f), 16.0f);
+    _focusButton.frame = focusFrame;
     [_focusButton addTarget:self action:@selector(_handleFocusButton:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_focusButton];
+    [_captureDock addSubview:_focusButton];
     
     // onion button
     _onionButton = [ExtendedHitButton extendedHitButton];
     [_onionButton setImage:[UIImage imageNamed:@"capture_onion"] forState:UIControlStateNormal];
     [_onionButton setImage:[UIImage imageNamed:@"capture_onion_selected"] forState:UIControlStateSelected];
-    _onionButton.frame = CGRectMake(CGRectGetWidth(self.view.bounds) - 25.0f - 15.0f, CGRectGetHeight(self.view.bounds) - 25.0f - 15.0f, 25.0f, 25.0f);
+    CGRect onionFrame = _onionButton.frame;
+    onionFrame.origin = CGPointMake(CGRectGetWidth(self.view.bounds) - CGRectGetWidth(_onionButton.frame) - 20.0f, 16.0f);
+    _onionButton.frame = onionFrame;
     [_onionButton addTarget:self action:@selector(_handleOnionSkinningButton:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_onionButton];
+    [_captureDock addSubview:_onionButton];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+
+    // iOS 6 support
+    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
     
     [self _resetCapture];
     [[PBJVision sharedInstance] startPreview];
@@ -221,6 +232,8 @@
     [super viewWillDisappear:animated];
     
     [[PBJVision sharedInstance] stopPreview];
+    
+    // iOS 6 support
     [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
 }
 
