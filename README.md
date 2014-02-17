@@ -2,13 +2,13 @@
 
 ## PBJVision
 
-'PBJVision' is an iOS camera engine that supports touch-to-record video and photo capture. It is compatible both iOS 6 and iOS 7 as well as 64-bit. Pause and resume video capture is also possible without having to use a gesture like the sample project provides.
+'PBJVision' is an iOS camera engine that supports touch-to-record video and photo capture. It is compatible both iOS 6 and iOS 7 as well as 64-bit. Pause and resume video capture is also possible without having to use a touch gesture as the sample project provides.
 
-We created this at [DIY](http://www.diy.org) as a fun means for young people to author video. This same recording interaction was pioneered by Vine and also later adopted by Instagram.
+I created this component at [DIY.org](http://www.diy.org) as a fun means for young people to author video. This same recording interaction was pioneered by Vine and also later adopted by Instagram.
 
 If you need a video player, check out [PBJVideoPlayer](https://github.com/piemonte/PBJVideoPlayer).
 
-Please review the [release history](https://github.com/piemonte/PBJVision/releases) for more information.  If you have questions, [github issues](https://github.com/piemonte/PBJVision/issues) is a great means to start a discussion, this allows others to benefit and chime in on the project too.
+Please review the [release history](https://github.com/piemonte/PBJVision/releases) for more information.  If you have questions or ideas, let me know! The [github issues page](https://github.com/piemonte/PBJVision/issues) is a great place to start a discussion but also allows others to benefit and chime in on the project too.
 
 ## Installation
 
