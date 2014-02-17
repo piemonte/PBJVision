@@ -45,7 +45,6 @@ typedef NS_ENUM(NSInteger, PBJOutputFormat) {
     PBJOutputFormatWidescreen
 };
 
-
 // photo dictionary keys
 
 extern NSString * const PBJVisionPhotoMetadataKey;
@@ -115,9 +114,10 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 // video
 // use pause/resume if a session is in progress, end finalizes that recording session
 
-@property (nonatomic, readonly, getter=isRecording) BOOL recording;
 @property (nonatomic, readonly) BOOL supportsVideoCapture;
 @property (nonatomic, readonly) BOOL canCaptureVideo;
+@property (nonatomic, readonly, getter=isRecording) BOOL recording;
+@property (nonatomic, readonly, getter=isPaused) BOOL paused;
 
 @property (nonatomic, getter=isVideoRenderingEnabled) BOOL videoRenderingEnabled;
 @property (nonatomic, readonly) EAGLContext *context;

@@ -188,6 +188,11 @@ enum
     return _flags.recording;
 }
 
+- (BOOL)isPaused
+{
+    return _flags.paused;
+}
+
 - (void)setVideoRenderingEnabled:(BOOL)videoRenderingEnabled
 {
     _flags.videoRenderingEnabled = (unsigned int)videoRenderingEnabled;
