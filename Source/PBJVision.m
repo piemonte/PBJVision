@@ -1594,12 +1594,16 @@ typedef void (^PBJVisionBlock)();
         }
 
         BOOL isReadyToRecord = (_mediaWriter.isAudioReady && _mediaWriter.isVideoReady);
+        if (!isReadyToRecord) {
+            CFRelease(sampleBuffer);
+            return;
+        }
 
         // calculate the length of the interruption
         if (_flags.interrupted && isAudio) {
             _flags.interrupted = NO;
 
-            CMTime time = isVideo ? _videoTimestamp : _audioTimestamp;
+            CMTime time = _audioTimestamp;
             // calculate the appropriate time offset
             if (CMTIME_IS_VALID(time)) {
                 CMTime pTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
@@ -1618,21 +1622,21 @@ typedef void (^PBJVisionBlock)();
             _videoTimestamp.flags = 0;
             
         }
+        
+        CMSampleBufferRef bufferToWrite = NULL;
 
-        if (isVideo && isReadyToRecord && !_flags.interrupted) {
-            
-            CMSampleBufferRef bufferToWrite = NULL;
-
-            if (_timeOffset.value > 0) {
-                bufferToWrite = [self _createOffsetSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
-                if (!bufferToWrite) {
-                    DLog(@"error subtracting the timeoffset from the sampleBuffer");
-                }
-            } else {
-                bufferToWrite = sampleBuffer;
-                CFRetain(bufferToWrite);
+        if (_timeOffset.value > 0) {
+            bufferToWrite = [self _createOffsetSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
+            if (!bufferToWrite) {
+                DLog(@"error subtracting the timeoffset from the sampleBuffer");
             }
+        } else {
+            bufferToWrite = sampleBuffer;
+            CFRetain(bufferToWrite);
+        }
 
+        if (isVideo && !_flags.interrupted) {
+            
             if (bufferToWrite) {
                 // update video and the last timestamp
                 CMTime time = CMSampleBufferGetPresentationTimeStamp(bufferToWrite);
@@ -1653,8 +1657,6 @@ typedef void (^PBJVisionBlock)();
                     }];
                 }
                 
-                CFRelease(bufferToWrite);
-
                 [self _enqueueBlockOnMainQueue:^{
                     if ([_delegate respondsToSelector:@selector(visionDidCaptureVideoSample:)]) {
                         [_delegate visionDidCaptureVideoSample:self];
@@ -1662,19 +1664,7 @@ typedef void (^PBJVisionBlock)();
                 }];
             }
             
-        } else if (isAudio && isReadyToRecord && !_flags.interrupted) {
-            
-            CMSampleBufferRef bufferToWrite = NULL;
-
-            if (_timeOffset.value > 0) {
-                bufferToWrite = [self _createOffsetSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
-                if (!bufferToWrite) {
-                    DLog(@"error subtracting the timeoffset from the sampleBuffer");
-                }
-            } else {
-                bufferToWrite = sampleBuffer;
-                CFRetain(bufferToWrite);
-            }
+        } else if (isAudio && !_flags.interrupted) {
 
             if (bufferToWrite && _flags.videoWritten) {
                 // update the last audio timestamp
@@ -1688,8 +1678,6 @@ typedef void (^PBJVisionBlock)();
                     _audioTimestamp = time;
                 }
                 
-                CFRelease(bufferToWrite);
-
                 [self _enqueueBlockOnMainQueue:^{
                     if ([_delegate respondsToSelector:@selector(visionDidCaptureAudioSample:)]) {
                         [_delegate visionDidCaptureAudioSample:self];
@@ -1697,6 +1685,8 @@ typedef void (^PBJVisionBlock)();
                 }];
             }
         }
+        
+        CFRelease(bufferToWrite);
         
         CFRelease(sampleBuffer);
     }];
