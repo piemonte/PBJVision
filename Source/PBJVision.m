@@ -133,8 +133,6 @@ enum
     struct {
         unsigned int previewRunning:1;
         unsigned int changingModes:1;
-        unsigned int readyForAudio:1;
-        unsigned int readyForVideo:1;
         unsigned int recording:1;
         unsigned int paused:1;
         unsigned int interrupted:1;
@@ -1253,8 +1251,6 @@ typedef void (^PBJVisionBlock)();
         _flags.recording = YES;
         _flags.paused = NO;
         _flags.interrupted = NO;
-        _flags.readyForAudio = NO;
-        _flags.readyForVideo = NO;
         _flags.videoWritten = NO;
         
         [self _enqueueBlockOnMainQueue:^{                
@@ -1331,8 +1327,6 @@ typedef void (^PBJVisionBlock)();
             _videoTimestamp = kCMTimeZero;
             _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
             _flags.interrupted = NO;
-            _flags.readyForAudio = NO;
-            _flags.readyForVideo = NO;
 
             [self _enqueueBlockOnMainQueue:^{
                 NSMutableDictionary *videoDict = [[NSMutableDictionary alloc] init];
@@ -1593,17 +1587,17 @@ typedef void (^PBJVisionBlock)();
         BOOL isAudio = (self.cameraMode != PBJCameraModePhoto) && (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
         BOOL isVideo = (connection == [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo]);
 
-        if (isAudio && !_flags.readyForAudio) {
-            _flags.readyForAudio = (unsigned int)[self _setupAssetWriterAudioInput:formatDescription];
+        if (isAudio && !_videoWriter.isAudioReady) {
+            [self _setupAssetWriterAudioInput:formatDescription];
             DLog(@"ready for audio (%d)", _flags.readyForAudio);
         }
 
-        if (isVideo && !_flags.readyForVideo) {
-            _flags.readyForVideo = (unsigned int)[self _setupAssetWriterVideoInput:formatDescription];
+        if (isVideo && !_videoWriter.isVideoReady) {
+            [self _setupAssetWriterVideoInput:formatDescription];
             DLog(@"ready for video (%d)", _flags.readyForVideo);
         }
 
-        BOOL isReadyToRecord = (_flags.readyForAudio && _flags.readyForVideo);
+        BOOL isReadyToRecord = (_videoWriter.isAudioReady && _videoWriter.isVideoReady);
 
         // calculate the length of the interruption
         if (_flags.interrupted && isAudio) {

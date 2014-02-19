@@ -18,6 +18,9 @@
 
 // setup output devices before writing
 
+@property (nonatomic, readonly, getter=isAudioReady) BOOL audioReady;
+@property (nonatomic, readonly, getter=isVideoReady) BOOL videoReady;
+
 - (BOOL)setupAudioOutputDeviceWithSettings:(NSDictionary *)audioSettings;
 - (BOOL)setupVideoOutputDeviceWithSettings:(NSDictionary *)videoSettings;
 

@@ -26,6 +26,8 @@
 	AVAssetWriterInput *_assetWriterVideoIn;
     
     NSURL *_outputURL;
+    BOOL _audioReady;
+    BOOL _videoReady;
 }
 
 @end
@@ -33,6 +35,18 @@
 @implementation PBJVideoWriter
 
 @synthesize outputURL = _outputURL;
+
+#pragma mark - getters/setters
+
+- (BOOL)isAudioReady
+{
+    return _audioReady;
+}
+
+- (BOOL)isVideoReady
+{
+    return _videoReady;
+}
 
 - (NSError *)error
 {
@@ -104,19 +118,18 @@
         
 		if ([_assetWriter canAddInput:_assetWriterAudioIn]) {
 			[_assetWriter addInput:_assetWriterAudioIn];
+            _audioReady = YES;
 		} else {
 			DLog(@"couldn't add asset writer audio input");
-            return NO;
 		}
         
 	} else {
     
 		DLog(@"couldn't apply audio output settings");
-        return NO;
         
 	}
     
-    return YES;
+    return _audioReady;
 }
 
 - (BOOL)setupVideoOutputDeviceWithSettings:(NSDictionary *)videoSettings
@@ -137,19 +150,18 @@
 
 		if ([_assetWriter canAddInput:_assetWriterVideoIn]) {
 			[_assetWriter addInput:_assetWriterVideoIn];
+            _videoReady = YES;
 		} else {
 			DLog(@"couldn't add asset writer video input");
-            return NO;
 		}
         
 	} else {
     
 		DLog(@"couldn't apply video output settings");
-        return NO;
         
 	}
     
-    return YES;
+    return _videoReady;
 }
 
 #pragma mark - sample buffer writing
@@ -202,9 +214,8 @@
 
     [_assetWriter finishWritingWithCompletionHandler:handler];
     
-// _assetWriterAudioIn = nil;
-// _assetWriterVideoIn = nil;
-
+    _audioReady = NO;
+    _videoReady = NO;
 }
 
 
