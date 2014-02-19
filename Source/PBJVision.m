@@ -1346,9 +1346,11 @@ typedef void (^PBJVisionBlock)();
 
 #pragma mark - sample buffer setup
 
-- (BOOL)_setupAssetWriterAudioInput:(CMFormatDescriptionRef)currentFormatDescription
+- (BOOL)_setupMediaWriterAudioInputWithSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
-	const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(currentFormatDescription);
+    CMFormatDescriptionRef formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer);
+
+	const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription);
     if (!asbd) {
         DLog(@"audio stream description used with non-audio format description");
         return NO;
@@ -1360,7 +1362,7 @@ typedef void (^PBJVisionBlock)();
     DLog(@"audio stream setup, channels (%d) sampleRate (%f)", channels, sampleRate);
     
     size_t aclSize = 0;
-	const AudioChannelLayout *currentChannelLayout = CMAudioFormatDescriptionGetChannelLayout(currentFormatDescription, &aclSize);
+	const AudioChannelLayout *currentChannelLayout = CMAudioFormatDescriptionGetChannelLayout(formatDescription, &aclSize);
 	NSData *currentChannelLayoutData = ( currentChannelLayout && aclSize > 0 ) ? [NSData dataWithBytes:currentChannelLayout length:aclSize] : [NSData data];
     
     NSDictionary *audioCompressionSettings = @{ AVFormatIDKey : @(kAudioFormatMPEG4AAC),
@@ -1372,9 +1374,10 @@ typedef void (^PBJVisionBlock)();
     return [_mediaWriter setupAudioOutputDeviceWithSettings:audioCompressionSettings];
 }
 
-- (BOOL)_setupAssetWriterVideoInput:(CMFormatDescriptionRef)currentFormatDescription
+- (BOOL)_setupMediaWriterVideoInputWithSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
-	CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(currentFormatDescription);
+    CMFormatDescriptionRef formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer);
+	CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription);
     
     CMVideoDimensions videoDimensions = dimensions;
     switch (_outputFormat) {
@@ -1560,41 +1563,34 @@ typedef void (^PBJVisionBlock)();
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    CMFormatDescriptionRef formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer);
 	CFRetain(sampleBuffer);
-	CFRetain(formatDescription);
     
     [self _enqueueBlockInCaptureVideoQueue:^{
         if (!CMSampleBufferDataIsReady(sampleBuffer)) {
             DLog(@"sample buffer data is not ready");
             CFRelease(sampleBuffer);
-            CFRelease(formatDescription);
             return;
         }
     
         if (!_flags.recording || _flags.paused) {
             CFRelease(sampleBuffer);
-            CFRelease(formatDescription);
             return;
         }
 
         if (!_mediaWriter) {
             CFRelease(sampleBuffer);
-            CFRelease(formatDescription);
             return;
         }
      
         BOOL isAudio = (self.cameraMode != PBJCameraModePhoto) && (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
         BOOL isVideo = (connection == [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo]);
-
         if (isAudio && !_mediaWriter.isAudioReady) {
-            [self _setupAssetWriterAudioInput:formatDescription];
-            DLog(@"ready for audio (%d)", _flags.readyForAudio);
+            [self _setupMediaWriterAudioInputWithSampleBuffer:sampleBuffer];
+            DLog(@"ready for audio (%d)", _mediaWriter.isAudioReady);
         }
-
         if (isVideo && !_mediaWriter.isVideoReady) {
-            [self _setupAssetWriterVideoInput:formatDescription];
-            DLog(@"ready for video (%d)", _flags.readyForVideo);
+            [self _setupMediaWriterVideoInputWithSampleBuffer:sampleBuffer];
+            DLog(@"ready for video (%d)", _mediaWriter.isVideoReady);
         }
 
         BOOL isReadyToRecord = (_mediaWriter.isAudioReady && _mediaWriter.isVideoReady);
@@ -1703,7 +1699,6 @@ typedef void (^PBJVisionBlock)();
         }
         
         CFRelease(sampleBuffer);
-        CFRelease(formatDescription);
     }];
 
 }
