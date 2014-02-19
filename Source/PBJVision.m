@@ -1581,7 +1581,8 @@ typedef void (^PBJVisionBlock)();
             CFRelease(sampleBuffer);
             return;
         }
-     
+        
+        // setup media writer
         BOOL isAudio = (self.cameraMode != PBJCameraModePhoto) && (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
         BOOL isVideo = (connection == [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo]);
         if (isAudio && !_mediaWriter.isAudioReady) {
