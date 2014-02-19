@@ -98,6 +98,15 @@
     return nil;
 }
 
++ (AVCaptureDevice *)audioDevice
+{
+    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeAudio];
+    if ([devices count] > 0)
+        return [devices objectAtIndex:0];
+    
+    return nil;
+}
+
 + (AVCaptureConnection *)connectionWithMediaType:(NSString *)mediaType fromConnections:(NSArray *)connections
 {
 	for ( AVCaptureConnection *connection in connections ) {
@@ -111,13 +120,42 @@
 	return nil;
 }
 
-+ (AVCaptureDevice *)audioDevice
++ (CMSampleBufferRef)createOffsetSampleBufferWithSampleBuffer:(CMSampleBufferRef)sampleBuffer usingTimeOffset:(CMTime)timeOffset duration:(CMTime)duration
 {
-    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeAudio];
-    if ([devices count] > 0)
-        return [devices objectAtIndex:0];
+    CMItemCount itemCount;
     
-    return nil;
+    OSStatus status = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, 0, NULL, &itemCount);
+    if (status) {
+        return NULL;
+    }
+    
+    CMSampleTimingInfo *timingInfo = (CMSampleTimingInfo *)malloc(sizeof(CMSampleTimingInfo) * (unsigned long)itemCount);
+    if (!timingInfo) {
+        return NULL;
+    }
+    
+    status = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, itemCount, timingInfo, &itemCount);
+    if (status) {
+        free(timingInfo);
+        timingInfo = NULL;
+        return NULL;
+    }
+    
+    for (CMItemCount i = 0; i < itemCount; i++) {
+        timingInfo[i].presentationTimeStamp = CMTimeSubtract(timingInfo[i].presentationTimeStamp, timeOffset);
+        timingInfo[i].decodeTimeStamp = CMTimeSubtract(timingInfo[i].decodeTimeStamp, timeOffset);
+        timingInfo[i].duration = duration;
+    }
+    
+    CMSampleBufferRef offsetSampleBuffer;
+    CMSampleBufferCreateCopyWithNewTiming(kCFAllocatorDefault, sampleBuffer, itemCount, timingInfo, &offsetSampleBuffer);
+    
+    if (timingInfo) {
+        free(timingInfo);
+        timingInfo = NULL;
+    }
+    
+    return offsetSampleBuffer;
 }
 
 + (CGFloat)angleOffsetFromPortraitOrientationToOrientation:(AVCaptureVideoOrientation)orientation
