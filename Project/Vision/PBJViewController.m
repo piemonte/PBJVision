@@ -252,6 +252,7 @@
 
     [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
         _instructionLabel.alpha = 0;
+        _instructionLabel.transform = CGAffineTransformMakeTranslation(0, 10.0f);
     } completion:^(BOOL finished) {
     }];
     [[PBJVision sharedInstance] startVideoCapture];
@@ -261,6 +262,7 @@
 {
     [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
         _instructionLabel.alpha = 1;
+        _instructionLabel.transform = CGAffineTransformIdentity;
     } completion:^(BOOL finished) {
     }];
 
@@ -272,6 +274,7 @@
 {
     [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
         _instructionLabel.alpha = 0;
+        _instructionLabel.transform = CGAffineTransformMakeTranslation(0, 10.0f);
     } completion:^(BOOL finished) {
     }];
     
