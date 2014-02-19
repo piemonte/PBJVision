@@ -1,12 +1,12 @@
 //
-//  PBJVideoWriter.m
+//  PBJMediaWriter.m
 //  Vision
 //
 //  Created by Patrick Piemonte on 1/27/14.
 //  Copyright (c) 2014 Patrick Piemonte. All rights reserved.
 //
 
-#import "PBJVideoWriter.h"
+#import "PBJMediaWriter.h"
 #import "PBJVisionUtilities.h"
 
 #import <UIKit/UIDevice.h>
@@ -19,7 +19,7 @@
 #   define DLog(...)
 #endif
 
-@interface PBJVideoWriter ()
+@interface PBJMediaWriter ()
 {
     AVAssetWriter *_assetWriter;
 	AVAssetWriterInput *_assetWriterAudioIn;
@@ -32,7 +32,7 @@
 
 @end
 
-@implementation PBJVideoWriter
+@implementation PBJMediaWriter
 
 @synthesize outputURL = _outputURL;
 

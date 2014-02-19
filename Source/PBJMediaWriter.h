@@ -1,5 +1,5 @@
 //
-//  PBJVideoWriter.h
+//  PBJMediaWriter.h
 //  Vision
 //
 //  Created by Patrick Piemonte on 1/27/14.
@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface PBJVideoWriter : NSObject
+@interface PBJMediaWriter : NSObject
 
 - (id)initWithOutputURL:(NSURL *)outputURL;
 

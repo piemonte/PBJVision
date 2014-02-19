@@ -7,7 +7,7 @@
 
 #import "PBJVision.h"
 #import "PBJVisionUtilities.h"
-#import "PBJVideoWriter.h"
+#import "PBJMediaWriter.h"
 
 #import <ImageIO/ImageIO.h>
 #import <OpenGLES/EAGL.h>
@@ -83,7 +83,7 @@ enum
 
     // vision core
 
-    PBJVideoWriter *_videoWriter;
+    PBJMediaWriter *_mediaWriter;
 
     dispatch_queue_t _captureSessionDispatchQueue;
     dispatch_queue_t _captureVideoDispatchQueue;
@@ -1238,7 +1238,7 @@ typedef void (^PBJVisionBlock)();
         if (!outputPath || [outputPath length] == 0)
             return;
             
-        _videoWriter = [[PBJVideoWriter alloc] initWithOutputURL:outputURL];
+        _mediaWriter = [[PBJMediaWriter alloc] initWithOutputURL:outputURL];
 
         AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
         [self _setOrientationForConnection:videoConnection];
@@ -1266,8 +1266,8 @@ typedef void (^PBJVisionBlock)();
         if (!_flags.recording)
             return;
 
-        if (!_videoWriter) {
-            DLog(@"assetWriter unavailable to stop");
+        if (!_mediaWriter) {
+            DLog(@"media writer unavailable to stop");
             return;
         }
 
@@ -1289,8 +1289,8 @@ typedef void (^PBJVisionBlock)();
         if (!_flags.recording || !_flags.paused)
             return;
  
-        if (!_videoWriter) {
-            DLog(@"assetWriter unavailable to resume");
+        if (!_mediaWriter) {
+            DLog(@"media writer unavailable to resume");
             return;
         }
  
@@ -1313,8 +1313,8 @@ typedef void (^PBJVisionBlock)();
         if (!_flags.recording)
             return;
         
-        if (!_videoWriter) {
-            DLog(@"assetWriter unavailable to end");
+        if (!_mediaWriter) {
+            DLog(@"media writer unavailable to end");
             return;
         }
         
@@ -1330,17 +1330,17 @@ typedef void (^PBJVisionBlock)();
 
             [self _enqueueBlockOnMainQueue:^{
                 NSMutableDictionary *videoDict = [[NSMutableDictionary alloc] init];
-                NSString *path = [_videoWriter.outputURL path];
+                NSString *path = [_mediaWriter.outputURL path];
                 if (path)
                     [videoDict setObject:path forKey:PBJVisionVideoPathKey];
 
-                NSError *error = [_videoWriter error];
+                NSError *error = [_mediaWriter error];
                 if ([_delegate respondsToSelector:@selector(vision:capturedVideo:error:)]) {
                     [_delegate vision:self capturedVideo:videoDict error:error];
                 }
             }];
         };
-        [_videoWriter finishWritingWithCompletionHandler:finishWritingCompletionHandler];
+        [_mediaWriter finishWritingWithCompletionHandler:finishWritingCompletionHandler];
     }];
 }
 
@@ -1369,7 +1369,7 @@ typedef void (^PBJVisionBlock)();
                                                 AVEncoderBitRateKey : @(_audioAssetBitRate),
                                                 AVChannelLayoutKey : currentChannelLayoutData };
 
-    return [_videoWriter setupAudioOutputDeviceWithSettings:audioCompressionSettings];
+    return [_mediaWriter setupAudioOutputDeviceWithSettings:audioCompressionSettings];
 }
 
 - (BOOL)_setupAssetWriterVideoInput:(CMFormatDescriptionRef)currentFormatDescription
@@ -1405,7 +1405,7 @@ typedef void (^PBJVisionBlock)();
                                      AVVideoHeightKey : @(videoDimensions.height),
                                      AVVideoCompressionPropertiesKey : compressionSettings };
     
-    return [_videoWriter setupVideoOutputDeviceWithSettings:videoSettings];
+    return [_mediaWriter setupVideoOutputDeviceWithSettings:videoSettings];
 }
 
 - (CMSampleBufferRef)_createOffsetSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset
@@ -1578,7 +1578,7 @@ typedef void (^PBJVisionBlock)();
             return;
         }
 
-        if (!_videoWriter) {
+        if (!_mediaWriter) {
             CFRelease(sampleBuffer);
             CFRelease(formatDescription);
             return;
@@ -1587,17 +1587,17 @@ typedef void (^PBJVisionBlock)();
         BOOL isAudio = (self.cameraMode != PBJCameraModePhoto) && (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
         BOOL isVideo = (connection == [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo]);
 
-        if (isAudio && !_videoWriter.isAudioReady) {
+        if (isAudio && !_mediaWriter.isAudioReady) {
             [self _setupAssetWriterAudioInput:formatDescription];
             DLog(@"ready for audio (%d)", _flags.readyForAudio);
         }
 
-        if (isVideo && !_videoWriter.isVideoReady) {
+        if (isVideo && !_mediaWriter.isVideoReady) {
             [self _setupAssetWriterVideoInput:formatDescription];
             DLog(@"ready for video (%d)", _flags.readyForVideo);
         }
 
-        BOOL isReadyToRecord = (_videoWriter.isAudioReady && _videoWriter.isVideoReady);
+        BOOL isReadyToRecord = (_mediaWriter.isAudioReady && _mediaWriter.isVideoReady);
 
         // calculate the length of the interruption
         if (_flags.interrupted && isAudio) {
@@ -1645,7 +1645,7 @@ typedef void (^PBJVisionBlock)();
                     time = CMTimeAdd(time, duration);
                 
                 if (time.value > _videoTimestamp.value) {
-                    [_videoWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeVideo];
+                    [_mediaWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeVideo];
                     _videoTimestamp = time;
                     _flags.videoWritten = YES;
                 }
@@ -1688,7 +1688,7 @@ typedef void (^PBJVisionBlock)();
                     time = CMTimeAdd(time, duration);
 
                 if (time.value > _audioTimestamp.value) {
-                    [_videoWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeAudio];
+                    [_mediaWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeAudio];
                     _audioTimestamp = time;
                 }
                 
