@@ -89,6 +89,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic) NSInteger audioAssetBitRate;
 @property (nonatomic) NSInteger videoAssetFrameInterval;
 @property (nonatomic, strong) NSString *captureSessionPreset;
+- (void)setCameraCaptureSessionPreset:(NSString *)captureSessionPreset;
 
 // preview
 

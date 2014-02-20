@@ -377,6 +377,25 @@ enum
     return (_currentDevice && [_currentDevice hasFlash]);
 }
 
+- (void)setCameraCaptureSessionPreset:(NSString *)captureSessionPreset {
+    CGFloat bytesPerSecond = 437500;
+    
+    if([captureSessionPreset isEqualToString:AVCaptureSessionPreset640x480])
+        bytesPerSecond = 437500;
+    else if([captureSessionPreset isEqualToString:AVCaptureSessionPreset1280x720])
+        bytesPerSecond = 1312500;
+    else if([captureSessionPreset isEqualToString:AVCaptureSessionPreset1920x1080])
+        bytesPerSecond = 2975000;
+    else if([captureSessionPreset isEqualToString:AVCaptureSessionPresetiFrame960x540])
+        bytesPerSecond = 3750000;
+    else if([captureSessionPreset isEqualToString:AVCaptureSessionPresetiFrame1280x720])
+        bytesPerSecond = 5000000;
+    
+    _videoAssetBitRate = bytesPerSecond * 8;
+    _videoAssetFrameInterval = 30;
+    _captureSessionPreset = captureSessionPreset;
+}
+
 #pragma mark - init
 
 - (id)init
@@ -621,8 +640,8 @@ typedef void (^PBJVisionBlock)();
     AVCaptureDevice *newCaptureDevice = nil;
     
     [_captureSession beginConfiguration];
-
-    [_captureSession setSessionPreset:AVCaptureSessionPresetMedium];
+    
+    [_captureSession setSessionPreset:_captureSessionPreset];
     NSString *sessionPreset = [_captureSession sessionPreset];
     
     // setup session device
@@ -740,7 +759,7 @@ typedef void (^PBJVisionBlock)();
         [_captureOutputVideo setAlwaysDiscardsLateVideoFrames:NO];
         
         // specify video preset
-        sessionPreset = AVCaptureSessionPreset640x480;
+        sessionPreset = [_captureSession sessionPreset];
 
         // setup video settings
         // kCVPixelFormatType_420YpCbCr8BiPlanarFullRange Bi-Planar Component Y'CbCr 8-bit 4:2:0, full-range (luma=[0,255] chroma=[1,255])
