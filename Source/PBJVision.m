@@ -12,7 +12,7 @@
 #import <ImageIO/ImageIO.h>
 #import <OpenGLES/EAGL.h>
 
-#define LOG_VISION 1
+#define LOG_VISION 0
 #if !defined(NDEBUG) && LOG_VISION
 #   define DLog(fmt, ...) NSLog((@"VISION: " fmt), ##__VA_ARGS__);
 #else
@@ -235,8 +235,8 @@ enum
         return;
      _cameraOrientation = cameraOrientation;
     
-    //if ([_previewLayer.connection isVideoOrientationSupported])
-    //    [self _setOrientationForConnection:_previewLayer.connection];
+    if ([_previewLayer.connection isVideoOrientationSupported])
+        [self _setOrientationForConnection:_previewLayer.connection];
 }
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
@@ -641,12 +641,8 @@ typedef void (^PBJVisionBlock)();
     
     [_captureSession beginConfiguration];
     
-    NSLog(@"_captureSessionPreset: %@", _captureSessionPreset);
-
-    [_captureSession setSessionPreset:/*AVCaptureSessionPresetMedium*/_captureSessionPreset];
+    [_captureSession setSessionPreset:_captureSessionPreset];
     NSString *sessionPreset = [_captureSession sessionPreset];
-    
-    NSLog(@"_captureSession Preset: %@", sessionPreset);
     
     // setup session device
     
