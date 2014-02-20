@@ -12,7 +12,7 @@
 #import <ImageIO/ImageIO.h>
 #import <OpenGLES/EAGL.h>
 
-#define LOG_VISION 0
+#define LOG_VISION 1
 #if !defined(NDEBUG) && LOG_VISION
 #   define DLog(fmt, ...) NSLog((@"VISION: " fmt), ##__VA_ARGS__);
 #else
@@ -235,8 +235,8 @@ enum
         return;
      _cameraOrientation = cameraOrientation;
     
-    if ([_previewLayer.connection isVideoOrientationSupported])
-        [self _setOrientationForConnection:_previewLayer.connection];
+    //if ([_previewLayer.connection isVideoOrientationSupported])
+    //    [self _setOrientationForConnection:_previewLayer.connection];
 }
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
@@ -375,6 +375,25 @@ enum
 - (BOOL)isFlashAvailable
 {
     return (_currentDevice && [_currentDevice hasFlash]);
+}
+
+- (void)setCameraCaptureSessionPreset:(NSString *)captureSessionPreset {
+    CGFloat bytesPerSecond = 437500;
+    
+    if([captureSessionPreset isEqualToString:AVCaptureSessionPreset640x480])
+        bytesPerSecond = 437500;
+    else if([captureSessionPreset isEqualToString:AVCaptureSessionPreset1280x720])
+        bytesPerSecond = 1312500;
+    else if([captureSessionPreset isEqualToString:AVCaptureSessionPreset1920x1080])
+        bytesPerSecond = 2975000;
+    else if([captureSessionPreset isEqualToString:AVCaptureSessionPresetiFrame960x540])
+        bytesPerSecond = 3750000;
+    else if([captureSessionPreset isEqualToString:AVCaptureSessionPresetiFrame1280x720])
+        bytesPerSecond = 5000000;
+    
+    _videoAssetBitRate = bytesPerSecond * 8;
+    _videoAssetFrameInterval = 30;
+    _captureSessionPreset = captureSessionPreset;
 }
 
 #pragma mark - init
@@ -621,9 +640,13 @@ typedef void (^PBJVisionBlock)();
     AVCaptureDevice *newCaptureDevice = nil;
     
     [_captureSession beginConfiguration];
+    
+    NSLog(@"_captureSessionPreset: %@", _captureSessionPreset);
 
-    [_captureSession setSessionPreset:AVCaptureSessionPresetMedium];
+    [_captureSession setSessionPreset:/*AVCaptureSessionPresetMedium*/_captureSessionPreset];
     NSString *sessionPreset = [_captureSession sessionPreset];
+    
+    NSLog(@"_captureSession Preset: %@", sessionPreset);
     
     // setup session device
     
@@ -740,7 +763,7 @@ typedef void (^PBJVisionBlock)();
         [_captureOutputVideo setAlwaysDiscardsLateVideoFrames:NO];
         
         // specify video preset
-        sessionPreset = AVCaptureSessionPreset640x480;
+        sessionPreset = [_captureSession sessionPreset];
 
         // setup video settings
         // kCVPixelFormatType_420YpCbCr8BiPlanarFullRange Bi-Planar Component Y'CbCr 8-bit 4:2:0, full-range (luma=[0,255] chroma=[1,255])
