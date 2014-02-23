@@ -407,7 +407,7 @@ enum
         _videoAssetBitRate = bytesPerSecond * 8;
         _videoAssetFrameInterval = 30;
 
-        _captureSessionPreset = AVCaptureSessionPreset640x480;
+        _captureSessionPreset = AVCaptureSessionPresetMedium;
 
         // default flags
         _flags.thumbnailEnabled = YES;
@@ -622,7 +622,7 @@ typedef void (^PBJVisionBlock)();
     
     [_captureSession beginConfiguration];
 
-    [_captureSession setSessionPreset:AVCaptureSessionPresetMedium];
+    _captureSession.sessionPreset = _captureSessionPreset;
     NSString *sessionPreset = [_captureSession sessionPreset];
     
     // setup session device
