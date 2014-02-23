@@ -621,9 +621,6 @@ typedef void (^PBJVisionBlock)();
     AVCaptureDevice *newCaptureDevice = nil;
     
     [_captureSession beginConfiguration];
-
-    _captureSession.sessionPreset = _captureSessionPreset;
-    NSString *sessionPreset = [_captureSession sessionPreset];
     
     // setup session device
     
@@ -726,6 +723,8 @@ typedef void (^PBJVisionBlock)();
     AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
 
     // setup input/output
+    
+    NSString *sessionPreset = _captureSessionPreset;
 
     if (newCaptureOutput && newCaptureOutput == _captureOutputVideo && videoConnection) {
         
@@ -740,7 +739,7 @@ typedef void (^PBJVisionBlock)();
         [_captureOutputVideo setAlwaysDiscardsLateVideoFrames:NO];
         
         // specify video preset
-        sessionPreset = AVCaptureSessionPreset640x480;
+        sessionPreset = _captureSessionPreset;
 
         // setup video settings
         // kCVPixelFormatType_420YpCbCr8BiPlanarFullRange Bi-Planar Component Y'CbCr 8-bit 4:2:0, full-range (luma=[0,255] chroma=[1,255])
