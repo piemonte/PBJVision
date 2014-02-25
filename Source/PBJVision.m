@@ -1686,7 +1686,8 @@ typedef void (^PBJVisionBlock)();
             }
         }
         
-        CFRelease(bufferToWrite);
+        if (bufferToWrite)
+            CFRelease(bufferToWrite);
         
         CFRelease(sampleBuffer);
     }];
