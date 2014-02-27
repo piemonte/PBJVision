@@ -70,9 +70,13 @@
         _outputURL = outputURL;
         _assetWriter.shouldOptimizeForNetworkUse = YES;
         _assetWriter.metadata = [self _metadataArray];
+
+        // It's possible to capture video without audio. If the user has denied access to the microphone, we don't need to setup the audio output device
+        if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] == AVAuthorizationStatusDenied) {
+            _audioReady = YES;
+        }
     }
     return self;
-
 }
 
 #pragma mark - private
