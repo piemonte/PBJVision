@@ -793,12 +793,6 @@ typedef void (^PBJVisionBlock)();
                 // smooth autofocus for videos
                 if ([newCaptureDevice isSmoothAutoFocusSupported])
                     [newCaptureDevice setSmoothAutoFocusEnabled:YES];
-
-                // setup framerate range
-                // TODO: seek best framerate range for slow-motion recording
-                CMTime frameDuration = CMTimeMake( 1, 30 );
-                newCaptureDevice.activeVideoMinFrameDuration = frameDuration;
-                newCaptureDevice.activeVideoMaxFrameDuration = frameDuration;
                 
                 [newCaptureDevice unlockForConfiguration];
         
