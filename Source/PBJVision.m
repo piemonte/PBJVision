@@ -326,6 +326,23 @@ enum
     return [UIImagePickerController isCameraDeviceAvailable:(UIImagePickerControllerCameraDevice)cameraDevice];
 }
 
+-(void)setFocusMode:(PBJFocusMode)focusMode {
+    BOOL shouldChangeFocusMode = (_focusMode != focusMode);
+    if (![_currentDevice isFocusModeSupported:(AVCaptureFocusMode)focusMode] || !shouldChangeFocusMode)
+        return;
+    
+    _focusMode = focusMode;
+    
+    NSError *error = nil;
+    if (_currentDevice && [_currentDevice lockForConfiguration:&error]) {
+        [_currentDevice setFocusMode:(AVCaptureFocusMode)focusMode];
+        [_currentDevice unlockForConfiguration];
+        
+    } else if (error) {
+        DLog(@"error locking device for focus mode change (%@)", error);
+    }
+}
+
 - (void)setFlashMode:(PBJFlashMode)flashMode
 {
     BOOL shouldChangeFlashMode = (_flashMode != flashMode);
@@ -975,8 +992,9 @@ typedef void (^PBJVisionBlock)();
         BOOL isWhiteBalanceModeSupported = [_currentDevice isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
     
         if (isFocusAtPointSupported && [_currentDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
+            AVCaptureFocusMode fm = [_currentDevice focusMode];
             [_currentDevice setFocusPointOfInterest:adjustedPoint];
-            [_currentDevice setFocusMode:AVCaptureFocusModeAutoFocus];
+            [_currentDevice setFocusMode:fm];
         }
         
         if (isExposureAtPointSupported && [_currentDevice isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure]) {
