@@ -326,7 +326,8 @@ enum
     return [UIImagePickerController isCameraDeviceAvailable:(UIImagePickerControllerCameraDevice)cameraDevice];
 }
 
--(void)setFocusMode:(PBJFocusMode)focusMode {
+- (void)setFocusMode:(PBJFocusMode)focusMode
+{
     BOOL shouldChangeFocusMode = (_focusMode != focusMode);
     if (![_currentDevice isFocusModeSupported:(AVCaptureFocusMode)focusMode] || !shouldChangeFocusMode)
         return;
