@@ -39,6 +39,12 @@ typedef NS_ENUM(NSInteger, PBJFlashMode) {
     PBJFlashModeAuto = AVCaptureFlashModeAuto
 };
 
+typedef NS_ENUM(NSInteger, PBJAuthorizationStatus) {
+    PBJAuthorizationStatusNotDetermined = 0,
+    PBJAuthorizationStatusAuthorized,
+    PBJAuthorizationStatusAudioDenied
+};
+
 typedef NS_ENUM(NSInteger, PBJOutputFormat) {
     PBJOutputFormatPreset = 0,
     PBJOutputFormatSquare,
@@ -148,6 +154,9 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionWillStartFocus:(PBJVision *)vision;
 - (void)visionDidStopFocus:(PBJVision *)vision;
 
+// authorization / availability
+
+- (void)visionDidChangeAuthorizationStatus:(PBJAuthorizationStatus)status;
 - (void)visionDidChangeFlashAvailablility:(PBJVision *)vision; // flash and torch
 
 // preview

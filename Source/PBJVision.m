@@ -63,7 +63,8 @@ enum
 
 @interface PBJVision () <
     AVCaptureAudioDataOutputSampleBufferDelegate,
-    AVCaptureVideoDataOutputSampleBufferDelegate>
+    AVCaptureVideoDataOutputSampleBufferDelegate,
+    PBJMediaWriterDelegate>
 {
     // AV
 
@@ -1251,6 +1252,7 @@ typedef void (^PBJVisionBlock)();
             return;
             
         _mediaWriter = [[PBJMediaWriter alloc] initWithOutputURL:outputURL];
+        _mediaWriter.delegate = self;
 
         AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
         [self _setOrientationForConnection:videoConnection];
@@ -1885,8 +1887,10 @@ typedef void (^PBJVisionBlock)();
                 context == (__bridge void *)PBJVisionTorchAvailabilityObserverContext ) {
     
 //        DLog(@"flash/torch availability did change");
-        if ([_delegate respondsToSelector:@selector(visionDidChangeFlashAvailablility:)])
-            [_delegate visionDidChangeFlashAvailablility:self];
+        [self _enqueueBlockOnMainQueue:^{
+            if ([_delegate respondsToSelector:@selector(visionDidChangeFlashAvailablility:)])
+                [_delegate visionDidChangeFlashAvailablility:self];
+        }];
     
 	} else if ( context == (__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext) ) {
     
@@ -1900,6 +1904,19 @@ typedef void (^PBJVisionBlock)();
 	} else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
+}
+
+#pragma mark - PBJMediaWriterDelegate
+
+- (void)mediaWriterDidObserveAudioAuthorizationStatusDenied:(PBJMediaWriter *)mediaWriter
+{
+    [self _enqueueBlockOnMainQueue:^{
+        [_delegate visionDidChangeAuthorizationStatus:PBJAuthorizationStatusAudioDenied];
+    }];
+}
+
+- (void)mediaWriterDidObserveVideoAuthorizationStatusDenied:(PBJMediaWriter *)mediaWriter
+{
 }
 
 #pragma mark - OpenGLES context support
