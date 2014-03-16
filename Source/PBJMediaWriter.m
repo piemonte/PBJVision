@@ -35,6 +35,7 @@
 @implementation PBJMediaWriter
 
 @synthesize outputURL = _outputURL;
+@synthesize delegate = _delegate;
 
 #pragma mark - getters/setters
 
@@ -71,11 +72,24 @@
         _assetWriter.shouldOptimizeForNetworkUse = YES;
         _assetWriter.metadata = [self _metadataArray];
 
-        // It's possible to capture video without audio. If the user has denied access to the microphone, we don't need to setup the audio output device
+        // It's possible to capture video without audio or audio without video.
+        // If the user has denied access to a device, we don't need to set it up
         if ([[AVCaptureDevice class] respondsToSelector:@selector(authorizationStatusForMediaType:)]) {
+            
             if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] == AVAuthorizationStatusDenied) {
                 _audioReady = YES;
+                if ([_delegate respondsToSelector:@selector(mediaWriterDidObserveAudioAuthorizationStatusDenied:)]) {
+                    [_delegate mediaWriterDidObserveAudioAuthorizationStatusDenied:self];
+                }
             }
+            
+            if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] == AVAuthorizationStatusDenied) {
+                _videoReady = YES;
+                if ([_delegate respondsToSelector:@selector(mediaWriterDidObserveVideoAuthorizationStatusDenied:)]) {
+                    [_delegate mediaWriterDidObserveVideoAuthorizationStatusDenied:self];
+                }
+            }
+            
         }
     }
     return self;
