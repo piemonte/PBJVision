@@ -1481,7 +1481,7 @@ typedef void (^PBJVisionBlock)();
 }
 
 // convert CoreVideo YUV pixel buffer (Y luminance and Cb Cr chroma) into RGB
-// processing is done on the GPU, operation WAY more efficient than converting .on the CPU
+// processing is done on the GPU, operation WAY more efficient than converting on the CPU
 - (void)_processSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
     if (!_context)
@@ -1708,7 +1708,6 @@ typedef void (^PBJVisionBlock)();
 }
 
 #pragma mark - App NSNotifications
-
 // TODO: support suspend/resume video recording
 
 - (void)_applicationWillEnterForeground:(NSNotification *)notification
@@ -1740,7 +1739,7 @@ typedef void (^PBJVisionBlock)();
 
 #pragma mark - AV NSNotifications
 
-// capture session
+// capture session handlers
 
 // TODO: add in a better error recovery
 
@@ -1844,7 +1843,7 @@ typedef void (^PBJVisionBlock)();
     }];
 }
 
-// capture input
+// capture input handler
 
 - (void)_inputPortFormatDescriptionDidChange:(NSNotification *)notification
 {
@@ -1862,7 +1861,7 @@ typedef void (^PBJVisionBlock)();
     }
 }
 
-// capture device
+// capture device handler
 
 - (void)_deviceSubjectAreaDidChange:(NSNotification *)notification
 {
@@ -1904,6 +1903,7 @@ typedef void (^PBJVisionBlock)();
 }
 
 #pragma mark - OpenGLES context support
+// TODO: abstract this in future, put in separate file
 
 - (void)_setupBuffers
 {
@@ -1986,7 +1986,7 @@ typedef void (^PBJVisionBlock)();
 }
 
 #pragma mark - OpenGLES shader support
-// TODO: abstract this in future
+// TODO: abstract this in future, put in separate file
 
 - (BOOL)_loadShaders
 {
