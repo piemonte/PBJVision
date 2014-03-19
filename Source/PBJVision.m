@@ -128,7 +128,9 @@ enum
     CVOpenGLESTextureRef _lumaTexture;
     CVOpenGLESTextureRef _chromaTexture;
     CVOpenGLESTextureCacheRef _videoTextureCache;
-
+    
+    BOOL _mirroredChanged;
+    
     // flags
     
     struct {
@@ -326,6 +328,24 @@ enum
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice
 {
     return [UIImagePickerController isCameraDeviceAvailable:(UIImagePickerControllerCameraDevice)cameraDevice];
+}
+
+- (void)setMirrored:(BOOL)mirrored
+{
+    _mirroredChanged = (mirrored != _mirrored);
+    _mirrored = mirrored;
+    
+    // since there is no session in progress, set and bail
+    if (!_captureSession) {
+        return;
+    }
+    
+    [self _enqueueBlockInCaptureSessionQueue:^{
+        [self _setupSession];
+        [self _enqueueBlockOnMainQueue:^{
+            _mirroredChanged = NO;
+        }];
+    }];
 }
 
 - (void)setFocusMode:(PBJFocusMode)focusMode
@@ -633,8 +653,11 @@ typedef void (^PBJVisionBlock)();
     
     DLog(@"switchDevice %d switchMode %d", shouldSwitchDevice, shouldSwitchMode);
 
-    if (!shouldSwitchDevice && !shouldSwitchMode)
-        return;
+    if (!_mirroredChanged) {
+        if (!shouldSwitchDevice && !shouldSwitchMode)
+            return;
+    }
+    
     
     AVCaptureDeviceInput *newDeviceInput = nil;
     AVCaptureOutput *newCaptureOutput = nil;
