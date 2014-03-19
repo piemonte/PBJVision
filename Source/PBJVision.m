@@ -152,6 +152,7 @@ enum
 @synthesize cleanAperture = _cleanAperture;
 @synthesize cameraOrientation = _cameraOrientation;
 @synthesize cameraDevice = _cameraDevice;
+@synthesize mirrored = _mirrored;
 @synthesize cameraMode = _cameraMode;
 @synthesize focusMode = _focusMode;
 @synthesize flashMode = _flashMode;
@@ -740,7 +741,10 @@ typedef void (^PBJVisionBlock)();
 
     // setup video connection
     AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
-
+    
+    // setup mirroring
+    videoConnection.videoMirrored = _mirrored;
+    
     // setup input/output
     
     NSString *sessionPreset = _captureSessionPreset;
