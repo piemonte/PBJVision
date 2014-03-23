@@ -154,6 +154,9 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionWillStartFocus:(PBJVision *)vision;
 - (void)visionDidStopFocus:(PBJVision *)vision;
 
+- (void)visionWillChangeExposure:(PBJVision *)vision;
+- (void)visionDidChangeExposure:(PBJVision *)vision;
+
 // authorization / availability
 
 - (void)visionDidChangeAuthorizationStatus:(PBJAuthorizationStatus)status;
