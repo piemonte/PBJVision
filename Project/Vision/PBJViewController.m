@@ -300,11 +300,9 @@
     if ([vision isCameraDeviceAvailable:PBJCameraDeviceBack]) {
         [vision setCameraDevice:PBJCameraDeviceBack];
         _flipButton.hidden = NO;
-        _focusButton.hidden = NO;
     } else {
         [vision setCameraDevice:PBJCameraDeviceFront];
         _flipButton.hidden = YES;
-        _focusButton.hidden = YES;
     }
     
     [vision setCameraMode:PBJCameraModeVideo];
@@ -320,10 +318,8 @@
 {
     PBJVision *vision = [PBJVision sharedInstance];
     if (vision.cameraDevice == PBJCameraDeviceBack) {
-        _focusButton.hidden = YES;
         [vision setCameraDevice:PBJCameraDeviceFront];
     } else {
-        _focusButton.hidden = NO;
         [vision setCameraDevice:PBJCameraDeviceBack];
     }
 }
@@ -465,6 +461,16 @@
 
 - (void)visionDidStopFocus:(PBJVision *)vision
 {
+    if (_focusView && [_focusView superview]) {
+        [_focusView stopAnimation];
+    }
+}
+
+- (void)visionWillChangeExposure:(PBJVision *)vision
+{
+}
+
+- (void)visionDidChangeExposure:(PBJVision *)vision {
     if (_focusView && [_focusView superview]) {
         [_focusView stopAnimation];
     }
