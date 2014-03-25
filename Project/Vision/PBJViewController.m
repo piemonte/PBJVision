@@ -203,7 +203,7 @@
     [_mirrorButton setImage:mirrorImage forState:UIControlStateNormal];
     [_mirrorButton setImage:[UIImage imageNamed:@"capture_mirror_selected"] forState:UIControlStateSelected];
     CGRect mirrorFrame = _mirrorButton.frame;
-    mirrorFrame.origin = CGPointMake((CGRectGetWidth(self.view.bounds) * 0.5f) - 60.0f, 16.0f);
+    mirrorFrame.origin = CGPointMake(_flipButton.frame.origin.x + _flipButton.frame.size.width + 20.0f, 16.0f);
     mirrorFrame.size = mirrorImage.size;
     _mirrorButton.frame = mirrorFrame;
     _mirrorButton.imageView.frame = _mirrorButton.bounds;
@@ -216,7 +216,7 @@
     [_focusButton setImage:focusImage forState:UIControlStateNormal];
     [_focusButton setImage:[UIImage imageNamed:@"capture_focus_button_active"] forState:UIControlStateSelected];
     CGRect focusFrame = _focusButton.frame;
-    focusFrame.origin = CGPointMake((CGRectGetWidth(self.view.bounds) * 0.5f) + 25.0f, 16.0f);
+    focusFrame.origin = CGPointMake((CGRectGetWidth(self.view.bounds) * 0.5f) - (focusImage.size.width * 0.5f), 16.0f);
     focusFrame.size = focusImage.size;
     _focusButton.frame = focusFrame;
     
