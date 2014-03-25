@@ -52,6 +52,7 @@
     UIButton *_flipButton;
     UIButton *_focusButton;
     UIButton *_onionButton;
+    UIButton *_mirrorButton;
     UIView *_captureDock;
 
     UIView *_previewView;
@@ -196,6 +197,19 @@
     [_flipButton addTarget:self action:@selector(_handleFlipButton:) forControlEvents:UIControlEventTouchUpInside];
     [_captureDock addSubview:_flipButton];
     
+    // mirror button
+    _mirrorButton = [ExtendedHitButton extendedHitButton];
+    UIImage *mirrorImage = [UIImage imageNamed:@"capture_mirror"];
+    [_mirrorButton setImage:mirrorImage forState:UIControlStateNormal];
+    [_mirrorButton setImage:[UIImage imageNamed:@"capture_mirror_selected"] forState:UIControlStateSelected];
+    CGRect mirrorFrame = _mirrorButton.frame;
+    mirrorFrame.origin = CGPointMake(_flipButton.frame.origin.x + _flipButton.frame.size.width + 20.0f, 16.0f);
+    mirrorFrame.size = mirrorImage.size;
+    _mirrorButton.frame = mirrorFrame;
+    _mirrorButton.imageView.frame = _mirrorButton.bounds;
+    [_mirrorButton addTarget:self action:@selector(_handleMirrorButton:) forControlEvents:UIControlEventTouchUpInside];
+    [_captureDock addSubview:_mirrorButton];
+    
     // focus mode button
     _focusButton = [ExtendedHitButton extendedHitButton];
     UIImage *focusImage = [UIImage imageNamed:@"capture_focus_button"];
@@ -221,6 +235,7 @@
     _onionButton.imageView.frame = _onionButton.bounds;
     [_onionButton addTarget:self action:@selector(_handleOnionSkinningButton:) forControlEvents:UIControlEventTouchUpInside];
     [_captureDock addSubview:_onionButton];
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -366,6 +381,13 @@
     _longPressGestureRecognizer.enabled = YES;
     
     [self _endCapture];
+}
+
+- (void)_handleMirrorButton:(UIButton *)button {
+    
+    [_mirrorButton setSelected:!_mirrorButton.selected];
+    PBJVision *vision = [PBJVision sharedInstance];
+    [vision setMirrored:!vision.mirrored];
 }
 
 #pragma mark - UIAlertViewDelegate
