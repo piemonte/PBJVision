@@ -130,8 +130,6 @@ enum
     CVOpenGLESTextureRef _chromaTexture;
     CVOpenGLESTextureCacheRef _videoTextureCache;
     
-    BOOL _mirroredChanged;
-    
     // flags
     
     struct {
@@ -155,7 +153,6 @@ enum
 @synthesize cleanAperture = _cleanAperture;
 @synthesize cameraOrientation = _cameraOrientation;
 @synthesize cameraDevice = _cameraDevice;
-@synthesize mirrored = _mirrored;
 @synthesize cameraMode = _cameraMode;
 @synthesize focusMode = _focusMode;
 @synthesize flashMode = _flashMode;
@@ -329,24 +326,6 @@ enum
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice
 {
     return [UIImagePickerController isCameraDeviceAvailable:(UIImagePickerControllerCameraDevice)cameraDevice];
-}
-
-- (void)setMirrored:(BOOL)mirrored
-{
-    _mirroredChanged = (mirrored != _mirrored);
-    _mirrored = mirrored;
-    
-    // since there is no session in progress, set and bail
-    if (!_captureSession) {
-        return;
-    }
-    
-    [self _enqueueBlockInCaptureSessionQueue:^{
-        [self _setupSession];
-        [self _enqueueBlockOnMainQueue:^{
-            _mirroredChanged = NO;
-        }];
-    }];
 }
 
 - (void)setFocusMode:(PBJFocusMode)focusMode
@@ -655,11 +634,8 @@ typedef void (^PBJVisionBlock)();
     
     DLog(@"switchDevice %d switchMode %d", shouldSwitchDevice, shouldSwitchMode);
 
-    if (!_mirroredChanged) {
-        if (!shouldSwitchDevice && !shouldSwitchMode)
-            return;
-    }
-    
+    if (!shouldSwitchDevice && !shouldSwitchMode)
+        return;
     
     AVCaptureDeviceInput *newDeviceInput = nil;
     AVCaptureOutput *newCaptureOutput = nil;
@@ -766,9 +742,6 @@ typedef void (^PBJVisionBlock)();
 
     // setup video connection
     AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
-    
-    // setup mirroring
-    videoConnection.videoMirrored = _mirrored;
     
     // setup input/output
     

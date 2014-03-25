@@ -80,11 +80,11 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 // setup
 
 @property (nonatomic) PBJCameraOrientation cameraOrientation;
-@property (nonatomic) PBJCameraDevice cameraDevice;
 @property (nonatomic) PBJCameraMode cameraMode;
-@property (nonatomic) PBJFocusMode focusMode;
+@property (nonatomic) PBJCameraDevice cameraDevice;
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice;
-@property (nonatomic, assign) BOOL mirrored;
+
+@property (nonatomic) PBJFocusMode focusMode;
 
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
 @property (nonatomic, readonly, getter=isFlashAvailable) BOOL flashAvailable;
