@@ -277,8 +277,31 @@ enum
     if (!changeMode && !changeDevice && !changeOutputFormat)
         return;
     
-    if ([_delegate respondsToSelector:@selector(visionModeWillChange:)])
-        [_delegate visionModeWillChange:self];
+    SEL targetDelegateMethodBeforeChange;
+    SEL targetDelegateMethodAfterChange;
+
+    if (changeDevice) {
+        targetDelegateMethodBeforeChange = @selector(visionCameraDeviceWillChange:);
+        targetDelegateMethodAfterChange = @selector(visionCameraDeviceDidChange:);
+    }
+    else if (changeMode) {
+        targetDelegateMethodBeforeChange = @selector(visionCameraModeWillChange:);
+        targetDelegateMethodAfterChange = @selector(visionCameraModeDidChange:);
+    }
+    else {
+        targetDelegateMethodBeforeChange = @selector(visionOutputFormatWillChange:);
+        targetDelegateMethodAfterChange = @selector(visionOutputFormatDidChange:);
+    }
+
+    if ([_delegate respondsToSelector:targetDelegateMethodBeforeChange]) {
+        // At this point, `targetDelegateMethodBeforeChange` will always refer to a valid selector, as
+        // from the sequence of conditionals above. Also the enclosing `if` statement ensures
+        // that the delegate responds to it, thus safely ignore this compiler warning.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        [_delegate performSelector:targetDelegateMethodBeforeChange withObject:self];
+#pragma clang diagnostic pop
+    }
     
     _flags.changingModes = YES;
     
@@ -291,8 +314,15 @@ enum
     if (!_captureSession) {
         _flags.changingModes = NO;
             
-        if ([_delegate respondsToSelector:@selector(visionModeDidChange:)])
-            [_delegate visionModeDidChange:self];
+        if ([_delegate respondsToSelector:targetDelegateMethodAfterChange]) {
+            // At this point, `targetDelegateMethodAfterChange` will always refer to a valid selector, as
+            // from the sequence of conditionals above. Also the enclosing `if` statement ensures
+            // that the delegate responds to it, thus safely ignore this compiler warning.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+            [_delegate performSelector:targetDelegateMethodAfterChange withObject:self];
+#pragma clang diagnostic pop
+        }
         
         return;
     }
@@ -302,8 +332,15 @@ enum
         [self _enqueueBlockOnMainQueue:^{
             _flags.changingModes = NO;
             
-            if ([_delegate respondsToSelector:@selector(visionModeDidChange:)])
-                [_delegate visionModeDidChange:self];
+            if ([_delegate respondsToSelector:targetDelegateMethodAfterChange]) {
+                // At this point, `targetDelegateMethodAfterChange` will always refer to a valid selector, as
+                // from the sequence of conditionals above. Also the enclosing `if` statement ensures
+                // that the delegate responds to it, thus safely ignore this compiler warning.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+                [_delegate performSelector:targetDelegateMethodAfterChange withObject:self];
+#pragma clang diagnostic pop
+            }
         }];
     }];
 }

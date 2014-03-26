@@ -443,12 +443,34 @@
     [_previewView removeFromSuperview];
 }
 
-- (void)visionModeWillChange:(PBJVision *)vision
+- (void)visionCameraModeWillChange:(PBJVision *)vision
 {
+    NSLog(@"Camera mode will change");
 }
 
-- (void)visionModeDidChange:(PBJVision *)vision
+- (void)visionCameraModeDidChange:(PBJVision *)vision
 {
+    NSLog(@"Camera mode did change");
+}
+
+- (void)visionCameraDeviceWillChange:(PBJVision *)vision
+{
+    NSLog(@"Camera device will change");
+}
+
+- (void)visionCameraDeviceDidChange:(PBJVision *)vision
+{
+    NSLog(@"Camera device did change");
+}
+
+- (void)visionOutputFormatWillChange:(PBJVision *)vision
+{
+    NSLog(@"Output format will change");
+}
+
+- (void)visionOutputFormatDidChange:(PBJVision *)vision
+{
+    NSLog(@"Output format did change");
 }
 
 - (void)vision:(PBJVision *)vision didChangeCleanAperture:(CGRect)cleanAperture
