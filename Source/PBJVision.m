@@ -26,6 +26,8 @@ static CGFloat const PBJVisionThumbnailWidth = 160.0f;
 
 static NSString * const PBJVisionFocusObserverContext = @"PBJVisionFocusObserverContext";
 static NSString * const PBJVisionExposureObserverContext = @"PBJVisionExposureObserverContext";
+static NSString * const PBJVisionFlashModeObserverContext = @"PBJVisionFlashModeObserverContext";
+static NSString * const PBJVisionTorchModeObserverContext = @"PBJVisionTorchModeObserverContext";
 static NSString * const PBJVisionFlashAvailabilityObserverContext = @"PBJVisionFlashAvailabilityObserverContext";
 static NSString * const PBJVisionTorchAvailabilityObserverContext = @"PBJVisionTorchAvailabilityObserverContext";
 static NSString * const PBJVisionCaptureStillImageIsCapturingStillImageObserverContext = @"PBJVisionCaptureStillImageIsCapturingStillImageObserverContext";
@@ -622,6 +624,8 @@ typedef void (^PBJVisionBlock)();
     [_captureOutputPhoto removeObserver:self forKeyPath:@"capturingStillImage"];
     [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
     [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
+    [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
+    [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
 
     _captureOutputPhoto = nil;
     _captureOutputAudio = nil;
@@ -889,12 +893,16 @@ typedef void (^PBJVisionBlock)();
     if (newCaptureDevice) {
         [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
         [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
+        [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
+        [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
         [_currentDevice removeObserver:self forKeyPath:@"flashAvailable"];
         [_currentDevice removeObserver:self forKeyPath:@"torchAvailable"];
         
         _currentDevice = newCaptureDevice;
         [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
         [_currentDevice addObserver:self forKeyPath:@"adjustingExposure" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionExposureObserverContext];
+        [_currentDevice addObserver:self forKeyPath:@"flashMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashModeObserverContext];
+        [_currentDevice addObserver:self forKeyPath:@"torchMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchModeObserverContext];
         [_currentDevice addObserver:self forKeyPath:@"flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
         [_currentDevice addObserver:self forKeyPath:@"torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
     }
@@ -1847,12 +1855,16 @@ typedef void (^PBJVisionBlock)();
                 if (device) {
                     [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
                     [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
+                    [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
+                    [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
                     [_currentDevice removeObserver:self forKeyPath:@"flashAvailable"];
                     [_currentDevice removeObserver:self forKeyPath:@"torchAvailable"];
                     
                     _currentDevice = device;
                     [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
                     [_currentDevice addObserver:self forKeyPath:@"adjustingExposure" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionExposureObserverContext];
+                    [_currentDevice addObserver:self forKeyPath:@"flashMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashModeObserverContext];
+                    [_currentDevice addObserver:self forKeyPath:@"torchMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchModeObserverContext];
                     [_currentDevice addObserver:self forKeyPath:@"flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
                     [_currentDevice addObserver:self forKeyPath:@"torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
                 }
@@ -1952,14 +1964,23 @@ typedef void (^PBJVisionBlock)();
         
     }
     else if ( context == (__bridge void *)PBJVisionFlashAvailabilityObserverContext ||
-                context == (__bridge void *)PBJVisionTorchAvailabilityObserverContext ) {
-    
-//        DLog(@"flash/torch availability did change");
+             context == (__bridge void *)PBJVisionTorchAvailabilityObserverContext ) {
+        
+        //        DLog(@"flash/torch availability did change");
         [self _enqueueBlockOnMainQueue:^{
             if ([_delegate respondsToSelector:@selector(visionDidChangeFlashAvailablility:)])
                 [_delegate visionDidChangeFlashAvailablility:self];
         }];
-    
+        
+	} else if ( context == (__bridge void *)PBJVisionFlashModeObserverContext ||
+              context == (__bridge void *)PBJVisionTorchModeObserverContext ) {
+        
+        //        DLog(@"flash/torch mode did change");
+        [self _enqueueBlockOnMainQueue:^{
+            if ([_delegate respondsToSelector:@selector(visionDidChangeFlashMode:)])
+                [_delegate visionDidChangeFlashMode:self];
+        }];
+        
 	} else if ( context == (__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext) ) {
     
 		BOOL isCapturingStillImage = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];

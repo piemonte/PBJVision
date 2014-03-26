@@ -164,10 +164,12 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionWillChangeExposure:(PBJVision *)vision;
 - (void)visionDidChangeExposure:(PBJVision *)vision;
 
+- (void)visionDidChangeFlashMode:(PBJVision *)vision; // flash or torch was changed
+
 // authorization / availability
 
 - (void)visionDidChangeAuthorizationStatus:(PBJAuthorizationStatus)status;
-- (void)visionDidChangeFlashAvailablility:(PBJVision *)vision; // flash and torch
+- (void)visionDidChangeFlashAvailablility:(PBJVision *)vision; // flash or torch is available
 
 // preview
 

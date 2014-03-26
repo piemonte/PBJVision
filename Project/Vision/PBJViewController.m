@@ -498,6 +498,10 @@
     }
 }
 
+- (void)visionDidChangeFlashMode:(PBJVision *)vision {
+    NSLog(@"Flash mode did change");
+}
+
 // photo
 
 - (void)visionWillCapturePhoto:(PBJVision *)vision
