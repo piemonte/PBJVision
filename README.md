@@ -1,4 +1,4 @@
-** Special note, a couple delegate method names have changed with v0.1.8, please ensure you've updated
+** Special note, a couple delegate method names have changed with [v0.1.8](https://github.com/piemonte/PBJVision/releases/tag/v0.1.8), please ensure you've updated
 
 ![PBJVision](https://raw.github.com/piemonte/PBJVision/master/pbj.gif)
 
