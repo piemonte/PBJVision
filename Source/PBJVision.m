@@ -298,7 +298,7 @@ enum
 
     if ([_delegate respondsToSelector:targetDelegateMethodBeforeChange]) {
         // At this point, `targetDelegateMethodBeforeChange` will always refer to a valid selector, as
-        // from the sequence of conditionals above, and the enclosing `if` statement ensures
+        // from the sequence of conditionals above. Also the enclosing `if` statement ensures
         // that the delegate responds to it, thus safely ignore this compiler warning.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
@@ -319,7 +319,7 @@ enum
             
         if ([_delegate respondsToSelector:targetDelegateMethodAfterChange]) {
             // At this point, `targetDelegateMethodAfterChange` will always refer to a valid selector, as
-            // from the sequence of conditionals above, and the enclosing `if` statement ensures
+            // from the sequence of conditionals above. Also the enclosing `if` statement ensures
             // that the delegate responds to it, thus safely ignore this compiler warning.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
@@ -337,7 +337,7 @@ enum
             
             if ([_delegate respondsToSelector:targetDelegateMethodAfterChange]) {
                 // At this point, `targetDelegateMethodAfterChange` will always refer to a valid selector, as
-                // from the sequence of conditionals above, and the enclosing `if` statement ensures
+                // from the sequence of conditionals above. Also the enclosing `if` statement ensures
                 // that the delegate responds to it, thus safely ignore this compiler warning.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
