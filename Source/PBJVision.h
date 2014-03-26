@@ -147,15 +147,6 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionSessionDidStart:(PBJVision *)vision;
 - (void)visionSessionDidStop:(PBJVision *)vision;
 
-/**
- The following 2 methods (visionModeWillChange:, visionModeDidChange:) 
- should not be used, and instead a more specific delegate method
- (ie. visionCameraDeviceWillChange:, visionCameraDeviceDidChange: etc.) should
- be used.
- */
-- (void)visionModeWillChange:(PBJVision *)vision __attribute__((deprecated));
-- (void)visionModeDidChange:(PBJVision *)vision __attribute__((deprecated));
-
 - (void)visionCameraDeviceWillChange:(PBJVision*)vision;
 - (void)visionCameraDeviceDidChange:(PBJVision*)vision;
 
