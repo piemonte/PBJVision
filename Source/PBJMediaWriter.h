@@ -29,6 +29,9 @@
 
 // write
 
+@property (nonatomic, readonly) CMTime audioTimestamp;
+@property (nonatomic, readonly) CMTime videoTimestamp;
+
 - (void)writeSampleBuffer:(CMSampleBufferRef)sampleBuffer ofType:(NSString *)mediaType;
 - (void)finishWritingWithCompletionHandler:(void (^)(void))handler;
 

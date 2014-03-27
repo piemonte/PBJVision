@@ -113,10 +113,8 @@ enum
     AVCaptureVideoPreviewLayer *_previewLayer;
     CGRect _cleanAperture;
 
-    CMTime _timeOffset;
     CMTime _startTimestamp;
-    CMTime _audioTimestamp;
-    CMTime _videoTimestamp;
+    CMTime _lastTimestamp;
 
     // sample buffer rendering
 
@@ -217,8 +215,8 @@ enum
 
 - (Float64)capturedAudioSeconds
 {
-    if (_audioTimestamp.value > 0) {
-        return CMTimeGetSeconds(CMTimeSubtract(_audioTimestamp, _startTimestamp));
+    if (_mediaWriter && CMTIME_IS_VALID(_mediaWriter.audioTimestamp)) {
+        return CMTimeGetSeconds(CMTimeSubtract(_mediaWriter.audioTimestamp, _startTimestamp));
     } else {
         return 0.0;
     }
@@ -226,8 +224,8 @@ enum
 
 - (Float64)capturedVideoSeconds
 {
-    if (_videoTimestamp.value > 0) {
-        return CMTimeGetSeconds(CMTimeSubtract(_videoTimestamp, _startTimestamp));
+    if (_mediaWriter && CMTIME_IS_VALID(_mediaWriter.videoTimestamp)) {
+        return CMTimeGetSeconds(CMTimeSubtract(_mediaWriter.videoTimestamp, _startTimestamp));
     } else {
         return 0.0;
     }
@@ -1320,10 +1318,8 @@ typedef void (^PBJVisionBlock)();
         AVCaptureConnection *videoConnection = [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo];
         [self _setOrientationForConnection:videoConnection];
 
-        _timeOffset = kCMTimeZero;
-        _audioTimestamp = kCMTimeZero;
-        _videoTimestamp = kCMTimeZero;
         _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
+        _lastTimestamp = kCMTimeInvalid;
         
         _flags.recording = YES;
         _flags.paused = NO;
@@ -1399,9 +1395,7 @@ typedef void (^PBJVisionBlock)();
         _flags.paused = NO;
         
         void (^finishWritingCompletionHandler)(void) = ^{
-            _timeOffset = kCMTimeZero;
-            _audioTimestamp = kCMTimeZero;
-            _videoTimestamp = kCMTimeZero;
+            _lastTimestamp = kCMTimeInvalid;
             _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
             _flags.interrupted = NO;
 
@@ -1695,10 +1689,6 @@ typedef void (^PBJVisionBlock)();
             } else {
                 DLog(@"invalid audio timestamp, no offset update");
             }
-            
-            _audioTimestamp.flags = 0;
-            _videoTimestamp.flags = 0;
-            
         }
         
         CMSampleBufferRef bufferToWrite = NULL;

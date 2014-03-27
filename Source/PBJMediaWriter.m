@@ -26,6 +26,10 @@
 	AVAssetWriterInput *_assetWriterVideoIn;
     
     NSURL *_outputURL;
+    
+    CMTime _audioTimestamp;
+    CMTime _videoTimestamp;
+    
     BOOL _audioReady;
     BOOL _videoReady;
 }
@@ -36,6 +40,9 @@
 
 @synthesize outputURL = _outputURL;
 @synthesize delegate = _delegate;
+
+@synthesize audioTimestamp = _audioTimestamp;
+@synthesize videoTimestamp = _videoTimestamp;
 
 #pragma mark - getters/setters
 
@@ -71,6 +78,9 @@
         _outputURL = outputURL;
         _assetWriter.shouldOptimizeForNetworkUse = YES;
         _assetWriter.metadata = [self _metadataArray];
+
+        _audioTimestamp = kCMTimeInvalid;
+        _videoTimestamp = kCMTimeInvalid;
 
         // It's possible to capture video without audio or audio without video.
         // If the user has denied access to a device, we don't need to set it up
@@ -207,17 +217,22 @@
 	
 	if ( _assetWriter.status == AVAssetWriterStatusWriting ) {
 		
+        CMTime timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
 		if (mediaType == AVMediaTypeVideo) {
 			if (_assetWriterVideoIn.readyForMoreMediaData) {
-				if (![_assetWriterVideoIn appendSampleBuffer:sampleBuffer]) {
+				if ([_assetWriterVideoIn appendSampleBuffer:sampleBuffer]) {
+                    _videoTimestamp = timestamp;
+				} else {
 					DLog(@"writer error appending video (%@)", [_assetWriter error]);
-				}
+                }
 			}
 		} else if (mediaType == AVMediaTypeAudio) {
 			if (_assetWriterAudioIn.readyForMoreMediaData) {
-				if (![_assetWriterAudioIn appendSampleBuffer:sampleBuffer]) {
+				if ([_assetWriterAudioIn appendSampleBuffer:sampleBuffer]) {
+                    _audioTimestamp = timestamp;
+				} else {
 					DLog(@"writer error appending audio (%@)", [_assetWriter error]);
-				}
+                }
 			}
 		}
         
@@ -236,6 +251,9 @@
     
     _audioReady = NO;
     _videoReady = NO;
+    
+    _audioTimestamp = kCMTimeInvalid;
+    _videoTimestamp = kCMTimeInvalid;
 }
 
 
