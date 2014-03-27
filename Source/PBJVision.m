@@ -1631,21 +1631,22 @@ typedef void (^PBJVisionBlock)();
             return;
         }
 
+        CMTime currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+        CMTime currentDuration = CMSampleBufferGetDuration(sampleBuffer);
+
         // calculate the length of the interruption
         if (_flags.interrupted && isAudio) {
             _flags.interrupted = NO;
 
-            CMTime time = _audioTimestamp;
             // calculate the appropriate time offset
-            if (CMTIME_IS_VALID(time)) {
-                CMTime pTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-                if (CMTIME_IS_VALID(_timeOffset)) {
-                    pTimestamp = CMTimeSubtract(pTimestamp, _timeOffset);
+            if (CMTIME_IS_VALID(currentTimestamp)) {
+                if (CMTIME_IS_VALID(_lastTimestamp)) {
+                    currentTimestamp = CMTimeSubtract(currentTimestamp, _lastTimestamp);
                 }
                 
-                CMTime offset = CMTimeSubtract(pTimestamp, _audioTimestamp);
-                _timeOffset = (_timeOffset.value == 0) ? offset : CMTimeAdd(_timeOffset, offset);
-                DLog(@"new calculated offset %f valid (%d)", CMTimeGetSeconds(_timeOffset), CMTIME_IS_VALID(_timeOffset));
+                CMTime offset = CMTimeSubtract(currentTimestamp, _mediaWriter.audioTimestamp);
+                _lastTimestamp = (_lastTimestamp.value == 0) ? offset : CMTimeAdd(_lastTimestamp, offset);
+                DLog(@"new calculated offset %f valid (%d)", CMTimeGetSeconds(_lastTimestamp), CMTIME_IS_VALID(_lastTimestamp));
             } else {
                 DLog(@"invalid audio timestamp, no offset update");
             }
@@ -1653,8 +1654,7 @@ typedef void (^PBJVisionBlock)();
         
         CMSampleBufferRef bufferToWrite = NULL;
 
-        if (_timeOffset.value > 0) {
-            bufferToWrite = [self _createOffsetSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
+        if (_lastTimestamp.value > 0) {
             bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer usingTimeOffset:_lastTimestamp duration:currentDuration];
             if (!bufferToWrite) {
                 DLog(@"error subtracting the timeoffset from the sampleBuffer");
@@ -1673,9 +1673,8 @@ typedef void (^PBJVisionBlock)();
                 if (duration.value > 0)
                     time = CMTimeAdd(time, duration);
                 
-                if (time.value > _videoTimestamp.value) {
+                if (time.value > _mediaWriter.videoTimestamp.value) {
                     [_mediaWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeVideo];
-                    _videoTimestamp = time;
                     _flags.videoWritten = YES;
                 }
                 
@@ -1702,9 +1701,8 @@ typedef void (^PBJVisionBlock)();
                 if (duration.value > 0)
                     time = CMTimeAdd(time, duration);
 
-                if (time.value > _audioTimestamp.value) {
+                if (time.value > _mediaWriter.audioTimestamp.value) {
                     [_mediaWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeAudio];
-                    _audioTimestamp = time;
                 }
                 
                 [self _enqueueBlockOnMainQueue:^{
