@@ -191,7 +191,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 // video capture progress
 
-- (void)visionDidCaptureVideoSample:(PBJVision *) vision;
-- (void)visionDidCaptureAudioSample:(PBJVision *) vision;
+- (void)visionDidCaptureVideoSample:(PBJVision *)vision;
+- (void)visionDidCaptureAudioSample:(PBJVision *)vision;
 
 @end
