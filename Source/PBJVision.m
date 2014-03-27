@@ -141,6 +141,7 @@ enum
         unsigned int videoWritten:1;
         unsigned int videoRenderingEnabled:1;
         unsigned int thumbnailEnabled:1;
+        unsigned int shouldResumeRecording:1;
     } __block _flags;
 }
 
@@ -1370,6 +1371,7 @@ typedef void (^PBJVisionBlock)();
         DLog(@"resuming video capture");
        
         _flags.paused = NO;
+        _flags.shouldResumeRecording = NO;
 
         [self _enqueueBlockOnMainQueue:^{
             if ([_delegate respondsToSelector:@selector(visionDidResumeVideoCapture:)])
@@ -1390,6 +1392,9 @@ typedef void (^PBJVisionBlock)();
             DLog(@"media writer unavailable to end");
             return;
         }
+        
+        if (_flags.shouldResumeRecording)
+            return;
         
         _flags.recording = NO;
         _flags.paused = NO;
@@ -1740,8 +1745,10 @@ typedef void (^PBJVisionBlock)();
 - (void)_applicationDidEnterBackground:(NSNotification *)notification
 {
     DLog(@"applicationDidEnterBackground");
-    if (_flags.recording)
+    if (_flags.recording) {
         [self pauseVideoCapture];
+        _flags.shouldResumeRecording = YES;
+    }
 
     if (_flags.previewRunning) {
         [self stopPreview];
