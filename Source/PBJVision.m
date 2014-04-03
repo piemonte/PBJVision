@@ -113,6 +113,9 @@ enum
     AVCaptureVideoPreviewLayer *_previewLayer;
     CGRect _cleanAperture;
 
+    CMTime _timeOffset;
+    CMTime _audioTimestamp;
+    CMTime _videoTimestamp;
     CMTime _startTimestamp;
     CMTime _lastTimestamp;
 
