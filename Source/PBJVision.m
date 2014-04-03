@@ -1487,6 +1487,46 @@ typedef void (^PBJVisionBlock)();
     return [_mediaWriter setupVideoOutputDeviceWithSettings:videoSettings];
 }
 
+- (CMSampleBufferRef)_createOffsetSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset
+{
+    CMItemCount itemCount;
+    
+    OSStatus status = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, 0, NULL, &itemCount);
+    if (status) {
+        DLog(@"couldn't determine the timing info count");
+        return NULL;
+    }
+    
+    CMSampleTimingInfo *timingInfo = (CMSampleTimingInfo *)malloc(sizeof(CMSampleTimingInfo) * (unsigned long)itemCount);
+    if (!timingInfo) {
+        DLog(@"couldn't allocate timing info");
+        return NULL;
+    }
+    
+    status = CMSampleBufferGetSampleTimingInfoArray(sampleBuffer, itemCount, timingInfo, &itemCount);
+    if (status) {
+        free(timingInfo);
+        timingInfo = NULL;
+        DLog(@"failure getting sample timing info array");
+        return NULL;
+    }
+    
+    for (CMItemCount i = 0; i < itemCount; i++) {
+        timingInfo[i].presentationTimeStamp = CMTimeSubtract(timingInfo[i].presentationTimeStamp, timeOffset);
+        timingInfo[i].decodeTimeStamp = CMTimeSubtract(timingInfo[i].decodeTimeStamp, timeOffset);
+    }
+    
+    CMSampleBufferRef outputSampleBuffer;
+    CMSampleBufferCreateCopyWithNewTiming(kCFAllocatorDefault, sampleBuffer, itemCount, timingInfo, &outputSampleBuffer);
+    
+    if (timingInfo) {
+        free(timingInfo);
+        timingInfo = NULL;
+    }
+    
+    return outputSampleBuffer;
+}
+
 #pragma mark - sample buffer processing
 
 - (void)_cleanUpTextures
@@ -1660,7 +1700,6 @@ typedef void (^PBJVisionBlock)();
 
         if (_timeOffset.value > 0) {
             bufferToWrite = [self _createOffsetSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
-            bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer usingTimeOffset:_lastTimestamp duration:currentDuration];
             if (!bufferToWrite) {
                 DLog(@"error subtracting the timeoffset from the sampleBuffer");
             }
