@@ -2074,8 +2074,8 @@ typedef void (^PBJVisionBlock)();
         0.0f, 0.0f,
     };
     
-    GLuint vertexAttributeLocation = [_program attributeIndex:@"a_position"];
-    GLuint textureAttributeLocation = [_program attributeIndex:@"a_texture"];
+    GLuint vertexAttributeLocation = [_program attributeLocation:@"a_position"];
+    GLuint textureAttributeLocation = [_program attributeLocation:@"a_texture"];
     
     glEnableVertexAttribArray(vertexAttributeLocation);
     glVertexAttribPointer(vertexAttributeLocation, 2, GL_FLOAT, GL_FALSE, 0, vertices);

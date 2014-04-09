@@ -94,12 +94,12 @@
 {
     if (![_attributes containsObject:attributeName]) {
         [_attributes addObject:attributeName];
-        GLuint index = [self attributeIndex:attributeName];
+        GLuint index = [self attributeLocation:attributeName];
         glBindAttribLocation(_program, index, [attributeName UTF8String]);
     }
 }
 
-- (GLuint)attributeIndex:(NSString *)attributeName
+- (GLuint)attributeLocation:(NSString *)attributeName
 {
     return (GLuint)[_attributes indexOfObject:attributeName];
 }

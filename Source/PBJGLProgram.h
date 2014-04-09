@@ -15,8 +15,8 @@
 - (id)initWithVertexShaderName:(NSString *)vertexShaderName fragmentShaderName:(NSString *)fragmentShaderName;
 
 - (void)addAttribute:(NSString *)attributeName;
-- (GLuint)attributeIndex:(NSString *)attributeName;
 
+- (GLuint)attributeLocation:(NSString *)attributeName;
 - (int)uniformLocation:(NSString *)uniformName;
 
 - (BOOL)link;
