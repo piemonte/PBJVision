@@ -97,6 +97,7 @@ enum
     PBJCameraOrientation _cameraOrientation;
     
     PBJFocusMode _focusMode;
+    PBJExposureMode _exposureMode;
     PBJFlashMode _flashMode;
 
     PBJOutputFormat _outputFormat;
@@ -155,6 +156,7 @@ enum
 @synthesize cameraDevice = _cameraDevice;
 @synthesize cameraMode = _cameraMode;
 @synthesize focusMode = _focusMode;
+@synthesize exposureMode = _exposureMode;
 @synthesize flashMode = _flashMode;
 @synthesize outputFormat = _outputFormat;
 @synthesize context = _context;
@@ -365,9 +367,9 @@ enum
     return [UIImagePickerController isCameraDeviceAvailable:(UIImagePickerControllerCameraDevice)cameraDevice];
 }
 
-- (BOOL)isCameraModeChanging
+- (BOOL)isFocusLockSupported
 {
-    return _flags.changingModes;
+    return [_currentDevice isFocusModeSupported:AVCaptureFocusModeLocked];
 }
 
 - (void)setFocusMode:(PBJFocusMode)focusMode
@@ -382,10 +384,37 @@ enum
     if (_currentDevice && [_currentDevice lockForConfiguration:&error]) {
         [_currentDevice setFocusMode:(AVCaptureFocusMode)focusMode];
         [_currentDevice unlockForConfiguration];
-        
     } else if (error) {
         DLog(@"error locking device for focus mode change (%@)", error);
     }
+}
+
+- (BOOL)isExposureLockSupported
+{
+    return [_currentDevice isExposureModeSupported:AVCaptureExposureModeLocked];
+}
+
+- (void)setExposureMode:(PBJExposureMode)exposureMode
+{
+    BOOL shouldChangeExposureMode = (_exposureMode != exposureMode);
+    if (![_currentDevice isExposureModeSupported:(AVCaptureExposureMode)exposureMode] || !shouldChangeExposureMode)
+        return;
+    
+    _exposureMode = exposureMode;
+    
+    NSError *error = nil;
+    if (_currentDevice && [_currentDevice lockForConfiguration:&error]) {
+        [_currentDevice setExposureMode:(AVCaptureExposureMode)exposureMode];
+        [_currentDevice unlockForConfiguration];
+    } else if (error) {
+        DLog(@"error locking device for exposure mode change (%@)", error);
+    }
+
+}
+
+- (BOOL)isFlashAvailable
+{
+    return (_currentDevice && [_currentDevice hasFlash]);
 }
 
 - (void)setFlashMode:(PBJFlashMode)flashMode
@@ -427,16 +456,6 @@ enum
     } else if (error) {
         DLog(@"error locking device for flash mode change (%@)", error);
     }
-}
-
-- (PBJFlashMode)flashMode
-{
-    return _flashMode;
-}
-
-- (BOOL)isFlashAvailable
-{
-    return (_currentDevice && [_currentDevice hasFlash]);
 }
 
 #pragma mark - init
@@ -564,19 +583,19 @@ typedef void (^PBJVisionBlock)();
         error = nil;
     }
     
-    if (self.cameraMode != PBJCameraModePhoto)
-	_captureDeviceAudio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
+    if (_cameraMode != PBJCameraModePhoto)
+        _captureDeviceAudio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
     _captureDeviceInputAudio = [AVCaptureDeviceInput deviceInputWithDevice:_captureDeviceAudio error:&error];
     if (error) {
         DLog(@"error setting up audio input (%@)", error);
     }
     
     _captureOutputPhoto = [[AVCaptureStillImageOutput alloc] init];
-    if (self.cameraMode != PBJCameraModePhoto)
+    if (_cameraMode != PBJCameraModePhoto)
     	_captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
     _captureOutputVideo = [[AVCaptureVideoDataOutput alloc] init];
     
-    if (self.cameraMode != PBJCameraModePhoto)
+    if (_cameraMode != PBJCameraModePhoto)
     	[_captureOutputAudio setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
     [_captureOutputVideo setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
     
@@ -988,6 +1007,21 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_focusEnded
 {
+    BOOL isAutoFocusEnabled = [_currentDevice focusMode] == AVCaptureFocusModeAutoFocus;
+    BOOL isFocusing = [_currentDevice isAdjustingFocus];
+    
+    if (!isFocusing && isAutoFocusEnabled) {
+        NSError *error = nil;
+        if ([_currentDevice lockForConfiguration:&error]) {
+        
+            [_currentDevice setSubjectAreaChangeMonitoringEnabled:YES];
+            [_currentDevice unlockForConfiguration];
+            
+        } else if (error) {
+            DLog(@"error locking device post exposure for subject area change monitoring (%@)", error);
+        }
+    }
+
     if ([_delegate respondsToSelector:@selector(visionDidStopFocus:)])
         [_delegate visionDidStopFocus:self];
 //    DLog(@"focus ended");
@@ -1002,12 +1036,73 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_exposureChangeEnded
 {
+    BOOL isContinuousAutoExposureEnabled = [_currentDevice exposureMode] == AVCaptureExposureModeContinuousAutoExposure;
+    BOOL isExposing = [_currentDevice isAdjustingExposure];
+    BOOL isFocusSupported = [_currentDevice isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus];
+
+    if (isContinuousAutoExposureEnabled && !isExposing && !isFocusSupported) {
+
+        NSError *error = nil;
+        if ([_currentDevice lockForConfiguration:&error]) {
+            
+            [_currentDevice setSubjectAreaChangeMonitoringEnabled:YES];
+            [_currentDevice unlockForConfiguration];
+            
+        } else if (error) {
+            DLog(@"error locking device post exposure for subject area change monitoring (%@)", error);
+        }
+
+    }
+
     if ([_delegate respondsToSelector:@selector(visionDidChangeExposure:)])
         [_delegate visionDidChangeExposure:self];
     //    DLog(@"exposure change ended");
 }
 
-- (void)_focus
+- (void)focusAtAdjustedPoint:(CGPoint)adjustedPoint
+{
+    if ([_currentDevice isAdjustingFocus] || [_currentDevice isAdjustingExposure])
+        return;
+
+    NSError *error = nil;
+    if ([_currentDevice lockForConfiguration:&error]) {
+    
+        BOOL isFocusAtPointSupported = [_currentDevice isFocusPointOfInterestSupported];
+    
+        if (isFocusAtPointSupported && [_currentDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
+            AVCaptureFocusMode fm = [_currentDevice focusMode];
+            [_currentDevice setFocusPointOfInterest:adjustedPoint];
+            [_currentDevice setFocusMode:fm];
+        }
+        [_currentDevice unlockForConfiguration];
+        
+    } else if (error) {
+        DLog(@"error locking device for focus adjustment (%@)", error);
+    }
+}
+
+- (void)exposeAtAdjustedPoint:(CGPoint)adjustedPoint
+{
+    if ([_currentDevice isAdjustingExposure])
+        return;
+
+    NSError *error = nil;
+    if ([_currentDevice lockForConfiguration:&error]) {
+    
+        BOOL isExposureAtPointSupported = [_currentDevice isExposurePointOfInterestSupported];
+        if (isExposureAtPointSupported && [_currentDevice isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure]) {
+            AVCaptureExposureMode em = [_currentDevice exposureMode];
+            [_currentDevice setExposurePointOfInterest:adjustedPoint];
+            [_currentDevice setExposureMode:em];
+        }
+        [_currentDevice unlockForConfiguration];
+        
+    } else if (error) {
+        DLog(@"error locking device for exposure adjustment (%@)", error);
+    }
+}
+
+- (void)_adjustFocusExposureAndWhiteBalance
 {
     if ([_currentDevice isAdjustingFocus] || [_currentDevice isAdjustingExposure])
         return;
@@ -1020,28 +1115,8 @@ typedef void (^PBJVisionBlock)();
     [self focusAtAdjustedPoint:focusPoint];
 }
 
-// TODO: should add in exposure and white balance locks for completeness one day
-- (void)_setFocusLocked:(BOOL)focusLocked
-{
-    NSError *error = nil;
-    if (_currentDevice && [_currentDevice lockForConfiguration:&error]) {
-    
-        if (focusLocked && [_currentDevice isFocusModeSupported:AVCaptureFocusModeLocked]) {
-            [_currentDevice setFocusMode:AVCaptureFocusModeLocked];
-        } else if ([_currentDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
-            [_currentDevice setFocusMode:AVCaptureFocusModeAutoFocus];
-        }
-        
-        [_currentDevice setSubjectAreaChangeMonitoringEnabled:focusLocked];
-            
-        [_currentDevice unlockForConfiguration];
-        
-    } else if (error) {
-        DLog(@"error locking device for focus adjustment (%@)", error);
-    }
-}
-
-- (void)focusAtAdjustedPoint:(CGPoint)adjustedPoint
+// focusExposeAndAdjustWhiteBalanceAtAdjustedPoint: will put focus and exposure into auto
+- (void)focusExposeAndAdjustWhiteBalanceAtAdjustedPoint:(CGPoint)adjustedPoint
 {
     if ([_currentDevice isAdjustingFocus] || [_currentDevice isAdjustingExposure])
         return;
@@ -1054,9 +1129,8 @@ typedef void (^PBJVisionBlock)();
         BOOL isWhiteBalanceModeSupported = [_currentDevice isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
     
         if (isFocusAtPointSupported && [_currentDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
-            AVCaptureFocusMode fm = [_currentDevice focusMode];
             [_currentDevice setFocusPointOfInterest:adjustedPoint];
-            [_currentDevice setFocusMode:fm];
+            [_currentDevice setFocusMode:AVCaptureFocusModeAutoFocus];
         }
         
         if (isExposureAtPointSupported && [_currentDevice isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure]) {
@@ -1068,10 +1142,12 @@ typedef void (^PBJVisionBlock)();
             [_currentDevice setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
         }
         
+        [_currentDevice setSubjectAreaChangeMonitoringEnabled:NO];
+        
         [_currentDevice unlockForConfiguration];
         
     } else if (error) {
-        DLog(@"error locking device for focus adjustment (%@)", error);
+        DLog(@"error locking device for focus / exposure / white-balance adjustment (%@)", error);
     }
 }
 
@@ -1272,7 +1348,7 @@ typedef void (^PBJVisionBlock)();
         }
         
         // run a post shot focus
-        [self performSelector:@selector(_focus) withObject:nil afterDelay:0.5f];
+        [self performSelector:@selector(_adjustFocusExposureAndWhiteBalance) withObject:nil afterDelay:0.5f];
     }];
 }
 
@@ -1890,7 +1966,7 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_deviceSubjectAreaDidChange:(NSNotification *)notification
 {
-    [self _focus];
+    [self _adjustFocusExposureAndWhiteBalance];
 }
 
 #pragma mark - KVO

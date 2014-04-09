@@ -421,7 +421,7 @@
     [_focusView startAnimation];
 
     CGPoint adjustPoint = [PBJVisionUtilities convertToPointOfInterestFromViewCoordinates:tapPoint inFrame:_previewView.frame];
-    [[PBJVision sharedInstance] focusAtAdjustedPoint:adjustPoint];
+    [[PBJVision sharedInstance] focusExposeAndAdjustWhiteBalanceAtAdjustedPoint:adjustPoint];
 }
 
 #pragma mark - PBJVisionDelegate

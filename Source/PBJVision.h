@@ -33,6 +33,12 @@ typedef NS_ENUM(NSInteger, PBJFocusMode) {
     PBJFocusModeContinuousAutoFocus = AVCaptureFocusModeContinuousAutoFocus
 };
 
+typedef NS_ENUM(NSInteger, PBJExposureMode) {
+    PBJExposureModeLocked = AVCaptureExposureModeLocked,
+    PBJExposureModeAutoExpose = AVCaptureExposureModeAutoExpose,
+    PBJExposureModeContinuousAutoExposure = AVCaptureExposureModeContinuousAutoExposure
+};
+
 typedef NS_ENUM(NSInteger, PBJFlashMode) {
     PBJFlashModeOff  = AVCaptureFlashModeOff,
     PBJFlashModeOn   = AVCaptureFlashModeOn,
@@ -66,8 +72,6 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @class EAGLContext;
 @protocol PBJVisionDelegate;
 @interface PBJVision : NSObject
-{
-}
 
 + (PBJVision *)sharedInstance;
 
@@ -83,10 +87,6 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic) PBJCameraMode cameraMode;
 @property (nonatomic) PBJCameraDevice cameraDevice;
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice;
-
-@property (nonatomic, readonly, getter = isCameraModeChanging) BOOL cameraModeChanging;
-
-@property (nonatomic) PBJFocusMode focusMode;
 
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
 @property (nonatomic, readonly, getter=isFlashAvailable) BOOL flashAvailable;
@@ -109,9 +109,18 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 - (void)unfreezePreview; // preview is automatically timed and frozen with photo capture
 
-// focus
+// focus, exposure, white balance
 
+// note: focus, exposure modes change when adjusting on point
+- (void)focusExposeAndAdjustWhiteBalanceAtAdjustedPoint:(CGPoint)adjustedPoint;
+
+@property (nonatomic) PBJFocusMode focusMode;
+@property (nonatomic, readonly, getter=isFocusLockSupported) BOOL focusLockSupported;
 - (void)focusAtAdjustedPoint:(CGPoint)adjustedPoint;
+
+@property (nonatomic) PBJExposureMode exposureMode;
+@property (nonatomic, readonly, getter=isExposureLockSupported) BOOL exposureLockSupported;
+- (void)exposeAtAdjustedPoint:(CGPoint)adjustedPoint;
 
 // photo
 
@@ -159,6 +168,8 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)visionOutputFormatDidChange:(PBJVision*)vision;
 
 - (void)vision:(PBJVision *)vision didChangeCleanAperture:(CGRect)cleanAperture;
+
+// focus / exposure
 
 - (void)visionWillStartFocus:(PBJVision *)vision;
 - (void)visionDidStopFocus:(PBJVision *)vision;
