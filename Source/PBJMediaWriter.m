@@ -141,9 +141,9 @@
 		_assetWriterAudioIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeAudio outputSettings:audioSettings];
 		_assetWriterAudioIn.expectsMediaDataInRealTime = YES;
         
-        DLog(@"prepared audio-in with compression settings sampleRate (%f) channels (%d) bitRate (%ld)",
+        DLog(@"prepared audio-in with compression settings sampleRate (%f) channels (%lu) bitRate (%ld)",
                     [[audioSettings objectForKey:AVSampleRateKey] floatValue],
-                    [[audioSettings objectForKey:AVNumberOfChannelsKey] unsignedIntegerValue],
+                    (unsigned long)[[audioSettings objectForKey:AVNumberOfChannelsKey] unsignedIntegerValue],
                     (long)[[audioSettings objectForKey:AVEncoderBitRateKey] integerValue]);
         
 		if ([_assetWriter canAddInput:_assetWriterAudioIn]) {
