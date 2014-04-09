@@ -10,6 +10,10 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 
+extern NSString * const PBJGLProgramAttributeVertex;
+extern NSString * const PBJGLProgramAttributeTextureCoord;
+extern NSString * const PBJGLProgramAttributeNormal;
+
 @interface PBJGLProgram : NSObject
 
 - (id)initWithVertexShaderName:(NSString *)vertexShaderName fragmentShaderName:(NSString *)fragmentShaderName;

@@ -8,6 +8,10 @@
 
 #import "PBJGLProgram.h"
 
+NSString * const PBJGLProgramAttributeVertex = @"a_position";
+NSString * const PBJGLProgramAttributeTextureCoord = @"a_texture";
+NSString * const PBJGLProgramAttributeNormal = @"a_normal";
+
 @interface PBJGLProgram ()
 {
     GLuint _program;

@@ -2074,8 +2074,8 @@ typedef void (^PBJVisionBlock)();
         0.0f, 0.0f,
     };
     
-    GLuint vertexAttributeLocation = [_program attributeLocation:@"a_position"];
-    GLuint textureAttributeLocation = [_program attributeLocation:@"a_texture"];
+    GLuint vertexAttributeLocation = [_program attributeLocation:PBJGLProgramAttributeVertex];
+    GLuint textureAttributeLocation = [_program attributeLocation:PBJGLProgramAttributeTextureCoord];
     
     glEnableVertexAttribArray(vertexAttributeLocation);
     glVertexAttribPointer(vertexAttributeLocation, 2, GL_FLOAT, GL_FALSE, 0, vertices);
@@ -2100,8 +2100,8 @@ typedef void (^PBJVisionBlock)();
     NSString *vertShaderName = [bundle pathForResource:@"Shader" ofType:@"vsh"];
     NSString *fragShaderName = [bundle pathForResource:@"Shader" ofType:@"fsh"];
     _program = [[PBJGLProgram alloc] initWithVertexShaderName:vertShaderName fragmentShaderName:fragShaderName];
-    [_program addAttribute:@"a_position"];
-    [_program addAttribute:@"a_texture"];
+    [_program addAttribute:PBJGLProgramAttributeVertex];
+    [_program addAttribute:PBJGLProgramAttributeTextureCoord];
     [_program link];
     
     uniforms[PBJVisionUniformY] = [_program uniformLocation:@"u_samplerY"];
