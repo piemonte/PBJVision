@@ -8,6 +8,7 @@
 #import "PBJVision.h"
 #import "PBJVisionUtilities.h"
 #import "PBJMediaWriter.h"
+#import "PBJGLProgram.h"
 
 #import <ImageIO/ImageIO.h>
 #import <OpenGLES/EAGL.h>
@@ -44,22 +45,12 @@ NSString * const PBJVisionPhotoThumbnailKey = @"PBJVisionPhotoThumbnailKey";
 NSString * const PBJVisionVideoPathKey = @"PBJVisionVideoPathKey";
 NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
 
-// buffer rendering shader uniforms and attributes
-// TODO: create an abstraction for shaders
-
-enum
+// PBJGLProgram shader uniforms for pixel format conversion on the GPU
+typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 {
     PBJVisionUniformY,
     PBJVisionUniformUV,
     PBJVisionUniformCount
-};
-GLint _uniforms[PBJVisionUniformCount];
-
-enum
-{
-    PBJVisionAttributeVertex,
-    PBJVisionAttributeTextureCoord,
-    PBJVisionAttributeCount
 };
 
 ///
@@ -126,7 +117,7 @@ enum
     CGRect _presentationFrame;
 
     EAGLContext *_context;
-    GLuint _program;
+    PBJGLProgram *_program;
     CVOpenGLESTextureRef _lumaTexture;
     CVOpenGLESTextureRef _chromaTexture;
     CVOpenGLESTextureCacheRef _videoTextureCache;
@@ -2083,144 +2074,53 @@ typedef void (^PBJVisionBlock)();
         0.0f, 0.0f,
     };
     
-    glEnableVertexAttribArray(PBJVisionAttributeVertex);
-    glVertexAttribPointer(PBJVisionAttributeVertex, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+    GLuint vertexAttributeLocation = [_program attributeIndex:@"a_position"];
+    GLuint textureAttributeLocation = [_program attributeIndex:@"a_texture"];
+    
+    glEnableVertexAttribArray(vertexAttributeLocation);
+    glVertexAttribPointer(vertexAttributeLocation, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     
     if (_cameraDevice == PBJCameraDeviceFront) {
-        glEnableVertexAttribArray(PBJVisionAttributeTextureCoord);
-        glVertexAttribPointer(PBJVisionAttributeTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, textureCoordinatesVerticalFlip);
+        glEnableVertexAttribArray(textureAttributeLocation);
+        glVertexAttribPointer(textureAttributeLocation, 2, GL_FLOAT, GL_FALSE, 0, textureCoordinatesVerticalFlip);
     } else {
-        glEnableVertexAttribArray(PBJVisionAttributeTextureCoord);
-        glVertexAttribPointer(PBJVisionAttributeTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, textureCoordinates);
+        glEnableVertexAttribArray(textureAttributeLocation);
+        glVertexAttribPointer(textureAttributeLocation, 2, GL_FLOAT, GL_FALSE, 0, textureCoordinates);
     }
 }
 
 - (void)_setupGL
 {
+    static GLint uniforms[PBJVisionUniformCount];
+
     [EAGLContext setCurrentContext:_context];
     
-    [self _loadShaders];
+    NSBundle *bundle = [NSBundle mainBundle];
     
-    glUseProgram(_program);
-        
-    glUniform1i(_uniforms[PBJVisionUniformY], 0);
-    glUniform1i(_uniforms[PBJVisionUniformUV], 1);
+    NSString *vertShaderName = [bundle pathForResource:@"Shader" ofType:@"vsh"];
+    NSString *fragShaderName = [bundle pathForResource:@"Shader" ofType:@"fsh"];
+    _program = [[PBJGLProgram alloc] initWithVertexShaderName:vertShaderName fragmentShaderName:fragShaderName];
+    [_program addAttribute:@"a_position"];
+    [_program addAttribute:@"a_texture"];
+    [_program link];
+    
+    uniforms[PBJVisionUniformY] = [_program uniformLocation:@"u_samplerY"];
+    uniforms[PBJVisionUniformUV] = [_program uniformLocation:@"u_samplerUV"];
+    [_program use];
+            
+    glUniform1i(uniforms[PBJVisionUniformY], 0);
+    glUniform1i(uniforms[PBJVisionUniformUV], 1);
 }
 
 - (void)_destroyGL
 {
     [EAGLContext setCurrentContext:_context];
 
-    if (_program) {
-        glDeleteProgram(_program);
-        _program = 0;
-    }
+    _program = nil;
     
     if ([EAGLContext currentContext] == _context) {
         [EAGLContext setCurrentContext:nil];
     }
 }
-
-#pragma mark - OpenGLES shader support
-// TODO: abstract this in future, put in separate file
-
-- (BOOL)_loadShaders
-{
-    GLuint vertShader;
-    GLuint fragShader;
-    NSString *vertShaderName;
-    NSString *fragShaderName;
-    
-    _program = glCreateProgram();
-    
-    vertShaderName = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"vsh"];
-    if (![self _compileShader:&vertShader type:GL_VERTEX_SHADER file:vertShaderName]) {
-        DLog(@"failed to compile vertex shader");
-        return NO;
-    }
-    
-    fragShaderName = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"fsh"];
-    if (![self _compileShader:&fragShader type:GL_FRAGMENT_SHADER file:fragShaderName]) {
-        DLog(@"failed to compile fragment shader");
-        return NO;
-    }
-    
-    glAttachShader(_program, vertShader);
-    glAttachShader(_program, fragShader);
-    
-    glBindAttribLocation(_program, PBJVisionAttributeVertex, "a_position");
-    glBindAttribLocation(_program, PBJVisionAttributeTextureCoord, "a_texture");
-    
-    if (![self _linkProgram:_program]) {
-        DLog(@"failed to link program, %d", _program);
-        
-        if (vertShader) {
-            glDeleteShader(vertShader);
-            vertShader = 0;
-        }
-        if (fragShader) {
-            glDeleteShader(fragShader);
-            fragShader = 0;
-        }
-        if (_program) {
-            glDeleteProgram(_program);
-            _program = 0;
-        }
-        
-        return NO;
-    }
-    
-    _uniforms[PBJVisionUniformY] = glGetUniformLocation(_program, "u_samplerY");
-    _uniforms[PBJVisionUniformUV] = glGetUniformLocation(_program, "u_samplerUV");
-    
-    if (vertShader) {
-        glDetachShader(_program, vertShader);
-        glDeleteShader(vertShader);
-    }
-    if (fragShader) {
-        glDetachShader(_program, fragShader);
-        glDeleteShader(fragShader);
-    }
-    
-    return YES;
-}
-
-- (BOOL)_compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file
-{
-    GLint status;
-    const GLchar *source;
-    
-    source = (GLchar *)[[NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil] UTF8String];
-    if (!source) {
-        DLog(@"failed to load vertex shader");
-        return NO;
-    }
-    
-    *shader = glCreateShader(type);
-    glShaderSource(*shader, 1, &source, NULL);
-    glCompileShader(*shader);
-    
-    glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
-    if (status == 0) {
-        glDeleteShader(*shader);
-        return NO;
-    }
-    
-    return YES;
-}
-
-- (BOOL)_linkProgram:(GLuint)prog
-{
-    GLint status;
-    glLinkProgram(prog);
-    
-    glGetProgramiv(prog, GL_LINK_STATUS, &status);
-    if (status == 0) {
-        return NO;
-    }
-    
-    return YES;
-}
-
 
 @end

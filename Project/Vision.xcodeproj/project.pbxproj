@@ -45,6 +45,7 @@
 		06B7D036179F357600F3F527 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D033179F357600F3F527 /* Default.png */; };
 		06B7D037179F357600F3F527 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D034179F357600F3F527 /* Default@2x.png */; };
 		06DF60741896B535000870C9 /* PBJMediaWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 06DF60731896B535000870C9 /* PBJMediaWriter.m */; };
+		06FEB59F18F5C15600AFD4DB /* PBJGLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 06FEB59E18F5C15600AFD4DB /* PBJGLProgram.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -96,6 +97,8 @@
 		06B7D034179F357600F3F527 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		06DF60721896B535000870C9 /* PBJMediaWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PBJMediaWriter.h; path = ../Source/PBJMediaWriter.h; sourceTree = "<group>"; };
 		06DF60731896B535000870C9 /* PBJMediaWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PBJMediaWriter.m; path = ../Source/PBJMediaWriter.m; sourceTree = "<group>"; };
+		06FEB59D18F5C15600AFD4DB /* PBJGLProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PBJGLProgram.h; path = ../Source/PBJGLProgram.h; sourceTree = "<group>"; };
+		06FEB59E18F5C15600AFD4DB /* PBJGLProgram.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PBJGLProgram.m; path = ../Source/PBJGLProgram.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -220,7 +223,7 @@
 		06B7D026179F2F0800F3F527 /* Vision */ = {
 			isa = PBXGroup;
 			children = (
-				067D52F917D8577D00541B5E /* Shaders */,
+				06FEB5A018F5C16400AFD4DB /* Effects */,
 				06B7D01A179F2E7700F3F527 /* PBJVision.h */,
 				06B7D01B179F2E7700F3F527 /* PBJVision.m */,
 				06B7D01C179F2E7700F3F527 /* PBJVisionUtilities.h */,
@@ -229,6 +232,16 @@
 				06DF60731896B535000870C9 /* PBJMediaWriter.m */,
 			);
 			name = Vision;
+			sourceTree = "<group>";
+		};
+		06FEB5A018F5C16400AFD4DB /* Effects */ = {
+			isa = PBXGroup;
+			children = (
+				067D52F917D8577D00541B5E /* Shaders */,
+				06FEB59D18F5C15600AFD4DB /* PBJGLProgram.h */,
+				06FEB59E18F5C15600AFD4DB /* PBJGLProgram.m */,
+			);
+			name = Effects;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -319,6 +332,7 @@
 				06DF60741896B535000870C9 /* PBJMediaWriter.m in Sources */,
 				061858F01846B06400DEC416 /* PBJFocusView.m in Sources */,
 				06B7D01E179F2E7700F3F527 /* PBJVision.m in Sources */,
+				06FEB59F18F5C15600AFD4DB /* PBJGLProgram.m in Sources */,
 				06B7D01F179F2E7700F3F527 /* PBJVisionUtilities.m in Sources */,
 				0683D1D2179F2E1700EE66D6 /* PBJAppDelegate.m in Sources */,
 			);
