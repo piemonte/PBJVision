@@ -20,6 +20,8 @@
 #   define DLog(...)
 #endif
 
+NSString * const PBJVisionErrorDomain = @"PBJVisionErrorDomain";
+
 static uint64_t const PBJVisionRequiredMinimumDiskSpaceInBytes = 49999872; // ~ 47 MB
 static CGFloat const PBJVisionThumbnailWidth = 160.0f;
 
@@ -1383,7 +1385,10 @@ typedef void (^PBJVisionBlock)();
 
         if (!outputPath || [outputPath length] == 0)
             return;
-            
+
+        if (_mediaWriter)
+            _mediaWriter.delegate = nil;
+        
         _mediaWriter = [[PBJMediaWriter alloc] initWithOutputURL:outputURL];
         _mediaWriter.delegate = self;
 
@@ -1480,6 +1485,30 @@ typedef void (^PBJVisionBlock)();
                 NSError *error = [_mediaWriter error];
                 if ([_delegate respondsToSelector:@selector(vision:capturedVideo:error:)]) {
                     [_delegate vision:self capturedVideo:videoDict error:error];
+                }
+            }];
+        };
+        [_mediaWriter finishWritingWithCompletionHandler:finishWritingCompletionHandler];
+    }];
+}
+
+- (void)cancelVideoCapture
+{
+    DLog(@"cancel video capture");
+    
+    [self _enqueueBlockInCaptureVideoQueue:^{
+        _flags.recording = NO;
+        _flags.paused = NO;
+        
+        void (^finishWritingCompletionHandler)(void) = ^{
+            _lastTimestamp = kCMTimeInvalid;
+            _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
+            _flags.interrupted = NO;
+
+            [self _enqueueBlockOnMainQueue:^{
+                NSError *error = [NSError errorWithDomain:PBJVisionErrorDomain code:PBJVisionErrorCancelled userInfo:nil];
+                if ([_delegate respondsToSelector:@selector(vision:capturedVideo:error:)]) {
+                    [_delegate vision:self capturedVideo:nil error:error];
                 }
             }];
         };

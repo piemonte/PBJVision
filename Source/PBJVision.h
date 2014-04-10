@@ -57,6 +57,16 @@ typedef NS_ENUM(NSInteger, PBJOutputFormat) {
     PBJOutputFormatWidescreen
 };
 
+// PBJError
+
+extern NSString * const PBJVisionErrorDomain;
+
+typedef NS_ENUM(NSInteger, PBJVisionErrorType)
+{
+    PBJVisionErrorUnknown = -1,
+    PBJVisionErrorCancelled = 100
+};
+
 // photo dictionary keys
 
 extern NSString * const PBJVisionPhotoMetadataKey;
@@ -148,6 +158,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (void)pauseVideoCapture;
 - (void)resumeVideoCapture;
 - (void)endVideoCapture;
+- (void)cancelVideoCapture;
 
 @end
 

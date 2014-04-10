@@ -250,10 +250,7 @@
     [_assetWriter finishWritingWithCompletionHandler:handler];
     
     _audioReady = NO;
-    _videoReady = NO;
-    
-    _audioTimestamp = kCMTimeInvalid;
-    _videoTimestamp = kCMTimeInvalid;
+    _videoReady = NO;    
 }
 
 

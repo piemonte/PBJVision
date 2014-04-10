@@ -538,7 +538,10 @@
 {
     _recording = NO;
 
-    if (error) {
+    if (error && [error.domain isEqual:PBJVisionErrorDomain] && error.code == PBJVisionErrorCancelled) {
+        NSLog(@"recording session cancelled");
+        return;
+    } else if (error) {
         NSLog(@"encounted an error in video capture (%@)", error);
         return;
     }
