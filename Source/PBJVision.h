@@ -109,6 +109,10 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic) NSInteger videoAssetFrameInterval;
 @property (nonatomic, strong) NSString *captureSessionPreset;
 
+@property (nonatomic) CMTimeScale frameRate; // fps
+- (BOOL)isFrameRateSupported:(CMTimeScale)frameRate;
+- (void)setupCameraForHighestFrameRate;
+
 // preview
 
 @property (nonatomic, readonly) AVCaptureVideoPreviewLayer *previewLayer;
@@ -137,7 +141,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic, readonly) BOOL canCapturePhoto;
 - (void)capturePhoto;
 
-@property (nonatomic) BOOL thumbnailEnabled; // thumbnail generation, disabling reduces processing time for an photo
+@property (nonatomic) BOOL thumbnailEnabled; // thumbnail generation, disabling reduces processing time for a photo
 
 // video
 // use pause/resume if a session is in progress, end finalizes that recording session

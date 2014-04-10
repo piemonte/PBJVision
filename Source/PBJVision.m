@@ -451,6 +451,126 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     }
 }
 
+- (void)setFrameRate:(CMTimeScale)frameRate
+{
+	if ([self isFrameRateSupported:frameRate]) {
+    
+        CMTime fps = CMTimeMake(1, frameRate);
+
+        if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
+            
+            NSError *error = nil;
+            if ([_currentDevice lockForConfiguration:&error]) {
+                _currentDevice.activeVideoMaxFrameDuration = fps;
+                _currentDevice.activeVideoMinFrameDuration = fps;
+                [_currentDevice unlockForConfiguration];
+            } else if (error) {
+                DLog(@"error locking device for frame rate change (%@)", error);
+            }
+            
+        } else {
+        
+            AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
+            
+            if (connection.isVideoMaxFrameDurationSupported) {
+                connection.videoMaxFrameDuration = fps;
+            } else {
+                DLog(@"failed to set frame rate");
+            }
+            
+            if (connection.isVideoMinFrameDurationSupported) {
+                connection.videoMinFrameDuration = fps;
+            } else {
+                DLog(@"failed to set frame rate");
+            }
+
+        }
+	} else {
+        DLog(@"frame rate range not supported for current device format");
+    }
+}
+
+- (CMTimeScale)frameRate
+{
+    if (!_currentDevice)
+        return 0;
+
+    CMTimeScale frameRate = 0;
+    
+    if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
+
+        frameRate = _currentDevice.activeVideoMaxFrameDuration.timescale;
+    
+    } else {
+    
+        AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
+        frameRate = connection.videoMaxFrameDuration.timescale;
+
+    }
+	
+	return frameRate;
+}
+
+- (BOOL)isFrameRateSupported:(CMTimeScale)frameRate
+{
+    if (_currentDevice) {
+
+        if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
+
+            NSArray *videoSupportedFrameRateRanges = [_currentDevice.activeFormat videoSupportedFrameRateRanges];
+            for (AVFrameRateRange *frameRateRange in videoSupportedFrameRateRanges) {
+                if ( (frameRateRange.minFrameRate <= frameRate) && (frameRate <= frameRateRange.maxFrameRate) ) {
+                    return YES;
+                }
+            }
+        
+        } else {
+        
+            // probably isn't very useful on older systems ;-)
+            AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
+            return (connection.isVideoMaxFrameDurationSupported && connection.isVideoMinFrameDurationSupported);
+        
+        }
+
+    }
+    
+    return NO;
+}
+
+- (void)setupCameraForHighestFrameRate
+{
+    // only supported by iOS 7 and beyond
+    if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1)
+        return;
+    
+    if (!_currentDevice)
+        return;
+
+    AVCaptureDeviceFormat *bestFormat = nil;
+    AVFrameRateRange *bestFrameRateRange = nil;
+    
+    for ( AVCaptureDeviceFormat *format in [_currentDevice formats] ) {
+        for ( AVFrameRateRange *range in format.videoSupportedFrameRateRanges ) {
+            if ( range.maxFrameRate > bestFrameRateRange.maxFrameRate ) {
+                bestFormat = format;
+                bestFrameRateRange = range;
+            }
+        }
+    }
+    
+    if (bestFormat) {
+        NSError *error = nil;
+        if ( [_currentDevice lockForConfiguration:&error] == YES ) {
+            _currentDevice.activeFormat = bestFormat;
+            _currentDevice.activeVideoMinFrameDuration = bestFrameRateRange.minFrameDuration;
+            _currentDevice.activeVideoMaxFrameDuration = bestFrameRateRange.minFrameDuration;
+            [_currentDevice unlockForConfiguration];
+        } else if (error) {
+            DLog(@"error locking device for highest framerate setup (%@)", error);
+        }
+    }
+}
+
 #pragma mark - init
 
 - (id)init
