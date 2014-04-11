@@ -305,6 +305,7 @@
         _flipButton.hidden = YES;
     }
     
+    //[vision setCaptureSessionPreset:AVCaptureSessionPreset640x480];
     [vision setCameraMode:PBJCameraModeVideo];
     [vision setCameraOrientation:PBJCameraOrientationPortrait];
     [vision setFocusMode:PBJFocusModeContinuousAutoFocus];
