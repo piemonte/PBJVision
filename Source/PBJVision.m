@@ -981,18 +981,6 @@ typedef void (^PBJVisionBlock)();
                 DLog(@"error locking device for video device configuration (%@)", error);
             }
         
-        } else {
-        
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            // setup framerate
-            CMTime frameDuration = CMTimeMake( 1, 30 );
-            if ( videoConnection.supportsVideoMinFrameDuration )
-                videoConnection.videoMinFrameDuration = frameDuration;
-            if ( videoConnection.supportsVideoMaxFrameDuration )
-                videoConnection.videoMaxFrameDuration = frameDuration;
-#pragma clang diagnostic pop
-        
         }
         
     } else if (newCaptureOutput && newCaptureOutput == _captureOutputPhoto) {
