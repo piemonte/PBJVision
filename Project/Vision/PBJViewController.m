@@ -426,6 +426,8 @@
 
 #pragma mark - PBJVisionDelegate
 
+// session
+
 - (void)visionSessionWillStart:(PBJVision *)vision
 {
 }
@@ -443,15 +445,20 @@
     [_previewView removeFromSuperview];
 }
 
-- (void)visionCameraModeWillChange:(PBJVision *)vision
+// preview
+
+- (void)visionSessionDidStartPreview:(PBJVision *)vision
 {
-    NSLog(@"Camera mode will change");
+    NSLog(@"Camera preview did start");
+    
 }
 
-- (void)visionCameraModeDidChange:(PBJVision *)vision
+- (void)visionSessionDidStopPreview:(PBJVision *)vision
 {
-    NSLog(@"Camera mode did change");
+    NSLog(@"Camera preview did stop");
 }
+
+// device
 
 - (void)visionCameraDeviceWillChange:(PBJVision *)vision
 {
@@ -462,6 +469,20 @@
 {
     NSLog(@"Camera device did change");
 }
+
+// mode
+
+- (void)visionCameraModeWillChange:(PBJVision *)vision
+{
+    NSLog(@"Camera mode will change");
+}
+
+- (void)visionCameraModeDidChange:(PBJVision *)vision
+{
+    NSLog(@"Camera mode did change");
+}
+
+// format
 
 - (void)visionOutputFormatWillChange:(PBJVision *)vision
 {
@@ -476,6 +497,8 @@
 - (void)vision:(PBJVision *)vision didChangeCleanAperture:(CGRect)cleanAperture
 {
 }
+
+// focus / exposure
 
 - (void)visionWillStartFocus:(PBJVision *)vision
 {
@@ -492,13 +515,17 @@
 {
 }
 
-- (void)visionDidChangeExposure:(PBJVision *)vision {
+- (void)visionDidChangeExposure:(PBJVision *)vision
+{
     if (_focusView && [_focusView superview]) {
         [_focusView stopAnimation];
     }
 }
 
-- (void)visionDidChangeFlashMode:(PBJVision *)vision {
+// flash
+
+- (void)visionDidChangeFlashMode:(PBJVision *)vision
+{
     NSLog(@"Flash mode did change");
 }
 
