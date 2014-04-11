@@ -103,15 +103,20 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 // video output/compression settings
 
+@property (nonatomic, strong) NSString *captureSessionPreset;
 @property (nonatomic) PBJOutputFormat outputFormat;
 @property (nonatomic) CGFloat videoAssetBitRate;
 @property (nonatomic) NSInteger audioAssetBitRate;
-@property (nonatomic) NSInteger videoAssetFrameInterval;
-@property (nonatomic, strong) NSString *captureSessionPreset;
 
-@property (nonatomic) CMTimeScale frameRate; // fps
-- (BOOL)isFrameRateSupported:(CMTimeScale)frameRate;
-- (void)setupCameraForHighestFrameRate;
+// video device format / frame rate setup
+
+@property (nonatomic) AVCaptureDeviceFormat *activeDeviceFormat;
+- (NSArray *)availableActiveDeviceFormats;
+
+@property (nonatomic) NSInteger videoFrameRate; // fps
+- (BOOL)isActiveDeviceVideoFrameRateSupported:(NSInteger)videoFrameRate;
+
+- (void)setupCameraForHighestFrameRate; // automatically select best format and frame rate
 
 // preview
 
