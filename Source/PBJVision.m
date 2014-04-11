@@ -461,17 +461,18 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
             
             NSError *error = nil;
             if ([_currentDevice lockForConfiguration:&error]) {
-                _currentDevice.activeVideoMaxFrameDuration = fps;
                 _currentDevice.activeVideoMinFrameDuration = fps;
+                _currentDevice.activeVideoMaxFrameDuration = fps;
                 [_currentDevice unlockForConfiguration];
             } else if (error) {
                 DLog(@"error locking device for frame rate change (%@)", error);
             }
             
         } else {
-        
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
-            
             if (connection.isVideoMaxFrameDurationSupported) {
                 connection.videoMaxFrameDuration = fps;
             } else {
@@ -483,6 +484,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
             } else {
                 DLog(@"failed to set frame rate");
             }
+#pragma clang diagnostic pop
 
         }
 	} else {
@@ -502,10 +504,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         frameRate = _currentDevice.activeVideoMaxFrameDuration.timescale;
     
     } else {
-    
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
         frameRate = connection.videoMaxFrameDuration.timescale;
-
+#pragma clang diagnostic pop
     }
 	
 	return frameRate;
@@ -525,11 +528,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
             }
         
         } else {
-        
-            // probably isn't very useful on older systems ;-)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
             return (connection.isVideoMaxFrameDurationSupported && connection.isVideoMinFrameDurationSupported);
-        
+#pragma clang diagnostic pop
         }
 
     }
@@ -952,15 +955,13 @@ typedef void (^PBJVisionBlock)();
                 supportsVideoRangeYUV = YES;
             }
         }
-        
+
         NSDictionary *videoSettings = nil;
-        
         if (supportsFullRangeYUV) {
             videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) };
         } else if (supportsVideoRangeYUV) {
             videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) };
         }
-        
         if (videoSettings)
             [_captureOutputVideo setVideoSettings:videoSettings];
         
