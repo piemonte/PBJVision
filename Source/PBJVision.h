@@ -169,9 +169,13 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @protocol PBJVisionDelegate <NSObject>
 @optional
 
+// session
+
 - (void)visionSessionWillStart:(PBJVision *)vision;
 - (void)visionSessionDidStart:(PBJVision *)vision;
 - (void)visionSessionDidStop:(PBJVision *)vision;
+
+// device / mode / format
 
 - (void)visionCameraDeviceWillChange:(PBJVision*)vision;
 - (void)visionCameraDeviceDidChange:(PBJVision*)vision;
