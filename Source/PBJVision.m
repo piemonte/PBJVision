@@ -926,7 +926,7 @@ typedef void (^PBJVisionBlock)();
     
     NSString *sessionPreset = _captureSessionPreset;
 
-    if (newCaptureOutput && newCaptureOutput == _captureOutputVideo && videoConnection) {
+    if ( newCaptureOutput && (newCaptureOutput == _captureOutputVideo) && videoConnection ) {
         
         // setup video orientation
         [self _setOrientationForConnection:videoConnection];
@@ -983,7 +983,7 @@ typedef void (^PBJVisionBlock)();
         
         }
         
-    } else if (newCaptureOutput && newCaptureOutput == _captureOutputPhoto) {
+    } else if ( newCaptureOutput && (newCaptureOutput == _captureOutputPhoto) ) {
     
         // specify photo preset
         sessionPreset = AVCaptureSessionPresetPhoto;
