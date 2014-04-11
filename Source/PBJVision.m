@@ -496,7 +496,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 - (void)setVideoFrameRate:(NSInteger)videoFrameRate
 {
-	if ([self isActiveDeviceVideoFrameRateSupported:videoFrameRate]) {
+	if ([self isDeviceFormat:nil videoFrameRateSupported:videoFrameRate]) {
     
         CMTime fps = CMTimeMake(1, (int32_t)videoFrameRate);
 
@@ -559,14 +559,17 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 	return frameRate;
 }
 
-- (BOOL)isActiveDeviceVideoFrameRateSupported:(NSInteger)videoFrameRate
+- (BOOL)isDeviceFormat:(AVCaptureDeviceFormat *)deviceFormat videoFrameRateSupported:(NSInteger)videoFrameRate
 {
-    if (!_currentDevice)
-        return NO;
-
     if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
-
-        NSArray *videoSupportedFrameRateRanges = [_currentDevice.activeFormat videoSupportedFrameRateRanges];
+        AVCaptureDeviceFormat *format = deviceFormat;
+        if (!format) {
+            if (!_currentDevice)
+                return NO;
+            format = _currentDevice.activeFormat;
+        }
+        
+        NSArray *videoSupportedFrameRateRanges = [format videoSupportedFrameRateRanges];
         for (AVFrameRateRange *frameRateRange in videoSupportedFrameRateRanges) {
             if ( (frameRateRange.minFrameRate <= videoFrameRate) && (videoFrameRate <= frameRateRange.maxFrameRate) ) {
                 return YES;

@@ -114,7 +114,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 - (NSArray *)availableActiveDeviceFormats;
 
 @property (nonatomic) NSInteger videoFrameRate; // fps
-- (BOOL)isActiveDeviceVideoFrameRateSupported:(NSInteger)videoFrameRate;
+- (BOOL)isDeviceFormat:(AVCaptureDeviceFormat *)deviceFormat videoFrameRateSupported:(NSInteger)videoFrameRate;
 
 - (void)setupCameraForHighestFrameRate; // automatically select best format and frame rate
 
