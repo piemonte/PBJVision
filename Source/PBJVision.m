@@ -635,6 +635,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
             DLog(@"failed to create GL context");
         }
         [self _setupGL];
+        
+        _captureSessionPreset = AVCaptureSessionPresetMedium;
 
         // default audio/video configuration
         _audioAssetBitRate = 64000;
@@ -647,12 +649,12 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         // 2975000, good for 1920 x 1080
         // 3750000, good for iFrame 960 x 540
         // 5000000, good for iFrame 1280 x 720
-
         CGFloat bytesPerSecond = 437500;
         _videoAssetBitRate = bytesPerSecond * 8;
-
-        _captureSessionPreset = AVCaptureSessionPresetMedium;
-
+        
+        // fps
+        _videoFrameRate = 30;
+        
         // default flags
         _flags.thumbnailEnabled = YES;
 
