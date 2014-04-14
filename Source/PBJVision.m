@@ -218,6 +218,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     return _flags.videoRenderingEnabled;
 }
 
+- (NSURL *)mediaWriterOutputURL
+{
+    return self.isRecording ? _mediaWriter.outputURL : nil;
+}
+
 - (void)setThumbnailEnabled:(BOOL)thumbnailEnabled
 {
     _flags.thumbnailEnabled = (unsigned int)thumbnailEnabled;

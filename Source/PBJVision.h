@@ -127,6 +127,14 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic) CGFloat videoBitRate;
 @property (nonatomic) NSInteger audioBitRate;
 
+/**
+ Returns the current output URL that the PBJMediaWriter is writing to.
+ 
+ Only returns a valid NSURL* if the PBJVision is currently recording.
+ If not, will return nil.
+ */
+@property (nonatomic, readonly) NSURL *mediaWriterOutputURL;
+
 // video frame rate (adjustment may change capture format (AVCaptureDeviceFormat : FoV, zoom factor, etc)
 
 @property (nonatomic) NSInteger videoFrameRate; // desire fps for cameraDevice
