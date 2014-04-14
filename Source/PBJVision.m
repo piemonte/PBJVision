@@ -1191,9 +1191,10 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_focusEnded
 {
-    BOOL isAutoFocusEnabled = [_currentDevice focusMode] == AVCaptureFocusModeAutoFocus;
+    AVCaptureFocusMode focusMode = [_currentDevice focusMode];
     BOOL isFocusing = [_currentDevice isAdjustingFocus];
-    
+    BOOL isAutoFocusEnabled = (focusMode == AVCaptureFocusModeAutoFocus ||
+                               focusMode == AVCaptureFocusModeContinuousAutoFocus);
     if (!isFocusing && isAutoFocusEnabled) {
         NSError *error = nil;
         if ([_currentDevice lockForConfiguration:&error]) {
