@@ -115,8 +115,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     NSString *_captureSessionPreset;
     PBJOutputFormat _outputFormat;
     
-    NSInteger _audioAssetBitRate;
-    CGFloat _videoAssetBitRate;
+    NSInteger _audioBitRate;
+    CGFloat _videoBitRate;
     NSInteger _videoFrameRate;
 
     AVCaptureDevice *_currentDevice;
@@ -173,8 +173,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize outputFormat = _outputFormat;
 @synthesize context = _context;
 @synthesize presentationFrame = _presentationFrame;
-@synthesize audioAssetBitRate = _audioAssetBitRate;
-@synthesize videoAssetBitRate = _videoAssetBitRate;
+@synthesize audioBitRate = _audioBitRate;
+@synthesize videoBitRate = _videoBitRate;
 @synthesize captureSessionPreset = _captureSessionPreset;
 
 #pragma mark - singleton
@@ -658,7 +658,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         _captureSessionPreset = AVCaptureSessionPresetMedium;
 
         // default audio/video configuration
-        _audioAssetBitRate = 64000;
+        _audioBitRate = 64000;
 
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
@@ -669,7 +669,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         // 3750000, good for iFrame 960 x 540
         // 5000000, good for iFrame 1280 x 720
         CGFloat bytesPerSecond = 437500;
-        _videoAssetBitRate = bytesPerSecond * 8;
+        _videoBitRate = bytesPerSecond * 8;
         
         // fps
         _videoFrameRate = 30;
@@ -1717,7 +1717,7 @@ typedef void (^PBJVisionBlock)();
     NSDictionary *audioCompressionSettings = @{ AVFormatIDKey : @(kAudioFormatMPEG4AAC),
                                                 AVNumberOfChannelsKey : @(channels),
                                                 AVSampleRateKey :  @(sampleRate),
-                                                AVEncoderBitRateKey : @(_audioAssetBitRate),
+                                                AVEncoderBitRateKey : @(_audioBitRate),
                                                 AVChannelLayoutKey : currentChannelLayoutData };
 
     return [_mediaWriter setupAudioOutputDeviceWithSettings:audioCompressionSettings];
@@ -1748,7 +1748,7 @@ typedef void (^PBJVisionBlock)();
             break;
     }
     
-    NSDictionary *compressionSettings = @{ AVVideoAverageBitRateKey : @(_videoAssetBitRate),
+    NSDictionary *compressionSettings = @{ AVVideoAverageBitRateKey : @(_videoBitRate),
                                            AVVideoMaxKeyFrameIntervalKey : @(_videoFrameRate) };
 
 	NSDictionary *videoSettings = @{ AVVideoCodecKey : AVVideoCodecH264,

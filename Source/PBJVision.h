@@ -124,8 +124,8 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 @property (nonatomic, strong) NSString *captureSessionPreset;
 @property (nonatomic) PBJOutputFormat outputFormat;
-@property (nonatomic) CGFloat videoAssetBitRate;
-@property (nonatomic) NSInteger audioAssetBitRate;
+@property (nonatomic) CGFloat videoBitRate;
+@property (nonatomic) NSInteger audioBitRate;
 
 // video device format / frame rate setup
 
