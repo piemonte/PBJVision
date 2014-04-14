@@ -488,7 +488,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
             
             AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
             AVCaptureDeviceFormat *supportingFormat = nil;
-            AVFrameRateRange *frameRateRange = nil;
             int32_t maxWidth = 0;
 
             NSArray *formats = [videoDevice formats];
@@ -501,7 +500,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
                     int32_t width = dimensions.width;
                     if (range.minFrameRate <= videoFrameRate && videoFrameRate <= range.maxFrameRate && width >= maxWidth) {
                         supportingFormat = format;
-                        frameRateRange = range;
                         maxWidth = width;
                     }
                     
