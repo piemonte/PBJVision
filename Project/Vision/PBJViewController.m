@@ -69,6 +69,7 @@
     
     UIButton *_flipButton;
     UIButton *_focusButton;
+    UIButton *_frameRateButton;
     UIButton *_onionButton;
     UIView *_captureDock;
 
@@ -223,9 +224,12 @@
     focusFrame.origin = CGPointMake((CGRectGetWidth(self.view.bounds) * 0.5f) - (focusImage.size.width * 0.5f), 16.0f);
     focusFrame.size = focusImage.size;
     _focusButton.frame = focusFrame;
-    
     [_focusButton addTarget:self action:@selector(_handleFocusButton:) forControlEvents:UIControlEventTouchUpInside];
     [_captureDock addSubview:_focusButton];
+    
+    if ([[PBJVision sharedInstance] supportsVideoFrameRate:120]) {
+        
+    }
     
     // onion button
     _onionButton = [ExtendedHitButton extendedHitButton];
@@ -371,9 +375,15 @@
     }];
 }
 
+- (void)_handleFrameRateChangeButton:(UIButton *)button
+{
+    
+}
+
 - (void)_handleOnionSkinningButton:(UIButton *)button
 {
-    [_onionButton setSelected:!_onionButton.selected];
+    _onionButton.selected = !_onionButton.selected;
+    
     if (_recording)
         _effectsViewController.view.hidden = !_onionButton.selected;
 }
