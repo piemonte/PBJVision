@@ -118,6 +118,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     NSInteger _audioBitRate;
     CGFloat _videoBitRate;
     NSInteger _videoFrameRate;
+    AVCaptureDeviceFormat *_initialFormat;
+    CMTime _initialFrameRate;
 
     AVCaptureDevice *_currentDevice;
     AVCaptureDeviceInput *_currentInput;
@@ -469,68 +471,55 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     }
 }
 
-// format / framerate
-
-- (void)setActiveDeviceFormat:(AVCaptureDeviceFormat *)activeDeviceFormat
-{
-    if (!_currentDevice)
-        return;
-
-    if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
-        
-        NSError *error = nil;
-        if ([_currentDevice lockForConfiguration:&error]) {
-            _currentDevice.activeFormat = activeDeviceFormat;
-            [_currentDevice unlockForConfiguration];
-        } else if (error) {
-            DLog(@"error locking device for frame rate change (%@)", error);
-        }
-        
-    }
-}
-
-- (AVCaptureDeviceFormat *)activeDeviceFormat
-{
-    if (!_currentDevice)
-        return nil;
-    
-    AVCaptureDeviceFormat *deviceFormat = nil;
-    if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
-       deviceFormat = [_currentDevice activeFormat];
-    }
-    
-    return deviceFormat;
-}
-
-- (NSArray *)availableActiveDeviceFormats
-{
-    if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1)
-        return nil;
-    
-    if (!_currentDevice)
-        return nil;
-    
-    return [_currentDevice formats];
-}
+// framerate
 
 - (void)setVideoFrameRate:(NSInteger)videoFrameRate
 {
-	if ([self isDeviceFormat:nil videoFrameRateSupported:videoFrameRate]) {
-    
+	if ([self supportsVideoFrameRate:videoFrameRate]) {
+
+        BOOL isRecording = _flags.recording;
+        if (isRecording) {
+            [self pauseVideoCapture];
+        }
+
         CMTime fps = CMTimeMake(1, (int32_t)videoFrameRate);
 
         if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
             
-            NSError *error = nil;
-            if ([_currentDevice lockForConfiguration:&error]) {
-                _currentDevice.activeVideoMinFrameDuration = fps;
-                _currentDevice.activeVideoMaxFrameDuration = fps;
-                _videoFrameRate = videoFrameRate;
-                [_currentDevice unlockForConfiguration];
-            } else if (error) {
-                DLog(@"error locking device for frame rate change (%@)", error);
+            AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+            AVCaptureDeviceFormat *supportingFormat = nil;
+            AVFrameRateRange *frameRateRange = nil;
+            int32_t maxWidth = 0;
+
+            NSArray *formats = [videoDevice formats];
+            for (AVCaptureDeviceFormat *format in formats) {
+                NSArray *videoSupportedFrameRateRanges = format.videoSupportedFrameRateRanges;
+                for (AVFrameRateRange *range in videoSupportedFrameRateRanges) {
+        
+                    CMFormatDescriptionRef desc = format.formatDescription;
+                    CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(desc);
+                    int32_t width = dimensions.width;
+                    if (range.minFrameRate <= videoFrameRate && videoFrameRate <= range.maxFrameRate && width >= maxWidth) {
+                        supportingFormat = format;
+                        frameRateRange = range;
+                        maxWidth = width;
+                    }
+                    
+                }
             }
             
+            if (supportingFormat) {
+                NSError *error = nil;
+                if ([_currentDevice lockForConfiguration:&error]) {
+                    _currentDevice.activeVideoMinFrameDuration = fps;
+                    _currentDevice.activeVideoMaxFrameDuration = fps;
+                    _videoFrameRate = videoFrameRate;
+                    [_currentDevice unlockForConfiguration];
+                } else if (error) {
+                    DLog(@"error locking device for frame rate change (%@)", error);
+                }
+            }
+                
         } else {
 
 #pragma clang diagnostic push
@@ -551,6 +540,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 #pragma clang diagnostic pop
 
         }
+        
+        if (isRecording) {
+            [self resumeVideoCapture];
+        }
+        
 	} else {
         DLog(@"frame rate range not supported for current device format");
     }
@@ -578,23 +572,43 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 	return frameRate;
 }
 
-- (BOOL)isDeviceFormat:(AVCaptureDeviceFormat *)deviceFormat videoFrameRateSupported:(NSInteger)videoFrameRate
+- (void)restoreInitialFormatAndFrameRate
+{
+    BOOL isRecording = _flags.recording;
+    if (isRecording) {
+        [self pauseVideoCapture];
+    }
+
+    NSError *error = nil;
+    if ( [_currentDevice lockForConfiguration:&error] == YES ) {
+        _currentDevice.activeFormat = _initialFormat;
+        _currentDevice.activeVideoMinFrameDuration = _initialFrameRate;
+        _currentDevice.activeVideoMaxFrameDuration = _initialFrameRate;
+        [_currentDevice unlockForConfiguration];
+    } else if (error) {
+        DLog(@"error locking device for highest framerate setup (%@)", error);
+    }
+
+    if (isRecording) {
+        [self resumeVideoCapture];
+    }
+}
+
+- (BOOL)supportsVideoFrameRate:(NSInteger)videoFrameRate
 {
     if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
-        AVCaptureDeviceFormat *format = deviceFormat;
-        if (!format) {
-            if (!_currentDevice)
-                return NO;
-            format = _currentDevice.activeFormat;
-        }
-        
-        NSArray *videoSupportedFrameRateRanges = [format videoSupportedFrameRateRanges];
-        for (AVFrameRateRange *frameRateRange in videoSupportedFrameRateRanges) {
-            if ( (frameRateRange.minFrameRate <= videoFrameRate) && (videoFrameRate <= frameRateRange.maxFrameRate) ) {
-                return YES;
+        AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+
+        NSArray *formats = [videoDevice formats];
+        for (AVCaptureDeviceFormat *format in formats) {
+            NSArray *videoSupportedFrameRateRanges = [format videoSupportedFrameRateRanges];
+            for (AVFrameRateRange *frameRateRange in videoSupportedFrameRateRanges) {
+                if ( (frameRateRange.minFrameRate <= videoFrameRate) && (videoFrameRate <= frameRateRange.maxFrameRate) ) {
+                    return YES;
+                }
             }
         }
-    
+        
     } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -604,41 +618,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     }
 
     return NO;
-}
-
-// 
-- (void)setupCameraForHighestFrameRate
-{
-    // only supported by iOS 7 and beyond
-    if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1)
-        return;
-    
-    if (!_currentDevice)
-        return;
-
-    AVCaptureDeviceFormat *bestFormat = nil;
-    AVFrameRateRange *bestFrameRateRange = nil;
-    
-    for ( AVCaptureDeviceFormat *format in [_currentDevice formats] ) {
-        for ( AVFrameRateRange *range in format.videoSupportedFrameRateRanges ) {
-            if ( range.maxFrameRate > bestFrameRateRange.maxFrameRate ) {
-                bestFormat = format;
-                bestFrameRateRange = range;
-            }
-        }
-    }
-    
-    if (bestFormat) {
-        NSError *error = nil;
-        if ( [_currentDevice lockForConfiguration:&error] == YES ) {
-            _currentDevice.activeFormat = bestFormat;
-            _currentDevice.activeVideoMinFrameDuration = bestFrameRateRange.minFrameDuration;
-            _currentDevice.activeVideoMaxFrameDuration = bestFrameRateRange.minFrameDuration;
-            [_currentDevice unlockForConfiguration];
-        } else if (error) {
-            DLog(@"error locking device for highest framerate setup (%@)", error);
-        }
-    }
 }
 
 #pragma mark - init
@@ -670,9 +649,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         // 5000000, good for iFrame 1280 x 720
         CGFloat bytesPerSecond = 437500;
         _videoBitRate = bytesPerSecond * 8;
-        
-        // fps
-        _videoFrameRate = 30;
         
         // default flags
         _flags.thumbnailEnabled = YES;
@@ -751,9 +727,11 @@ typedef void (^PBJVisionBlock)();
 
     _captureSession = [[AVCaptureSession alloc] init];
     
+    // capture devices
     _captureDeviceFront = [PBJVisionUtilities captureDeviceForPosition:AVCaptureDevicePositionFront];
     _captureDeviceBack = [PBJVisionUtilities captureDeviceForPosition:AVCaptureDevicePositionBack];
 
+    // capture device inputs
     NSError *error = nil;
     _captureDeviceInputFront = [AVCaptureDeviceInput deviceInputWithDevice:_captureDeviceFront error:&error];
     if (error) {
@@ -774,6 +752,7 @@ typedef void (^PBJVisionBlock)();
         DLog(@"error setting up audio input (%@)", error);
     }
     
+    // capture device ouputs
     _captureOutputPhoto = [[AVCaptureStillImageOutput alloc] init];
     if (_cameraMode != PBJCameraModePhoto)
     	_captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
@@ -782,7 +761,17 @@ typedef void (^PBJVisionBlock)();
     if (_cameraMode != PBJCameraModePhoto)
     	[_captureOutputAudio setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
     [_captureOutputVideo setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
-    
+
+    // capture device initial settings
+    if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
+        if (!_initialFormat) {
+            AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+            _initialFormat = videoDevice.activeFormat;
+            _initialFrameRate = videoDevice.activeVideoMaxFrameDuration;
+            _videoFrameRate = (int32_t)_initialFrameRate.timescale;
+        }    
+    }
+
     // add notification observers
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     
@@ -917,7 +906,7 @@ typedef void (^PBJVisionBlock)();
           default:
             break;
         }
-    
+        
     } // shouldSwitchDevice
     
     // setup session input/output
