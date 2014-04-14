@@ -197,14 +197,14 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 // device / mode / format
 
-- (void)visionCameraDeviceWillChange:(PBJVision*)vision;
-- (void)visionCameraDeviceDidChange:(PBJVision*)vision;
+- (void)visionCameraDeviceWillChange:(PBJVision *)vision;
+- (void)visionCameraDeviceDidChange:(PBJVision *)vision;
 
-- (void)visionCameraModeWillChange:(PBJVision*)vision;
-- (void)visionCameraModeDidChange:(PBJVision*)vision;
+- (void)visionCameraModeWillChange:(PBJVision *)vision;
+- (void)visionCameraModeDidChange:(PBJVision *)vision;
 
-- (void)visionOutputFormatWillChange:(PBJVision*)vision;
-- (void)visionOutputFormatDidChange:(PBJVision*)vision;
+- (void)visionOutputFormatWillChange:(PBJVision *)vision;
+- (void)visionOutputFormatDidChange:(PBJVision *)vision;
 
 - (void)vision:(PBJVision *)vision didChangeCleanAperture:(CGRect)cleanAperture;
 
