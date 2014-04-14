@@ -333,6 +333,7 @@
     [vision setFocusMode:PBJFocusModeContinuousAutoFocus];
     [vision setOutputFormat:PBJOutputFormatSquare];
     [vision setVideoRenderingEnabled:YES];
+    [vision restoreInitialFormatAndFrameRate];
 }
 
 #pragma mark - UIButton
