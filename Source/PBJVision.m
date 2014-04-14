@@ -342,7 +342,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         return;
     }
     
-    [self _enqueueBlockInCaptureSessionQueue:^{
+    [self _enqueueBlockOnCaptureSessionQueue:^{
         [self _setupSession];
         [self _enqueueBlockOnMainQueue:^{
             _flags.changingModes = NO;
@@ -475,76 +475,85 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 - (void)setVideoFrameRate:(NSInteger)videoFrameRate
 {
-	if ([self supportsVideoFrameRate:videoFrameRate]) {
+    if (![self supportsVideoFrameRate:videoFrameRate]) {
+        DLog(@"frame rate range not supported for current device format");
+        return;
+    }
+    
+    BOOL isRecording = _flags.recording;
+    if (isRecording) {
+        [self pauseVideoCapture];
+    }
 
-        BOOL isRecording = _flags.recording;
-        if (isRecording) {
-            [self pauseVideoCapture];
-        }
+    CMTime fps = CMTimeMake(1, (int32_t)videoFrameRate);
 
-        CMTime fps = CMTimeMake(1, (int32_t)videoFrameRate);
-
-        if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
-            
-            AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-            AVCaptureDeviceFormat *supportingFormat = nil;
-            int32_t maxWidth = 0;
-
-            NSArray *formats = [videoDevice formats];
-            for (AVCaptureDeviceFormat *format in formats) {
-                NSArray *videoSupportedFrameRateRanges = format.videoSupportedFrameRateRanges;
-                for (AVFrameRateRange *range in videoSupportedFrameRateRanges) {
+    if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
         
-                    CMFormatDescriptionRef desc = format.formatDescription;
-                    CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(desc);
-                    int32_t width = dimensions.width;
-                    if (range.minFrameRate <= videoFrameRate && videoFrameRate <= range.maxFrameRate && width >= maxWidth) {
-                        supportingFormat = format;
-                        maxWidth = width;
-                    }
-                    
+        AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+        AVCaptureDeviceFormat *supportingFormat = nil;
+        int32_t maxWidth = 0;
+
+        NSArray *formats = [videoDevice formats];
+        for (AVCaptureDeviceFormat *format in formats) {
+            NSArray *videoSupportedFrameRateRanges = format.videoSupportedFrameRateRanges;
+            for (AVFrameRateRange *range in videoSupportedFrameRateRanges) {
+    
+                CMFormatDescriptionRef desc = format.formatDescription;
+                CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(desc);
+                int32_t width = dimensions.width;
+                if (range.minFrameRate <= videoFrameRate && videoFrameRate <= range.maxFrameRate && width >= maxWidth) {
+                    supportingFormat = format;
+                    maxWidth = width;
                 }
-            }
-            
-            if (supportingFormat) {
-                NSError *error = nil;
-                if ([_currentDevice lockForConfiguration:&error]) {
-                    _currentDevice.activeVideoMinFrameDuration = fps;
-                    _currentDevice.activeVideoMaxFrameDuration = fps;
-                    _videoFrameRate = videoFrameRate;
-                    [_currentDevice unlockForConfiguration];
-                } else if (error) {
-                    DLog(@"error locking device for frame rate change (%@)", error);
-                }
-            }
                 
-        } else {
+            }
+        }
+        
+        if (supportingFormat) {
+            NSError *error = nil;
+            if ([_currentDevice lockForConfiguration:&error]) {
+                _currentDevice.activeVideoMinFrameDuration = fps;
+                _currentDevice.activeVideoMaxFrameDuration = fps;
+                _videoFrameRate = videoFrameRate;
+                [_currentDevice unlockForConfiguration];
+            } else if (error) {
+                DLog(@"error locking device for frame rate change (%@)", error);
+            }
+        }
+        
+        [self _enqueueBlockOnMainQueue:^{
+            if ([_delegate respondsToSelector:@selector(visionDidChangeVideoFormatAndFrameRate:)])
+                [_delegate visionDidChangeVideoFormatAndFrameRate:self];
+        }];
+            
+    } else {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
-            if (connection.isVideoMaxFrameDurationSupported) {
-                connection.videoMaxFrameDuration = fps;
-            } else {
-                DLog(@"failed to set frame rate");
-            }
-            
-            if (connection.isVideoMinFrameDurationSupported) {
-                connection.videoMinFrameDuration = fps;
-                _videoFrameRate = videoFrameRate;
-            } else {
-                DLog(@"failed to set frame rate");
-            }
+        AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
+        if (connection.isVideoMaxFrameDurationSupported) {
+            connection.videoMaxFrameDuration = fps;
+        } else {
+            DLog(@"failed to set frame rate");
+        }
+        
+        if (connection.isVideoMinFrameDurationSupported) {
+            connection.videoMinFrameDuration = fps;
+            _videoFrameRate = videoFrameRate;
+        } else {
+            DLog(@"failed to set frame rate");
+        }
+        
+        [self _enqueueBlockOnMainQueue:^{
+            if ([_delegate respondsToSelector:@selector(visionDidChangeVideoFormatAndFrameRate:)])
+                [_delegate visionDidChangeVideoFormatAndFrameRate:self];
+        }];
 #pragma clang diagnostic pop
 
-        }
-        
-        if (isRecording) {
-            [self resumeVideoCapture];
-        }
-        
-	} else {
-        DLog(@"frame rate range not supported for current device format");
+    }
+    
+    if (isRecording) {
+        [self resumeVideoCapture];
     }
 }
 
@@ -586,6 +595,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     } else if (error) {
         DLog(@"error locking device for highest framerate setup (%@)", error);
     }
+    
+    [self _enqueueBlockOnMainQueue:^{
+        if ([_delegate respondsToSelector:@selector(visionDidChangeVideoFormatAndFrameRate:)])
+            [_delegate visionDidChangeVideoFormatAndFrameRate:self];
+    }];
 
     if (isRecording) {
         [self resumeVideoCapture];
@@ -683,25 +697,29 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 typedef void (^PBJVisionBlock)();
 
-- (void)_enqueueBlockInCaptureSessionQueue:(PBJVisionBlock)block {
+- (void)_enqueueBlockOnCaptureSessionQueue:(PBJVisionBlock)block
+{
     dispatch_async(_captureSessionDispatchQueue, ^{
         block();
     });
 }
 
-- (void)_enqueueBlockInCaptureVideoQueue:(PBJVisionBlock)block {
+- (void)_enqueueBlockOnCaptureVideoQueue:(PBJVisionBlock)block
+{
     dispatch_async(_captureVideoDispatchQueue, ^{
         block();
     });
 }
 
-- (void)_enqueueBlockOnMainQueue:(PBJVisionBlock)block {
+- (void)_enqueueBlockOnMainQueue:(PBJVisionBlock)block
+{
     dispatch_async(dispatch_get_main_queue(), ^{
         block();
     });
 }
 
-- (void)_executeBlockOnMainQueue:(PBJVisionBlock)block {
+- (void)_executeBlockOnMainQueue:(PBJVisionBlock)block
+{
     dispatch_sync(dispatch_get_main_queue(), ^{
         block();
     });
@@ -709,6 +727,7 @@ typedef void (^PBJVisionBlock)();
 
 #pragma mark - camera
 
+// only call from the session queue
 - (void)_setupCamera
 {
     if (_captureSession)
@@ -792,6 +811,7 @@ typedef void (^PBJVisionBlock)();
     DLog(@"camera setup");
 }
 
+// only call from the session queue
 - (void)_destroyCamera
 {
     if (!_captureSession)
@@ -819,6 +839,12 @@ typedef void (^PBJVisionBlock)();
     [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
     [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
     [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
+
+    if (_initialFormat) {
+        _initialFormat = nil;
+        _initialFrameRate = kCMTimeZero;
+        _videoFrameRate = 0;
+    }
 
     _captureOutputPhoto = nil;
     _captureOutputAudio = nil;
@@ -1101,7 +1127,7 @@ typedef void (^PBJVisionBlock)();
 
 - (void)startPreview
 {
-    [self _enqueueBlockInCaptureSessionQueue:^{
+    [self _enqueueBlockOnCaptureSessionQueue:^{
         if (!_captureSession) {
             [self _setupCamera];
             [self _setupSession];
@@ -1128,14 +1154,15 @@ typedef void (^PBJVisionBlock)();
 
 - (void)stopPreview
 {    
-    [self _enqueueBlockInCaptureSessionQueue:^{
+    [self _enqueueBlockOnCaptureSessionQueue:^{
         if (!_flags.previewRunning)
             return;
 
         if (_previewLayer)
             _previewLayer.connection.enabled = YES;
 
-        [_captureSession stopRunning];
+        if ([_captureSession isRunning])
+            [_captureSession stopRunning];
 
         [self _executeBlockOnMainQueue:^{
             if ([_delegate respondsToSelector:@selector(visionSessionDidStopPreview:)]) {
@@ -1531,7 +1558,7 @@ typedef void (^PBJVisionBlock)();
     
     DLog(@"starting video capture");
         
-    [self _enqueueBlockInCaptureVideoQueue:^{
+    [self _enqueueBlockOnCaptureVideoQueue:^{
 
         if (_flags.recording || _flags.paused)
             return;
@@ -1576,7 +1603,7 @@ typedef void (^PBJVisionBlock)();
 
 - (void)pauseVideoCapture
 {
-    [self _enqueueBlockInCaptureVideoQueue:^{
+    [self _enqueueBlockOnCaptureVideoQueue:^{
         if (!_flags.recording)
             return;
 
@@ -1599,7 +1626,7 @@ typedef void (^PBJVisionBlock)();
 
 - (void)resumeVideoCapture
 {
-    [self _enqueueBlockInCaptureVideoQueue:^{
+    [self _enqueueBlockOnCaptureVideoQueue:^{
         if (!_flags.recording || !_flags.paused)
             return;
  
@@ -1623,7 +1650,7 @@ typedef void (^PBJVisionBlock)();
 {    
     DLog(@"ending video capture");
     
-    [self _enqueueBlockInCaptureVideoQueue:^{
+    [self _enqueueBlockOnCaptureVideoQueue:^{
         if (!_flags.recording)
             return;
         
@@ -1660,7 +1687,7 @@ typedef void (^PBJVisionBlock)();
 {
     DLog(@"cancel video capture");
     
-    [self _enqueueBlockInCaptureVideoQueue:^{
+    [self _enqueueBlockOnCaptureVideoQueue:^{
         _flags.recording = NO;
         _flags.paused = NO;
         
@@ -1861,7 +1888,7 @@ typedef void (^PBJVisionBlock)();
 {
 	CFRetain(sampleBuffer);
     
-    [self _enqueueBlockInCaptureVideoQueue:^{
+    [self _enqueueBlockOnCaptureVideoQueue:^{
         if (!CMSampleBufferDataIsReady(sampleBuffer)) {
             DLog(@"sample buffer data is not ready");
             CFRelease(sampleBuffer);
@@ -1992,7 +2019,7 @@ typedef void (^PBJVisionBlock)();
 - (void)_applicationWillEnterForeground:(NSNotification *)notification
 {
     DLog(@"applicationWillEnterForeground");
-    [self _enqueueBlockInCaptureSessionQueue:^{
+    [self _enqueueBlockOnCaptureSessionQueue:^{
         if (!_flags.previewRunning)
             return;
         
@@ -2010,7 +2037,7 @@ typedef void (^PBJVisionBlock)();
 
     if (_flags.previewRunning) {
         [self stopPreview];
-        [self _enqueueBlockInCaptureSessionQueue:^{
+        [self _enqueueBlockOnCaptureSessionQueue:^{
             _flags.previewRunning = YES;
         }];
     }
@@ -2020,16 +2047,13 @@ typedef void (^PBJVisionBlock)();
 
 // capture session handlers
 
-// TODO: add in a better error recovery
-
 - (void)_sessionRuntimeErrored:(NSNotification *)notification
 {
-    [self _enqueueBlockOnMainQueue:^{
+    [self _enqueueBlockOnCaptureSessionQueue:^{
         if ([notification object] == _captureSession) {
             NSError *error = [[notification userInfo] objectForKey:AVCaptureSessionErrorKey];
             if (error) {
-                NSInteger errorCode = [error code];
-                switch (errorCode) {
+                switch ([error code]) {
                     case AVErrorMediaServicesWereReset:
                     {
                         DLog(@"error media services were reset");
@@ -2093,7 +2117,7 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_sessionStopped:(NSNotification *)notification
 {
-    [self _enqueueBlockInCaptureVideoQueue:^{
+    [self _enqueueBlockOnCaptureVideoQueue:^{
         DLog(@"session was stopped");
         if (_flags.recording)
             [self endVideoCapture];

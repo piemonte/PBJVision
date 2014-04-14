@@ -208,6 +208,8 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 - (void)vision:(PBJVision *)vision didChangeCleanAperture:(CGRect)cleanAperture;
 
+- (void)visionDidChangeVideoFormatAndFrameRate:(PBJVision *)vision;
+
 // focus / exposure
 
 - (void)visionWillStartFocus:(PBJVision *)vision;
