@@ -911,8 +911,10 @@ typedef void (^PBJVisionBlock)();
         switch (_cameraDevice) {
           case PBJCameraDeviceFront:
           {
-            [_captureSession removeInput:_captureDeviceInputBack];
-            if ([_captureSession canAddInput:_captureDeviceInputFront]) {
+            if (_captureDeviceInputBack)
+                [_captureSession removeInput:_captureDeviceInputBack];
+            
+            if (_captureDeviceInputFront && [_captureSession canAddInput:_captureDeviceInputFront]) {
                 [_captureSession addInput:_captureDeviceInputFront];
                 newDeviceInput = _captureDeviceInputFront;
                 newCaptureDevice = _captureDeviceFront;
@@ -921,8 +923,10 @@ typedef void (^PBJVisionBlock)();
           }
           case PBJCameraDeviceBack:
           {
-            [_captureSession removeInput:_captureDeviceInputFront];
-            if ([_captureSession canAddInput:_captureDeviceInputBack]) {
+            if (_captureDeviceInputFront)
+                [_captureSession removeInput:_captureDeviceInputFront];
+            
+            if (_captureDeviceInputBack && [_captureSession canAddInput:_captureDeviceInputBack]) {
                 [_captureSession addInput:_captureDeviceInputBack];
                 newDeviceInput = _captureDeviceInputBack;
                 newCaptureDevice = _captureDeviceBack;
