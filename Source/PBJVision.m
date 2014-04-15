@@ -33,10 +33,12 @@
 #import <OpenGLES/EAGL.h>
 
 #define LOG_VISION 0
+#ifndef DLog
 #if !defined(NDEBUG) && LOG_VISION
 #   define DLog(fmt, ...) NSLog((@"VISION: " fmt), ##__VA_ARGS__);
 #else
 #   define DLog(...)
+#endif
 #endif
 
 NSString * const PBJVisionErrorDomain = @"PBJVisionErrorDomain";
