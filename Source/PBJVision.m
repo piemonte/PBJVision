@@ -120,9 +120,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     NSInteger _audioBitRate;
     CGFloat _videoBitRate;
     NSInteger _videoFrameRate;
-    AVCaptureDeviceFormat *_initialFormat;
-    CMTime _initialFrameRate;
-
+    
     AVCaptureDevice *_currentDevice;
     AVCaptureDeviceInput *_currentInput;
     AVCaptureOutput *_currentOutput;
@@ -581,33 +579,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 	return frameRate;
 }
 
-- (void)restoreInitialFormatAndFrameRate
-{
-    BOOL isRecording = _flags.recording;
-    if (isRecording) {
-        [self pauseVideoCapture];
-    }
-
-    NSError *error = nil;
-    if ( [_currentDevice lockForConfiguration:&error] == YES ) {
-        _currentDevice.activeFormat = _initialFormat;
-        _currentDevice.activeVideoMinFrameDuration = _initialFrameRate;
-        _currentDevice.activeVideoMaxFrameDuration = _initialFrameRate;
-        [_currentDevice unlockForConfiguration];
-    } else if (error) {
-        DLog(@"error locking device for highest framerate setup (%@)", error);
-    }
-    
-    [self _enqueueBlockOnMainQueue:^{
-        if ([_delegate respondsToSelector:@selector(visionDidChangeVideoFormatAndFrameRate:)])
-            [_delegate visionDidChangeVideoFormatAndFrameRate:self];
-    }];
-
-    if (isRecording) {
-        [self resumeVideoCapture];
-    }
-}
-
 - (BOOL)supportsVideoFrameRate:(NSInteger)videoFrameRate
 {
     if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
@@ -782,14 +753,7 @@ typedef void (^PBJVisionBlock)();
     [_captureOutputVideo setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
 
     // capture device initial settings
-    if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
-        if (!_initialFormat) {
-            AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-            _initialFormat = videoDevice.activeFormat;
-            _initialFrameRate = videoDevice.activeVideoMaxFrameDuration;
-            _videoFrameRate = (int32_t)_initialFrameRate.timescale;
-        }    
-    }
+    _videoFrameRate = 30;
 
     // add notification observers
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
@@ -841,12 +805,6 @@ typedef void (^PBJVisionBlock)();
     [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
     [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
     [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
-
-    if (_initialFormat) {
-        _initialFormat = nil;
-        _initialFrameRate = kCMTimeZero;
-        _videoFrameRate = 0;
-    }
 
     _captureOutputPhoto = nil;
     _captureOutputAudio = nil;

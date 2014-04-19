@@ -127,11 +127,10 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic) CGFloat videoBitRate;
 @property (nonatomic) NSInteger audioBitRate;
 
-// video frame rate (adjustment may change capture format (AVCaptureDeviceFormat : FoV, zoom factor, etc)
+// video frame rate (adjustment may change the capture format (AVCaptureDeviceFormat : FoV, zoom factor, etc)
 
-@property (nonatomic) NSInteger videoFrameRate; // desire fps for cameraDevice
+@property (nonatomic) NSInteger videoFrameRate; // desired fps for active cameraDevice
 - (BOOL)supportsVideoFrameRate:(NSInteger)videoFrameRate;
-- (void)restoreInitialFormatAndFrameRate;
 
 // preview
 
