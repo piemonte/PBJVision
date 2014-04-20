@@ -386,6 +386,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     return [UIImagePickerController isCameraDeviceAvailable:(UIImagePickerControllerCameraDevice)cameraDevice];
 }
 
+- (BOOL)isFocusPointOfInterestSupported
+{
+    return [_currentDevice isFocusPointOfInterestSupported];
+}
+
 - (BOOL)isFocusLockSupported
 {
     return [_currentDevice isFocusModeSupported:AVCaptureFocusModeLocked];

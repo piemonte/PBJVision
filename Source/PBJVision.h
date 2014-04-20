@@ -144,7 +144,8 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 // focus, exposure, white balance
 
-// note: focus, exposure modes change when adjusting on point
+// note: focus and exposure modes change when adjusting on point
+- (BOOL)isFocusPointOfInterestSupported;
 - (void)focusExposeAndAdjustWhiteBalanceAtAdjustedPoint:(CGPoint)adjustedPoint;
 
 @property (nonatomic) PBJFocusMode focusMode;
