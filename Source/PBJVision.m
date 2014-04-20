@@ -1741,21 +1741,6 @@ typedef void (^PBJVisionBlock)();
 
 #pragma mark - sample buffer processing
 
-- (void)_cleanUpTextures
-{
-    CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
-
-    if (_lumaTexture) {
-        CFRelease(_lumaTexture);
-        _lumaTexture = NULL;        
-    }
-    
-    if (_chromaTexture) {
-        CFRelease(_chromaTexture);
-        _chromaTexture = NULL;
-    }
-}
-
 // convert CoreVideo YUV pixel buffer (Y luminance and Cb Cr chroma) into RGB
 // processing is done on the GPU, operation WAY more efficient than converting on the CPU
 - (void)_processSampleBuffer:(CMSampleBufferRef)sampleBuffer
@@ -1845,6 +1830,21 @@ typedef void (^PBJVisionBlock)();
         return;
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+- (void)_cleanUpTextures
+{
+    CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
+
+    if (_lumaTexture) {
+        CFRelease(_lumaTexture);
+        _lumaTexture = NULL;        
+    }
+    
+    if (_chromaTexture) {
+        CFRelease(_chromaTexture);
+        _chromaTexture = NULL;
+    }
 }
 
 #pragma mark - AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate
