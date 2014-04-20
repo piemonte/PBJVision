@@ -130,6 +130,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
     CMTime _startTimestamp;
     CMTime _lastTimestamp;
+    
+    CMTime _maximumCaptureDuration;
 
     // sample buffer rendering
 
@@ -178,6 +180,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize audioBitRate = _audioBitRate;
 @synthesize videoBitRate = _videoBitRate;
 @synthesize captureSessionPreset = _captureSessionPreset;
+@synthesize maximumCaptureDuration = _maximumCaptureDuration;
 
 #pragma mark - singleton
 
@@ -643,6 +646,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         _captureVideoDispatchQueue = dispatch_queue_create("PBJVisionVideo", DISPATCH_QUEUE_SERIAL); // protects capture
         
         _previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:nil];
+        
+        _maximumCaptureDuration = kCMTimeInvalid;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationWillEnterForeground:) name:@"UIApplicationWillEnterForegroundNotification" object:[UIApplication sharedApplication]];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationDidEnterBackground:) name:@"UIApplicationDidEnterBackgroundNotification" object:[UIApplication sharedApplication]];
@@ -1871,7 +1876,7 @@ typedef void (^PBJVisionBlock)();
         }
         
         // setup media writer
-        BOOL isAudio = (self.cameraMode != PBJCameraModePhoto) && (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
+        BOOL isAudio = (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
         BOOL isVideo = (connection == [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo]);
         if (isAudio && !_mediaWriter.isAudioReady) {
             [self _setupMediaWriterAudioInputWithSampleBuffer:sampleBuffer];
@@ -1969,6 +1974,14 @@ typedef void (^PBJVisionBlock)();
             }
         }
         
+        if (CMTIME_IS_VALID(_lastTimestamp) && CMTIME_IS_VALID(_maximumCaptureDuration)) {
+            if (CMTIME_COMPARE_INLINE(_lastTimestamp, >=, _maximumCaptureDuration)) {
+                [self _enqueueBlockOnMainQueue:^{
+                    [self endVideoCapture];
+                }];
+            }
+        }
+            
         if (bufferToWrite)
             CFRelease(bufferToWrite);
         
@@ -1978,7 +1991,6 @@ typedef void (^PBJVisionBlock)();
 }
 
 #pragma mark - App NSNotifications
-// TODO: support suspend/resume video recording
 
 - (void)_applicationWillEnterForeground:(NSNotification *)notification
 {

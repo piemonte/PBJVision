@@ -174,6 +174,7 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 @property (nonatomic, readonly) EAGLContext *context;
 @property (nonatomic) CGRect presentationFrame;
 
+@property (nonatomic) CMTime maximumCaptureDuration; // automatically ends after exceeding threshold, calling vision:capturedVideo:error:
 @property (nonatomic, readonly) Float64 capturedAudioSeconds;
 @property (nonatomic, readonly) Float64 capturedVideoSeconds;
 
