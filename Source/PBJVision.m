@@ -1889,7 +1889,6 @@ typedef void (^PBJVisionBlock)();
         }
 
         CMTime currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-        CMTime currentDuration = CMSampleBufferGetDuration(sampleBuffer);
 
         // calculate the length of the interruption
         if (_flags.interrupted && isAudio) {
@@ -1912,7 +1911,7 @@ typedef void (^PBJVisionBlock)();
         CMSampleBufferRef bufferToWrite = NULL;
 
         if (_lastTimestamp.value > 0) {
-            bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer usingTimeOffset:_lastTimestamp duration:currentDuration];
+            bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer usingTimeOffset:_lastTimestamp];
             if (!bufferToWrite) {
                 DLog(@"error subtracting the timeoffset from the sampleBuffer");
             }
