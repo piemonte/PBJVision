@@ -1752,114 +1752,6 @@ typedef void (^PBJVisionBlock)();
     return [_mediaWriter setupVideoOutputDeviceWithSettings:videoSettings];
 }
 
-#pragma mark - sample buffer processing
-
-// convert CoreVideo YUV pixel buffer (Y luminance and Cb Cr chroma) into RGB
-// processing is done on the GPU, operation WAY more efficient than converting on the CPU
-- (void)_processSampleBuffer:(CMSampleBufferRef)sampleBuffer
-{
-    if (!_context)
-        return;
-
-    if (!_videoTextureCache)
-        return;
-
-    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-
-    if (CVPixelBufferLockBaseAddress(imageBuffer, 0) != kCVReturnSuccess)
-        return;
-
-    [EAGLContext setCurrentContext:_context];
-
-    [self _cleanUpTextures];
-
-    size_t width = CVPixelBufferGetWidth(imageBuffer);
-    size_t height = CVPixelBufferGetHeight(imageBuffer);
-
-    // only bind the vertices once or if parameters change
-    
-    if (_bufferWidth != width ||
-        _bufferHeight != height ||
-        _bufferDevice != _cameraDevice ||
-        _bufferOrientation != _cameraOrientation) {
-        
-        _bufferWidth = width;
-        _bufferHeight = height;
-        _bufferDevice = _cameraDevice;
-        _bufferOrientation = _cameraOrientation;
-        [self _setupBuffers];
-        
-    }
-    
-    // always upload the texturs since the input may be changing
-    
-    CVReturn error = 0;
-    
-    // Y-plane
-    glActiveTexture(GL_TEXTURE0);
-    error = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
-                                                        _videoTextureCache,
-                                                        imageBuffer,
-                                                        NULL,
-                                                        GL_TEXTURE_2D,
-                                                        GL_RED_EXT,
-                                                        (GLsizei)_bufferWidth,
-                                                        (GLsizei)_bufferHeight,
-                                                        GL_RED_EXT,
-                                                        GL_UNSIGNED_BYTE,
-                                                        0,
-                                                        &_lumaTexture);
-    if (error) {
-        DLog(@"error CVOpenGLESTextureCacheCreateTextureFromImage (%d)", error);
-    }
-    
-    glBindTexture(CVOpenGLESTextureGetTarget(_lumaTexture), CVOpenGLESTextureGetName(_lumaTexture));
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
-    
-    // UV-plane
-    glActiveTexture(GL_TEXTURE1);
-    error = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
-                                                         _videoTextureCache,
-                                                         imageBuffer,
-                                                         NULL,
-                                                         GL_TEXTURE_2D,
-                                                         GL_RG_EXT,
-                                                         (GLsizei)(_bufferWidth * 0.5),
-                                                         (GLsizei)(_bufferHeight * 0.5),
-                                                         GL_RG_EXT,
-                                                         GL_UNSIGNED_BYTE,
-                                                         1,
-                                                         &_chromaTexture);
-    if (error) {
-        DLog(@"error CVOpenGLESTextureCacheCreateTextureFromImage (%d)", error);
-    }
-    
-    glBindTexture(CVOpenGLESTextureGetTarget(_chromaTexture), CVOpenGLESTextureGetName(_chromaTexture));
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    
-    if (CVPixelBufferUnlockBaseAddress(imageBuffer, 0) != kCVReturnSuccess)
-        return;
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-}
-
-- (void)_cleanUpTextures
-{
-    CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
-
-    if (_lumaTexture) {
-        CFRelease(_lumaTexture);
-        _lumaTexture = NULL;        
-    }
-    
-    if (_chromaTexture) {
-        CFRelease(_chromaTexture);
-        _chromaTexture = NULL;
-    }
-}
-
 #pragma mark - AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
@@ -2228,6 +2120,114 @@ typedef void (^PBJVisionBlock)();
 
 - (void)mediaWriterDidObserveVideoAuthorizationStatusDenied:(PBJMediaWriter *)mediaWriter
 {
+}
+
+#pragma mark - sample buffer processing
+
+// convert CoreVideo YUV pixel buffer (Y luminance and Cb Cr chroma) into RGB
+// processing is done on the GPU, operation WAY more efficient than converting on the CPU
+- (void)_processSampleBuffer:(CMSampleBufferRef)sampleBuffer
+{
+    if (!_context)
+        return;
+
+    if (!_videoTextureCache)
+        return;
+
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+
+    if (CVPixelBufferLockBaseAddress(imageBuffer, 0) != kCVReturnSuccess)
+        return;
+
+    [EAGLContext setCurrentContext:_context];
+
+    [self _cleanUpTextures];
+
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+
+    // only bind the vertices once or if parameters change
+    
+    if (_bufferWidth != width ||
+        _bufferHeight != height ||
+        _bufferDevice != _cameraDevice ||
+        _bufferOrientation != _cameraOrientation) {
+        
+        _bufferWidth = width;
+        _bufferHeight = height;
+        _bufferDevice = _cameraDevice;
+        _bufferOrientation = _cameraOrientation;
+        [self _setupBuffers];
+        
+    }
+    
+    // always upload the texturs since the input may be changing
+    
+    CVReturn error = 0;
+    
+    // Y-plane
+    glActiveTexture(GL_TEXTURE0);
+    error = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+                                                        _videoTextureCache,
+                                                        imageBuffer,
+                                                        NULL,
+                                                        GL_TEXTURE_2D,
+                                                        GL_RED_EXT,
+                                                        (GLsizei)_bufferWidth,
+                                                        (GLsizei)_bufferHeight,
+                                                        GL_RED_EXT,
+                                                        GL_UNSIGNED_BYTE,
+                                                        0,
+                                                        &_lumaTexture);
+    if (error) {
+        DLog(@"error CVOpenGLESTextureCacheCreateTextureFromImage (%d)", error);
+    }
+    
+    glBindTexture(CVOpenGLESTextureGetTarget(_lumaTexture), CVOpenGLESTextureGetName(_lumaTexture));
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+    
+    // UV-plane
+    glActiveTexture(GL_TEXTURE1);
+    error = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+                                                         _videoTextureCache,
+                                                         imageBuffer,
+                                                         NULL,
+                                                         GL_TEXTURE_2D,
+                                                         GL_RG_EXT,
+                                                         (GLsizei)(_bufferWidth * 0.5),
+                                                         (GLsizei)(_bufferHeight * 0.5),
+                                                         GL_RG_EXT,
+                                                         GL_UNSIGNED_BYTE,
+                                                         1,
+                                                         &_chromaTexture);
+    if (error) {
+        DLog(@"error CVOpenGLESTextureCacheCreateTextureFromImage (%d)", error);
+    }
+    
+    glBindTexture(CVOpenGLESTextureGetTarget(_chromaTexture), CVOpenGLESTextureGetName(_chromaTexture));
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    if (CVPixelBufferUnlockBaseAddress(imageBuffer, 0) != kCVReturnSuccess)
+        return;
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+- (void)_cleanUpTextures
+{
+    CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
+
+    if (_lumaTexture) {
+        CFRelease(_lumaTexture);
+        _lumaTexture = NULL;        
+    }
+    
+    if (_chromaTexture) {
+        CFRelease(_chromaTexture);
+        _chromaTexture = NULL;
+    }
 }
 
 #pragma mark - OpenGLES context support
