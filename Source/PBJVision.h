@@ -150,11 +150,11 @@ extern NSString * const PBJVisionVideoThumbnailKey;
 
 @property (nonatomic) PBJFocusMode focusMode;
 @property (nonatomic, readonly, getter=isFocusLockSupported) BOOL focusLockSupported;
-- (void)focusAtAdjustedPoint:(CGPoint)adjustedPoint;
+- (void)focusAtAdjustedPointOfInterest:(CGPoint)adjustedPoint;
 
 @property (nonatomic) PBJExposureMode exposureMode;
 @property (nonatomic, readonly, getter=isExposureLockSupported) BOOL exposureLockSupported;
-- (void)exposeAtAdjustedPoint:(CGPoint)adjustedPoint;
+- (void)exposeAtAdjustedPointOfInterest:(CGPoint)adjustedPoint;
 
 // photo
 

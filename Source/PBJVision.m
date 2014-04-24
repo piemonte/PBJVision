@@ -1221,7 +1221,7 @@ typedef void (^PBJVisionBlock)();
     //    DLog(@"exposure change ended");
 }
 
-- (void)focusAtAdjustedPoint:(CGPoint)adjustedPoint
+- (void)focusAtAdjustedPointOfInterest:(CGPoint)adjustedPoint
 {
     if ([_currentDevice isAdjustingFocus] || [_currentDevice isAdjustingExposure])
         return;
@@ -1243,7 +1243,7 @@ typedef void (^PBJVisionBlock)();
     }
 }
 
-- (void)exposeAtAdjustedPoint:(CGPoint)adjustedPoint
+- (void)exposeAtAdjustedPointOfInterest:(CGPoint)adjustedPoint
 {
     if ([_currentDevice isAdjustingExposure])
         return;
@@ -1274,7 +1274,7 @@ typedef void (^PBJVisionBlock)();
         [_delegate visionWillStartFocus:self];
 
     CGPoint focusPoint = CGPointMake(0.5f, 0.5f);
-    [self focusAtAdjustedPoint:focusPoint];
+    [self focusAtAdjustedPointOfInterest:focusPoint];
 }
 
 // focusExposeAndAdjustWhiteBalanceAtAdjustedPoint: will put focus and exposure into auto
