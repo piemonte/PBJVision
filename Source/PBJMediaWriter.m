@@ -30,7 +30,7 @@
 #import <UIKit/UIDevice.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 
-#define LOG_WRITER 1
+#define LOG_WRITER 0
 #if !defined(NDEBUG) && LOG_WRITER
 #   define DLog(fmt, ...) NSLog((@"writer: " fmt), ##__VA_ARGS__);
 #else
