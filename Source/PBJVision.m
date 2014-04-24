@@ -1740,7 +1740,9 @@ typedef void (^PBJVisionBlock)();
             break;
     }
     
-    NSDictionary *compressionSettings = @{ AVVideoAverageBitRateKey : @(_videoBitRate),
+    // TODO: expose a means for adding addition options to setings
+    NSDictionary *compressionSettings = @{ AVVideoProfileLevelKey : AVVideoProfileLevelH264Baseline30,
+                                           AVVideoAverageBitRateKey : @(_videoBitRate),
                                            AVVideoMaxKeyFrameIntervalKey : @(_videoFrameRate) };
 
 	NSDictionary *videoSettings = @{ AVVideoCodecKey : AVVideoCodecH264,
