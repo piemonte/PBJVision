@@ -1,6 +1,6 @@
 ## Contributing
 
-Vision is a community project and contributing should be as easy and fun as possible. If you encounter bugs or have ideas for the project, please open an issue or create a pull request.
+Vision is a community project in which contributing should be as easy and fun as possible. If you encounter bugs or have ideas, please open an issue or create a pull request.
 
 ## Pull Requests
 
