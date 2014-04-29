@@ -87,8 +87,6 @@ pod 'PBJVision'
 
 ## Resources
 
-External links that may be useful:
-
 * [AV Foundation Programming Guide](https://developer.apple.com/library/ios/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/00_Introduction.html)
 * [PBJVideoPlayer, a simple iOS video player](https://github.com/piemonte/PBJVideoPlayer)
 
