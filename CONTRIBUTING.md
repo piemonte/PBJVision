@@ -12,7 +12,7 @@ Vision is a community project in which contributing should be as easy and fun as
 [GitHub issues](https://github.com/piemonte/PBJVision/issues) is used to track feature ideas and bugs. Please ensure your issue descriptions are clear and have sufficient instructions to be able to reproduce.
 
 ## Coding Style
-Vision follows the [WebKit coding style](http://www.webkit.org/coding/coding-style.html) as closely as it can.
+Vision follows the [WebKit coding style](http://www.webkit.org/coding/coding-style.html) as closely as possible.
 
 ## License
 By contributing to Vision you agree that your contributions will be licensed under it's MIT license.
