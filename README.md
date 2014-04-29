@@ -90,11 +90,11 @@ pod 'PBJVision'
 External links that may be useful:
 
 * [AV Foundation Programming Guide](https://developer.apple.com/library/ios/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/00_Introduction.html)
-* [PBJVideoPlayer, a simple iOS video player](https://github.com/piemonte/PBJVideoPlayer).
+* [PBJVideoPlayer, a simple iOS video player](https://github.com/piemonte/PBJVideoPlayer)
 
 ## Contributing
 
-See the [CONTRIBUTING](https://github.com/piemonte/PBJVision/blob/master/CONTRIBUTING.md) file for how to collaborate and help out. The [github issues page](https://github.com/piemonte/PBJVision/issues) is a great place to start a discussion and allows others to benefit and chime-in on the project too.
+See the [CONTRIBUTING](https://github.com/piemonte/PBJVision/blob/master/CONTRIBUTING.md) file for information on how to collaborate and help out. The [github issues page](https://github.com/piemonte/PBJVision/issues) is a great place to start a discussion and also allows others to benefit and chime-in too.
 
 ## License
 
