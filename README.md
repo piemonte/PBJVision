@@ -6,11 +6,13 @@
 
 I created this component at [DIY.org](http://diy.org) as a fun means for young people to author video. This same recording interaction was pioneered by [Vine](http://vine.co) and also later adopted by [Instagram](http://instagram.com).
 
-If you need a video player, check out [PBJVideoPlayer](https://github.com/piemonte/PBJVideoPlayer).
+If you are looking for a video player, check out [PBJVideoPlayer](https://github.com/piemonte/PBJVideoPlayer).
 
 Please review the [release history](https://github.com/piemonte/PBJVision/releases) for more information.
 
 If you have questions or ideas, let me know! Project contributions, ideas, and collaborations are all welcome. The [github issues page](https://github.com/piemonte/PBJVision/issues) is a great place to start a discussion and allows others to benefit and chime-in on the project too.
+
+[![Build Status](https://travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 
 ## Installation
 
