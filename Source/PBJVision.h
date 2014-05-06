@@ -96,6 +96,7 @@ extern NSString * const PBJVisionPhotoThumbnailKey; // 160x120
 
 extern NSString * const PBJVisionVideoPathKey;
 extern NSString * const PBJVisionVideoThumbnailKey;
+extern NSString * const PBJVisionVideoCapturedDurationKey; // Captured duration in seconds
 
 @class EAGLContext;
 @protocol PBJVisionDelegate;
