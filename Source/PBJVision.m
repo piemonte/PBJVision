@@ -66,6 +66,8 @@ NSString * const PBJVisionPhotoThumbnailKey = @"PBJVisionPhotoThumbnailKey";
 
 NSString * const PBJVisionVideoPathKey = @"PBJVisionVideoPathKey";
 NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
+NSString * const PBJVisionVideoCapturedDurationKey = @"PBJVisionVideoCapturedDurationKey";
+
 
 // PBJGLProgram shader uniforms for pixel format conversion on the GPU
 typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
@@ -1640,6 +1642,8 @@ typedef void (^PBJVisionBlock)();
         _flags.paused = NO;
         
         void (^finishWritingCompletionHandler)(void) = ^{
+            Float64 capturedDuration = self.capturedVideoSeconds;
+            
             _lastTimestamp = kCMTimeInvalid;
             _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
             _flags.interrupted = NO;
@@ -1649,6 +1653,8 @@ typedef void (^PBJVisionBlock)();
                 NSString *path = [_mediaWriter.outputURL path];
                 if (path)
                     [videoDict setObject:path forKey:PBJVisionVideoPathKey];
+
+                [videoDict setObject:@(capturedDuration) forKey:PBJVisionVideoCapturedDurationKey];
 
                 NSError *error = [_mediaWriter error];
                 if ([_delegate respondsToSelector:@selector(vision:capturedVideo:error:)]) {
