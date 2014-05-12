@@ -1883,8 +1883,9 @@ typedef void (^PBJVisionBlock)();
         
         // when a valid maxium duration is provided, end capture
         if (CMTIME_IS_VALID(_maximumCaptureDuration)) {
-            // _lastTimestamp for interrupeted recording, otherwise current
-            CMTime timestamp = CMTIME_IS_VALID(_lastTimestamp) ? _lastTimestamp : currentTimestamp;
+            // _lastTimestamp for interrupted recording, otherwise currentCaptureDuration
+            CMTime currentCaptureDuration = CMTimeSubtract(currentTimestamp, _startTimestamp);
+            CMTime timestamp = CMTIME_IS_VALID(_lastTimestamp) ? _lastTimestamp : currentCaptureDuration;
             if (CMTIME_IS_VALID(timestamp) && CMTIME_COMPARE_INLINE(timestamp, >=, _maximumCaptureDuration)) {
                 [self _enqueueBlockOnMainQueue:^{
                     [self endVideoCapture];
