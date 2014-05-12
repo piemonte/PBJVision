@@ -1881,18 +1881,14 @@ typedef void (^PBJVisionBlock)();
             }
         }
         
-        currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-        if (CMTIME_IS_VALID(currentTimestamp) && CMTIME_IS_VALID(_startTimestamp) && CMTIME_IS_VALID(_maximumCaptureDuration)) {
-            CMTime currentCaptureDuration = CMTimeSubtract(currentTimestamp, _startTimestamp);
-            if (CMTIME_IS_VALID(currentCaptureDuration)) {
-                if (CMTIME_COMPARE_INLINE(currentCaptureDuration, >=, _maximumCaptureDuration)) {
-                    [self _enqueueBlockOnMainQueue:^{
-                        [self endVideoCapture];
-                    }];
-                }
+        if (CMTIME_IS_VALID(_lastTimestamp) && CMTIME_IS_VALID(_maximumCaptureDuration)) {
+            if (CMTIME_COMPARE_INLINE(_lastTimestamp, >=, _maximumCaptureDuration)) {
+                [self _enqueueBlockOnMainQueue:^{
+                    [self endVideoCapture];
+                }];
             }
         }
-        
+            
         if (bufferToWrite)
             CFRelease(bufferToWrite);
         
