@@ -180,6 +180,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize presentationFrame = _presentationFrame;
 @synthesize audioBitRate = _audioBitRate;
 @synthesize videoBitRate = _videoBitRate;
+@synthesize videoProfileLevel = _videoProfileLevel;
+@synthesize videoOutputSettings = _videoOutputSettings;
 @synthesize captureSessionPreset = _captureSessionPreset;
 @synthesize maximumCaptureDuration = _maximumCaptureDuration;
 
@@ -646,6 +648,9 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         // 5000000, good for iFrame 1280 x 720
         CGFloat bytesPerSecond = 437500;
         _videoBitRate = bytesPerSecond * 8;
+
+        // Video profile for video compression
+        _videoProfileLevel = AVVideoProfileLevelH264Baseline30;
         
         // default flags
         _flags.thumbnailEnabled = YES;
@@ -1722,6 +1727,11 @@ typedef void (^PBJVisionBlock)();
 
 - (BOOL)_setupMediaWriterVideoInputWithSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
+    // Use the custom output settings, in case of some specific video settings
+    if (_videoOutputSettings) {
+        return [_mediaWriter setupVideoOutputDeviceWithSettings:_videoOutputSettings];
+    }
+
     CMFormatDescriptionRef formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer);
 	CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription);
     
@@ -1746,7 +1756,7 @@ typedef void (^PBJVisionBlock)();
     }
     
     // TODO: expose a means for adding addition options to setings
-    NSDictionary *compressionSettings = @{ AVVideoProfileLevelKey : AVVideoProfileLevelH264Baseline30,
+    NSDictionary *compressionSettings = @{ AVVideoProfileLevelKey : _videoProfileLevel,
                                            AVVideoAverageBitRateKey : @(_videoBitRate),
                                            AVVideoMaxKeyFrameIntervalKey : @(_videoFrameRate) };
 
