@@ -2,10 +2,6 @@ language: objective-c
 compiler:
   - clang
 
-xcode_project: Project/Vision.xcodeproj
-xcode_scheme: Debug
-xcode_sdk: iphonesimulator7.0
-
 branches:
   only:
     - master
@@ -14,3 +10,5 @@ before_install:
   - export LANG=en_US.UTF-8
   - brew update
   - brew upgrade xctool
+
+script: xctool -workspace Project/Vision.xcworkspace -scheme Debug -sdk iphonesimulator7.0 build analyze test
