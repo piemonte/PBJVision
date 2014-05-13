@@ -11,4 +11,4 @@ before_install:
   - brew update
   - brew upgrade xctool
 
-script: xctool -workspace Project/Vision.xcodeproj -scheme Debug -sdk iphonesimulator7.0 build analyze test
+script: xctool -project Project/Vision.xcodeproj -scheme Debug -sdk iphonesimulator7.0 build analyze test
