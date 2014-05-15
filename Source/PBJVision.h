@@ -120,10 +120,13 @@ extern NSString * const PBJVisionVideoCapturedDurationKey; // Captured duration 
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
 @property (nonatomic, readonly, getter=isFlashAvailable) BOOL flashAvailable;
 
-// video output/compression settings
+// video output settings
 
 @property (nonatomic, copy) NSString *captureSessionPreset;
 @property (nonatomic) PBJOutputFormat outputFormat;
+
+// video compression settings
+
 @property (nonatomic) CGFloat videoBitRate;
 @property (nonatomic) NSInteger audioBitRate;
 
