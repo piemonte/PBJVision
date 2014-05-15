@@ -122,7 +122,7 @@ extern NSString * const PBJVisionVideoCapturedDurationKey; // Captured duration 
 
 // video output/compression settings
 
-@property (nonatomic, strong) NSString *captureSessionPreset;
+@property (nonatomic, copy) NSString *captureSessionPreset;
 @property (nonatomic) PBJOutputFormat outputFormat;
 @property (nonatomic) CGFloat videoBitRate;
 @property (nonatomic) NSInteger audioBitRate;
