@@ -129,6 +129,15 @@ extern NSString * const PBJVisionVideoCapturedDurationKey; // Captured duration 
 
 @property (nonatomic) CGFloat videoBitRate;
 @property (nonatomic) NSInteger audioBitRate;
+@property (nonatomic, copy) NSString *videoProfileLevel; // @see AVVideoProfileLevelKey. Default value is AVVideoProfileLevelH264Baseline30
+
+// Video output custom settings
+// Setting this property will disable any passes in values of outputFormat, videoBitRate, audioBitRate, videoProfileLevel
+// These settings will be passed directly to the Asset Writer via
+// [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeVideo outputSettings:videoOutputSettings]
+// Default value is nil
+@property (nonatomic, strong) NSDictionary *videoOutputSettings;
+
 
 // video frame rate (adjustment may change the capture format (AVCaptureDeviceFormat : FoV, zoom factor, etc)
 
