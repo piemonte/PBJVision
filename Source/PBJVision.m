@@ -1883,7 +1883,7 @@ typedef void (^PBJVisionBlock)();
         
         currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
         
-        if (CMTIME_IS_VALID(currentTimestamp) && CMTIME_IS_VALID(_startTimestamp) && CMTIME_IS_VALID(_maximumCaptureDuration)) {
+        if (!_flags.interrupted && CMTIME_IS_VALID(currentTimestamp) && CMTIME_IS_VALID(_startTimestamp) && CMTIME_IS_VALID(_maximumCaptureDuration)) {
             
             if (CMTIME_IS_VALID(_lastTimestamp)) {
                 // Current time stamp is actually timstamp with data from globalClock
