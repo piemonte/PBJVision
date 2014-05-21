@@ -1881,15 +1881,24 @@ typedef void (^PBJVisionBlock)();
             }
         }
         
-        // when a valid maxium duration is provided, end capture
-        if (CMTIME_IS_VALID(_maximumCaptureDuration)) {
-            // _lastTimestamp for interrupted recording, otherwise currentCaptureDuration
+        currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+        
+        if (CMTIME_IS_VALID(currentTimestamp) && CMTIME_IS_VALID(_startTimestamp) && CMTIME_IS_VALID(_maximumCaptureDuration)) {
+            
+            if (CMTIME_IS_VALID(_lastTimestamp)) {
+                // Current time stamp is actually timstamp with data from globalClock
+                // In case, if we had interruption, then _lastTimeStamp
+                // will have infromation about the time diff between globalClock and assetWriterClock
+                // So in case if we had interruption we need to remove that offset from "currentTimestamp"
+                currentTimestamp = CMTimeSubtract(currentTimestamp, _lastTimestamp);
+            }
             CMTime currentCaptureDuration = CMTimeSubtract(currentTimestamp, _startTimestamp);
-            CMTime timestamp = CMTIME_IS_VALID(_lastTimestamp) ? _lastTimestamp : currentCaptureDuration;
-            if (CMTIME_IS_VALID(timestamp) && CMTIME_COMPARE_INLINE(timestamp, >=, _maximumCaptureDuration)) {
-                [self _enqueueBlockOnMainQueue:^{
-                    [self endVideoCapture];
-                }];
+            if (CMTIME_IS_VALID(currentCaptureDuration)) {
+                if (CMTIME_COMPARE_INLINE(currentCaptureDuration, >=, _maximumCaptureDuration)) {
+                    [self _enqueueBlockOnMainQueue:^{
+                        [self endVideoCapture];
+                    }];
+                }
             }
         }
             
