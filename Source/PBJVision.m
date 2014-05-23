@@ -118,8 +118,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     NSString *_captureSessionPreset;
     PBJOutputFormat _outputFormat;
     
-    NSInteger _audioBitRate;
-    CGFloat _videoBitRate;
     NSInteger _videoFrameRate;
     
     AVCaptureDevice *_currentDevice;
