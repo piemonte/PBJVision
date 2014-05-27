@@ -182,6 +182,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize videoBitRate = _videoBitRate;
 @synthesize captureSessionPreset = _captureSessionPreset;
 @synthesize maximumCaptureDuration = _maximumCaptureDuration;
+@synthesize bytesPerSecond = _bytesPerSecond;
 
 #pragma mark - singleton
 
@@ -644,8 +645,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         // 2975000, good for 1920 x 1080
         // 3750000, good for iFrame 960 x 540
         // 5000000, good for iFrame 1280 x 720
-        CGFloat bytesPerSecond = 437500;
-        _videoBitRate = bytesPerSecond * 8;
+        _bytesPerSecond = 437500;
+//        _videoBitRate = _bytesPerSecond * 8;
         
         // default flags
         _flags.thumbnailEnabled = YES;
@@ -662,6 +663,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationDidEnterBackground:) name:@"UIApplicationDidEnterBackgroundNotification" object:[UIApplication sharedApplication]];
     }
     return self;
+}
+
+- (void)setBytesPerSecond:(CGFloat)bytesPerSecond {
+    bytesPerSecond = _bytesPerSecond;
+    _videoBitRate = bytesPerSecond * 8;
 }
 
 - (void)dealloc
