@@ -75,6 +75,17 @@ typedef NS_ENUM(NSInteger, PBJOutputFormat) {
     PBJOutputFormatWidescreen
 };
 
+
+//bytesPerSecond defined from those in the PBJVision.m
+typedef NS_ENUM(NSInteger, PBJBytesPerSecond) {
+    PBJBytesPerSecond480X360 = 87500,
+    PBJBytesPerSecond640X480 = 437500,
+    PBJBytesPerSecond1280X720 = 1312500,
+    PBJBytesPerSecond1920X1080 = 2975000,
+    PBJBytesPerSecond960X540 = 3750000,
+    PBJBytesPerSecond1280X750 = 5000000
+};
+
 // PBJError
 
 extern NSString * const PBJVisionErrorDomain;
@@ -129,6 +140,9 @@ extern NSString * const PBJVisionVideoCapturedDurationKey; // Captured duration 
 
 @property (nonatomic) CGFloat videoBitRate;
 @property (nonatomic) NSInteger audioBitRate;
+
+//Whenever this is set it updates the videoBitRate
+@property (nonatomic) CGFloat bytesPerSecond;
 
 // video frame rate (adjustment may change the capture format (AVCaptureDeviceFormat : FoV, zoom factor, etc)
 
