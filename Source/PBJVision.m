@@ -639,14 +639,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
-        // 87500, good for 480 x 360
-        // 437500, good for 640 x 480
-        // 1312500, good for 1280 x 720
-        // 2975000, good for 1920 x 1080
-        // 3750000, good for iFrame 960 x 540
-        // 5000000, good for iFrame 1280 x 720
-        _bytesPerSecond = 437500;
-//        _videoBitRate = _bytesPerSecond * 8;
+        self.bytesPerSecond = PBJBytesPerSecond640X480;
         
         // default flags
         _flags.thumbnailEnabled = YES;
