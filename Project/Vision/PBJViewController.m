@@ -332,6 +332,7 @@
     [vision setFocusMode:PBJFocusModeContinuousAutoFocus];
     [vision setOutputFormat:PBJOutputFormatSquare];
     [vision setVideoRenderingEnabled:YES];
+    vision.additionalCompressionProperties = @{AVVideoProfileLevelKey : AVVideoProfileLevelH264Baseline30}; // AVVideoProfileLevelKey requires specific captureSessionPreset
 }
 
 #pragma mark - UIButton
