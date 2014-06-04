@@ -118,9 +118,10 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     NSString *_captureSessionPreset;
     PBJOutputFormat _outputFormat;
     
-    NSInteger _audioBitRate;
     CGFloat _videoBitRate;
+    NSInteger _audioBitRate;
     NSInteger _videoFrameRate;
+    NSDictionary *_additionalCompressionProperties;
     
     AVCaptureDevice *_currentDevice;
     AVCaptureDeviceInput *_currentInput;
@@ -178,9 +179,10 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize outputFormat = _outputFormat;
 @synthesize context = _context;
 @synthesize presentationFrame = _presentationFrame;
+@synthesize captureSessionPreset = _captureSessionPreset;
 @synthesize audioBitRate = _audioBitRate;
 @synthesize videoBitRate = _videoBitRate;
-@synthesize captureSessionPreset = _captureSessionPreset;
+@synthesize additionalCompressionProperties = _additionalCompressionProperties;
 @synthesize maximumCaptureDuration = _maximumCaptureDuration;
 
 #pragma mark - singleton
@@ -1738,12 +1740,18 @@ typedef void (^PBJVisionBlock)();
             break;
     }
     
-    // TODO: expose a means for adding addition options to setings, such as AVVideoProfileLevelKey
-    NSDictionary *compressionSettings = @{
-                                           //AVVideoProfileLevelKey : AVVideoProfileLevelH264Baseline30,
-                                           AVVideoAverageBitRateKey : @(_videoBitRate),
-                                           AVVideoMaxKeyFrameIntervalKey : @(_videoFrameRate) };
-
+    NSDictionary *compressionSettings = nil;
+    
+    if (_additionalCompressionProperties && [_additionalCompressionProperties count] > 0) {
+        NSMutableDictionary *mutableDictionary = [NSMutableDictionary dictionaryWithDictionary:_additionalCompressionProperties];
+        [mutableDictionary setObject:@(_videoBitRate) forKey:AVVideoAverageBitRateKey];
+        [mutableDictionary setObject:@(_videoFrameRate) forKey:AVVideoMaxKeyFrameIntervalKey];
+        compressionSettings = mutableDictionary;
+    } else {
+        compressionSettings = @{ AVVideoAverageBitRateKey : @(_videoBitRate),
+                                 AVVideoMaxKeyFrameIntervalKey : @(_videoFrameRate) };
+    }
+    
 	NSDictionary *videoSettings = @{ AVVideoCodecKey : AVVideoCodecH264,
                                      AVVideoScalingModeKey : AVVideoScalingModeResizeAspectFill,
                                      AVVideoWidthKey : @(videoDimensions.width),

@@ -138,6 +138,7 @@ static CGFloat const PBJVideoBitRate1280X750 = 5000000 * 8;
 
 @property (nonatomic) CGFloat videoBitRate;
 @property (nonatomic) NSInteger audioBitRate;
+@property (nonatomic) NSDictionary *additionalCompressionProperties;
 
 // video frame rate (adjustment may change the capture format (AVCaptureDeviceFormat : FoV, zoom factor, etc)
 
