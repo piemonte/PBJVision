@@ -182,7 +182,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize videoBitRate = _videoBitRate;
 @synthesize captureSessionPreset = _captureSessionPreset;
 @synthesize maximumCaptureDuration = _maximumCaptureDuration;
-@synthesize bytesPerSecond = _bytesPerSecond;
 
 #pragma mark - singleton
 
@@ -484,14 +483,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     }
 }
 
-// video
-
-- (void)setBytesPerSecond:(CGFloat)bytesPerSecond
-{
-    bytesPerSecond = _bytesPerSecond;
-    _videoBitRate = bytesPerSecond * 8;
-}
-
 // framerate
 
 - (void)setVideoFrameRate:(NSInteger)videoFrameRate
@@ -642,12 +633,12 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         
         _captureSessionPreset = AVCaptureSessionPresetMedium;
 
-        // default audio/video configuration
-        _audioBitRate = 64000;
-
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
-        self.bytesPerSecond = PBJBytesPerSecond640X480;
+        _videoBitRate = PBJVideoBitRate640X480;
+
+        // default audio/video configuration
+        _audioBitRate = 64000;
         
         // default flags
         _flags.thumbnailEnabled = YES;
