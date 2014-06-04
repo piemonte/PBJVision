@@ -484,6 +484,14 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     }
 }
 
+// video
+
+- (void)setBytesPerSecond:(CGFloat)bytesPerSecond
+{
+    bytesPerSecond = _bytesPerSecond;
+    _videoBitRate = bytesPerSecond * 8;
+}
+
 // framerate
 
 - (void)setVideoFrameRate:(NSInteger)videoFrameRate
@@ -656,11 +664,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationDidEnterBackground:) name:@"UIApplicationDidEnterBackgroundNotification" object:[UIApplication sharedApplication]];
     }
     return self;
-}
-
-- (void)setBytesPerSecond:(CGFloat)bytesPerSecond {
-    bytesPerSecond = _bytesPerSecond;
-    _videoBitRate = bytesPerSecond * 8;
 }
 
 - (void)dealloc
@@ -1744,8 +1747,9 @@ typedef void (^PBJVisionBlock)();
             break;
     }
     
-    // TODO: expose a means for adding addition options to setings
-    NSDictionary *compressionSettings = @{ AVVideoProfileLevelKey : AVVideoProfileLevelH264Baseline30,
+    // TODO: expose a means for adding addition options to setings, such as AVVideoProfileLevelKey
+    NSDictionary *compressionSettings = @{
+                                           //AVVideoProfileLevelKey : AVVideoProfileLevelH264Baseline30,
                                            AVVideoAverageBitRateKey : @(_videoBitRate),
                                            AVVideoMaxKeyFrameIntervalKey : @(_videoFrameRate) };
 

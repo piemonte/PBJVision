@@ -140,9 +140,7 @@ extern NSString * const PBJVisionVideoCapturedDurationKey; // Captured duration 
 
 @property (nonatomic) CGFloat videoBitRate;
 @property (nonatomic) NSInteger audioBitRate;
-
-//Whenever this is set it updates the videoBitRate
-@property (nonatomic) CGFloat bytesPerSecond;
+@property (nonatomic) CGFloat bytesPerSecond; // video
 
 // video frame rate (adjustment may change the capture format (AVCaptureDeviceFormat : FoV, zoom factor, etc)
 
