@@ -227,7 +227,7 @@
     [_captureDock addSubview:_focusButton];
     
     if ([[PBJVision sharedInstance] supportsVideoFrameRate:120]) {
-        
+        // set faster frame rate
     }
     
     // onion button
@@ -319,19 +319,18 @@
     vision.delegate = self;
 
     if ([vision isCameraDeviceAvailable:PBJCameraDeviceBack]) {
-        [vision setCameraDevice:PBJCameraDeviceBack];
+        vision.cameraDevice = PBJCameraDeviceBack;
         _flipButton.hidden = NO;
     } else {
-        [vision setCameraDevice:PBJCameraDeviceFront];
+        vision.cameraDevice = PBJCameraDeviceFront;
         _flipButton.hidden = YES;
     }
     
-    //[vision setCaptureSessionPreset:AVCaptureSessionPreset640x480];
-    [vision setCameraMode:PBJCameraModeVideo];
-    [vision setCameraOrientation:PBJCameraOrientationPortrait];
-    [vision setFocusMode:PBJFocusModeContinuousAutoFocus];
-    [vision setOutputFormat:PBJOutputFormatSquare];
-    [vision setVideoRenderingEnabled:YES];
+    vision.cameraMode = PBJCameraModeVideo;
+    vision.cameraOrientation = PBJCameraOrientationPortrait;
+    vision.focusMode = PBJFocusModeContinuousAutoFocus;
+    vision.outputFormat = PBJOutputFormatSquare;
+    vision.videoRenderingEnabled = YES;
     vision.additionalCompressionProperties = @{AVVideoProfileLevelKey : AVVideoProfileLevelH264Baseline30}; // AVVideoProfileLevelKey requires specific captureSessionPreset
 }
 
@@ -340,11 +339,7 @@
 - (void)_handleFlipButton:(UIButton *)button
 {
     PBJVision *vision = [PBJVision sharedInstance];
-    if (vision.cameraDevice == PBJCameraDeviceBack) {
-        [vision setCameraDevice:PBJCameraDeviceFront];
-    } else {
-        [vision setCameraDevice:PBJCameraDeviceBack];
-    }
+    vision.cameraDevice = vision.cameraDevice == PBJCameraDeviceBack ? PBJCameraDeviceFront : PBJCameraDeviceBack;
 }
 
 - (void)_handleFocusButton:(UIButton *)button
@@ -570,6 +565,7 @@
 
 - (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error
 {
+    // photo captured, PBJVisionPhotoJPEGKey
 }
 
 // video capture
