@@ -33,9 +33,6 @@
 		0683D1D8179F2E1700EE66D6 /* PBJViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0683D1D7179F2E1700EE66D6 /* PBJViewController.m */; };
 		06B7D01E179F2E7700F3F527 /* PBJVision.m in Sources */ = {isa = PBXBuildFile; fileRef = 06B7D01B179F2E7700F3F527 /* PBJVision.m */; };
 		06B7D01F179F2E7700F3F527 /* PBJVisionUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 06B7D01D179F2E7700F3F527 /* PBJVisionUtilities.m */; };
-		06B7D023179F2EDC00F3F527 /* Base.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D020179F2EDC00F3F527 /* Base.xcconfig */; };
-		06B7D024179F2EDC00F3F527 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D021179F2EDC00F3F527 /* Debug.xcconfig */; };
-		06B7D025179F2EDC00F3F527 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D022179F2EDC00F3F527 /* Release.xcconfig */; };
 		06B7D028179F307D00F3F527 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D027179F307D00F3F527 /* AVFoundation.framework */; };
 		06B7D02A179F312F00F3F527 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D029179F312F00F3F527 /* CoreMedia.framework */; };
 		06B7D02C179F313800F3F527 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D02B179F313800F3F527 /* CoreVideo.framework */; };
