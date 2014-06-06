@@ -1735,6 +1735,12 @@ typedef void (^PBJVisionBlock)();
             videoDimensions.height = (int32_t)(dimensions.width / 1.5f);
             break;
         }
+        case PBJOutputFormatStandard:
+        {
+            videoDimensions.width = dimensions.width;
+            videoDimensions.height = (int32_t)(dimensions.width * 3 / 4.0f);
+            break;
+        }
         case PBJOutputFormatPreset:
         default:
             break;
