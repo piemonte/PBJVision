@@ -101,12 +101,12 @@ extern NSString * const PBJVisionVideoCapturedDurationKey; // Captured duration 
 
 // suggested videoBitRate constants
 
-static CGFloat const PBJVideoBitRate480X360 = 87500 * 8;
-static CGFloat const PBJVideoBitRate640X480 = 437500 * 8;
-static CGFloat const PBJVideoBitRate1280X720 = 1312500 * 8;
-static CGFloat const PBJVideoBitRate1920X1080 = 2975000 * 8;
-static CGFloat const PBJVideoBitRate960X540 = 3750000 * 8;
-static CGFloat const PBJVideoBitRate1280X750 = 5000000 * 8;
+static CGFloat const PBJVideoBitRate480x360 = 87500 * 8;
+static CGFloat const PBJVideoBitRate640x480 = 437500 * 8;
+static CGFloat const PBJVideoBitRate1280x720 = 1312500 * 8;
+static CGFloat const PBJVideoBitRate1920x1080 = 2975000 * 8;
+static CGFloat const PBJVideoBitRate960x540 = 3750000 * 8;
+static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 @class EAGLContext;
 @protocol PBJVisionDelegate;

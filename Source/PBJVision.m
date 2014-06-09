@@ -637,7 +637,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
-        _videoBitRate = PBJVideoBitRate640X480;
+        _videoBitRate = PBJVideoBitRate640x480;
 
         // default audio/video configuration
         _audioBitRate = 64000;
