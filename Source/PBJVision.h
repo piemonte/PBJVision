@@ -210,6 +210,9 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 - (void)visionSessionDidStart:(PBJVision *)vision;
 - (void)visionSessionDidStop:(PBJVision *)vision;
 
+- (void)visionSessionWasInterrupted:(PBJVision *)vision;
+- (void)visionSessionInterruptionEnded:(PBJVision *)vision;
+
 // device / mode / format
 
 - (void)visionCameraDeviceWillChange:(PBJVision *)vision;
@@ -259,6 +262,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 - (void)vision:(PBJVision *)vision capturedVideo:(NSDictionary *)videoDict error:(NSError *)error;
 
 // video capture progress
+
 - (void)vision:(PBJVision *)vision didCaptureVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer;
 - (void)vision:(PBJVision *)vision didCaptureAudioSample:(CMSampleBufferRef)sampleBuffer;
 

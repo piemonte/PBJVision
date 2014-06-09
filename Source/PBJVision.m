@@ -2021,16 +2021,18 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_sessionStopped:(NSNotification *)notification
 {
-    [self _enqueueBlockOnCaptureVideoQueue:^{
+    [self _enqueueBlockOnCaptureSessionQueue:^{
+        if ([notification object] != _captureSession)
+            return;
+    
         DLog(@"session was stopped");
+        
         if (_flags.recording)
             [self endVideoCapture];
     
         [self _enqueueBlockOnMainQueue:^{
-            if ([notification object] == _captureSession) {
-                if ([_delegate respondsToSelector:@selector(visionSessionDidStop:)]) {
-                    [_delegate visionSessionDidStop:self];
-                }
+            if ([_delegate respondsToSelector:@selector(visionSessionDidStop:)]) {
+                [_delegate visionSessionDidStop:self];
             }
         }];
     }];
@@ -2039,20 +2041,42 @@ typedef void (^PBJVisionBlock)();
 - (void)_sessionWasInterrupted:(NSNotification *)notification
 {
     [self _enqueueBlockOnMainQueue:^{
-        if ([notification object] == _captureSession) {
-            DLog(@"session was interrupted");
-            // notify stop?
+        if ([notification object] != _captureSession)
+            return;
+        
+        DLog(@"session was interrupted");
+        
+        if (_flags.recording) {
+            [self _enqueueBlockOnMainQueue:^{
+                if ([_delegate respondsToSelector:@selector(visionSessionDidStop:)]) {
+                    [_delegate visionSessionDidStop:self];
+                }
+            }];
         }
+        
+        [self _enqueueBlockOnMainQueue:^{
+            if ([_delegate respondsToSelector:@selector(visionSessionWasInterruped:)]) {
+                [_delegate visionSessionWasInterruped:self];
+            }
+        }];
     }];
 }
 
 - (void)_sessionInterruptionEnded:(NSNotification *)notification
 {
     [self _enqueueBlockOnMainQueue:^{
-        if ([notification object] == _captureSession) {
-            DLog(@"session interruption ended");
-            // notify ended?
-        }
+        
+        if ([notification object] != _captureSession)
+            return;
+        
+        DLog(@"session interruption ended");
+        
+        [self _enqueueBlockOnMainQueue:^{
+            if ([_delegate respondsToSelector:@selector(visionSessionInterruptionEnded:)]) {
+                [_delegate visionSessionInterruptionEnded:self];
+            }
+        }];
+        
     }];
 }
 
