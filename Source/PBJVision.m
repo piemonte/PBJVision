@@ -1987,34 +1987,35 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_sessionStarted:(NSNotification *)notification
 {
-    [self _enqueueBlockOnMainQueue:^{        
-        if ([notification object] == _captureSession) {
-            DLog(@"session was started");
-            
-            // ensure there is a capture device setup
-            if (_currentInput) {
-                AVCaptureDevice *device = [_currentInput device];
-                if (device) {
-                    [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
-                    [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
-                    [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
-                    [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
-                    [_currentDevice removeObserver:self forKeyPath:@"flashAvailable"];
-                    [_currentDevice removeObserver:self forKeyPath:@"torchAvailable"];
-                    
-                    _currentDevice = device;
-                    [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
-                    [_currentDevice addObserver:self forKeyPath:@"adjustingExposure" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionExposureObserverContext];
-                    [_currentDevice addObserver:self forKeyPath:@"flashMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashModeObserverContext];
-                    [_currentDevice addObserver:self forKeyPath:@"torchMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchModeObserverContext];
-                    [_currentDevice addObserver:self forKeyPath:@"flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
-                    [_currentDevice addObserver:self forKeyPath:@"torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
-                }
-            }
+    [self _enqueueBlockOnMainQueue:^{
+        if ([notification object] != _captureSession)
+            return;
+
+        DLog(@"session was started");
         
-            if ([_delegate respondsToSelector:@selector(visionSessionDidStart:)]) {
-                [_delegate visionSessionDidStart:self];
+        // ensure there is a capture device setup
+        if (_currentInput) {
+            AVCaptureDevice *device = [_currentInput device];
+            if (device) {
+                [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
+                [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
+                [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
+                [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
+                [_currentDevice removeObserver:self forKeyPath:@"flashAvailable"];
+                [_currentDevice removeObserver:self forKeyPath:@"torchAvailable"];
+                
+                _currentDevice = device;
+                [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
+                [_currentDevice addObserver:self forKeyPath:@"adjustingExposure" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionExposureObserverContext];
+                [_currentDevice addObserver:self forKeyPath:@"flashMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashModeObserverContext];
+                [_currentDevice addObserver:self forKeyPath:@"torchMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchModeObserverContext];
+                [_currentDevice addObserver:self forKeyPath:@"flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
+                [_currentDevice addObserver:self forKeyPath:@"torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
             }
+        }
+    
+        if ([_delegate respondsToSelector:@selector(visionSessionDidStart:)]) {
+            [_delegate visionSessionDidStart:self];
         }
     }];
 }
