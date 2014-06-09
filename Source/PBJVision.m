@@ -1862,8 +1862,8 @@ typedef void (^PBJVisionBlock)();
                 }
                 
                 [self _enqueueBlockOnMainQueue:^{
-                    if ([_delegate respondsToSelector:@selector(visionDidCaptureVideoSample:)]) {
-                        [_delegate visionDidCaptureVideoSample:self];
+                    if ([_delegate respondsToSelector:@selector(vision:didCaptureVideoSampleBuffer:)]) {
+                        [_delegate vision:self didCaptureVideoSampleBuffer:bufferToWrite];
                     }
                 }];
             }
@@ -1882,8 +1882,8 @@ typedef void (^PBJVisionBlock)();
                 }
                 
                 [self _enqueueBlockOnMainQueue:^{
-                    if ([_delegate respondsToSelector:@selector(visionDidCaptureAudioSample:)]) {
-                        [_delegate visionDidCaptureAudioSample:self];
+                    if ([_delegate respondsToSelector:@selector(vision:didCaptureAudioSample:)]) {
+                        [_delegate vision:self didCaptureAudioSample:bufferToWrite];
                     }
                 }];
             }
