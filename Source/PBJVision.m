@@ -2055,8 +2055,8 @@ typedef void (^PBJVisionBlock)();
         }
         
         [self _enqueueBlockOnMainQueue:^{
-            if ([_delegate respondsToSelector:@selector(visionSessionWasInterruped:)]) {
-                [_delegate visionSessionWasInterruped:self];
+            if ([_delegate respondsToSelector:@selector(visionSessionWasInterrupted:)]) {
+                [_delegate visionSessionWasInterrupted:self];
             }
         }];
     }];
