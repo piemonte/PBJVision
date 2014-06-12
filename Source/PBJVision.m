@@ -352,7 +352,9 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     }
     
     [self _enqueueBlockOnCaptureSessionQueue:^{
+        // camera is already setup, no need to call _setupCamera
         [self _setupSession];
+        
         [self _enqueueBlockOnMainQueue:^{
             _flags.changingModes = NO;
             
@@ -724,6 +726,7 @@ typedef void (^PBJVisionBlock)();
         NSLog(@"error CVOpenGLESTextureCacheCreate (%d)", cvError);
     }
 
+    // create session
     _captureSession = [[AVCaptureSession alloc] init];
     
     // capture devices
@@ -753,12 +756,14 @@ typedef void (^PBJVisionBlock)();
     
     // capture device ouputs
     _captureOutputPhoto = [[AVCaptureStillImageOutput alloc] init];
-    if (_cameraMode != PBJCameraModePhoto)
+    if (_cameraMode != PBJCameraModePhoto) {
     	_captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
+    }
     _captureOutputVideo = [[AVCaptureVideoDataOutput alloc] init];
     
-    if (_cameraMode != PBJCameraModePhoto)
+    if (_cameraMode != PBJCameraModePhoto) {
     	[_captureOutputAudio setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
+    }
     [_captureOutputVideo setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
 
     // capture device initial settings
@@ -846,6 +851,7 @@ typedef void (^PBJVisionBlock)();
     return (sessionContainsOutput && outputHasConnection);
 }
 
+// _setupSession is always called from the captureSession queue
 - (void)_setupSession
 {
     if (!_captureSession) {
