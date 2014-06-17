@@ -159,6 +159,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         unsigned int interrupted:1;
         unsigned int videoWritten:1;
         unsigned int videoRenderingEnabled:1;
+        unsigned int audioCaptureEnabled:1;
         unsigned int thumbnailEnabled:1;
     } __block _flags;
 }
@@ -222,6 +223,16 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 - (BOOL)isVideoRenderingEnabled
 {
     return _flags.videoRenderingEnabled;
+}
+
+- (void)setAudioCaptureEnabled:(BOOL)audioCaptureEnabled
+{
+    _flags.audioCaptureEnabled = (unsigned int)audioCaptureEnabled;
+}
+
+- (BOOL)isAudioCaptureEnabled
+{
+    return _flags.audioCaptureEnabled;
 }
 
 - (void)setThumbnailEnabled:(BOOL)thumbnailEnabled
@@ -646,6 +657,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         
         // default flags
         _flags.thumbnailEnabled = YES;
+        _flags.audioCaptureEnabled = YES;
 
         // setup queues
         _captureSessionDispatchQueue = dispatch_queue_create("PBJVisionSession", DISPATCH_QUEUE_SERIAL); // protects session
@@ -747,21 +759,23 @@ typedef void (^PBJVisionBlock)();
         error = nil;
     }
     
-    if (_cameraMode != PBJCameraModePhoto)
+    if (_cameraMode != PBJCameraModePhoto && _flags.audioCaptureEnabled) {
         _captureDeviceAudio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
-    _captureDeviceInputAudio = [AVCaptureDeviceInput deviceInputWithDevice:_captureDeviceAudio error:&error];
-    if (error) {
-        DLog(@"error setting up audio input (%@)", error);
+        _captureDeviceInputAudio = [AVCaptureDeviceInput deviceInputWithDevice:_captureDeviceAudio error:&error];
+
+        if (error) {
+            DLog(@"error setting up audio input (%@)", error);
+        }
     }
     
     // capture device ouputs
     _captureOutputPhoto = [[AVCaptureStillImageOutput alloc] init];
-    if (_cameraMode != PBJCameraModePhoto) {
+    if (_cameraMode != PBJCameraModePhoto && _flags.audioCaptureEnabled) {
     	_captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
     }
     _captureOutputVideo = [[AVCaptureVideoDataOutput alloc] init];
     
-    if (_cameraMode != PBJCameraModePhoto) {
+    if (_cameraMode != PBJCameraModePhoto && _flags.audioCaptureEnabled) {
     	[_captureOutputAudio setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
     }
     [_captureOutputVideo setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
@@ -919,11 +933,13 @@ typedef void (^PBJVisionBlock)();
         // disable audio when in use for photos, otherwise enable it
         
     	if (self.cameraMode == PBJCameraModePhoto) {
-        
-        	[_captureSession removeInput:_captureDeviceInputAudio];
-        	[_captureSession removeOutput:_captureOutputAudio];
+            if (_captureDeviceInputAudio)
+                [_captureSession removeInput:_captureDeviceInputAudio];
+            
+            if (_captureOutputAudio)
+                [_captureSession removeOutput:_captureOutputAudio];
     	
-        } else if (!_captureDeviceAudio && !_captureDeviceInputAudio && !_captureOutputAudio) {
+        } else if (!_captureDeviceAudio && !_captureDeviceInputAudio && !_captureOutputAudio &&  _flags.audioCaptureEnabled) {
         
             NSError *error = nil;
             _captureDeviceAudio = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
