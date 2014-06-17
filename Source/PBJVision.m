@@ -165,11 +165,14 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     } __block _flags;
 }
 
+@property (nonatomic) AVCaptureDevice *currentDevice;
+
 @end
 
 @implementation PBJVision
 
 @synthesize delegate = _delegate;
+@synthesize currentDevice = _currentDevice;
 @synthesize previewLayer = _previewLayer;
 @synthesize cleanAperture = _cleanAperture;
 @synthesize cameraOrientation = _cameraOrientation;
@@ -799,7 +802,16 @@ typedef void (^PBJVisionBlock)();
     
     // capture device notifications
     [notificationCenter addObserver:self selector:@selector(_deviceSubjectAreaDidChange:) name:AVCaptureDeviceSubjectAreaDidChangeNotification object:nil];
-    
+
+    // current device KVO notifications
+    [self addObserver:self forKeyPath:@"currentDevice.adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
+    [self addObserver:self forKeyPath:@"currentDevice.adjustingExposure" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionExposureObserverContext];
+    [self addObserver:self forKeyPath:@"currentDevice.adjustingWhiteBalance" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionWhiteBalanceObserverContext];
+    [self addObserver:self forKeyPath:@"currentDevice.flashMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashModeObserverContext];
+    [self addObserver:self forKeyPath:@"currentDevice.torchMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchModeObserverContext];
+    [self addObserver:self forKeyPath:@"currentDevice.flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
+    [self addObserver:self forKeyPath:@"currentDevice.torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
+
     // KVO is only used to monitor focus and capture events
     [_captureOutputPhoto addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew context:(__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext)];
     
@@ -811,10 +823,19 @@ typedef void (^PBJVisionBlock)();
 {
     if (!_captureSession)
         return;
+    
+    // current device KVO notifications
+    [self removeObserver:self forKeyPath:@"currentDevice.adjustingFocus"];
+    [self removeObserver:self forKeyPath:@"currentDevice.adjustingExposure"];
+    [self removeObserver:self forKeyPath:@"currentDevice.adjustingWhiteBalance"];
+    [self removeObserver:self forKeyPath:@"currentDevice.flashMode"];
+    [self removeObserver:self forKeyPath:@"currentDevice.torchMode"];
+    [self removeObserver:self forKeyPath:@"currentDevice.flashAvailable"];
+    [self removeObserver:self forKeyPath:@"currentDevice.torchAvailable"];
 
     // remove notification observers (we don't want to just 'remove all' because we're also observing background notifications
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
-        
+
     // session notifications
     [notificationCenter removeObserver:self name:AVCaptureSessionRuntimeErrorNotification object:_captureSession];
     [notificationCenter removeObserver:self name:AVCaptureSessionDidStartRunningNotification object:_captureSession];
@@ -827,13 +848,6 @@ typedef void (^PBJVisionBlock)();
     
     // capture device notifications
     [notificationCenter removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:nil];
-
-    // only KVO use
-    [_captureOutputPhoto removeObserver:self forKeyPath:@"capturingStillImage"];
-    [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
-    [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
-    [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
-    [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
 
     _captureOutputPhoto = nil;
     _captureOutputAudio = nil;
@@ -1087,29 +1101,21 @@ typedef void (^PBJVisionBlock)();
     if ([_captureSession canSetSessionPreset:sessionPreset])
         [_captureSession setSessionPreset:sessionPreset];
 
-    // KVO
-    if (newCaptureDevice) {
-        [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
-        [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
-        [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
-        [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
-        [_currentDevice removeObserver:self forKeyPath:@"flashAvailable"];
-        [_currentDevice removeObserver:self forKeyPath:@"torchAvailable"];
-        
-        _currentDevice = newCaptureDevice;
-        [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
-        [_currentDevice addObserver:self forKeyPath:@"adjustingExposure" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionExposureObserverContext];
-        [_currentDevice addObserver:self forKeyPath:@"flashMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashModeObserverContext];
-        [_currentDevice addObserver:self forKeyPath:@"torchMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchModeObserverContext];
-        [_currentDevice addObserver:self forKeyPath:@"flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
-        [_currentDevice addObserver:self forKeyPath:@"torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
-    }
-    
     if (newDeviceInput)
         _currentInput = newDeviceInput;
     
     if (newCaptureOutput)
         _currentOutput = newCaptureOutput;
+
+    // ensure there is a capture device setup
+    if (_currentInput) {
+        AVCaptureDevice *device = [_currentInput device];
+        if (device) {
+            [self willChangeValueForKey:@"currentDevice"];
+            _currentDevice = device;
+            [self didChangeValueForKey:@"currentDevice"];
+        }
+    }
 
     [_captureSession commitConfiguration];
     
@@ -2023,20 +2029,9 @@ typedef void (^PBJVisionBlock)();
         if (_currentInput) {
             AVCaptureDevice *device = [_currentInput device];
             if (device) {
-                [_currentDevice removeObserver:self forKeyPath:@"adjustingFocus"];
-                [_currentDevice removeObserver:self forKeyPath:@"adjustingExposure"];
-                [_currentDevice removeObserver:self forKeyPath:@"flashMode"];
-                [_currentDevice removeObserver:self forKeyPath:@"torchMode"];
-                [_currentDevice removeObserver:self forKeyPath:@"flashAvailable"];
-                [_currentDevice removeObserver:self forKeyPath:@"torchAvailable"];
-                
+                [self willChangeValueForKey:@"currentDevice"];
                 _currentDevice = device;
-                [_currentDevice addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
-                [_currentDevice addObserver:self forKeyPath:@"adjustingExposure" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionExposureObserverContext];
-                [_currentDevice addObserver:self forKeyPath:@"flashMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashModeObserverContext];
-                [_currentDevice addObserver:self forKeyPath:@"torchMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchModeObserverContext];
-                [_currentDevice addObserver:self forKeyPath:@"flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
-                [_currentDevice addObserver:self forKeyPath:@"torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
+                [self didChangeValueForKey:@"currentDevice"];
             }
         }
     
