@@ -63,6 +63,12 @@ typedef NS_ENUM(NSInteger, PBJFlashMode) {
     PBJFlashModeAuto = AVCaptureFlashModeAuto
 };
 
+typedef NS_ENUM(NSInteger, PBJMirroringMode) {
+	PBJMirroringAuto,
+	PBJMirroringOn,
+	PBJMirroringOff
+};
+
 typedef NS_ENUM(NSInteger, PBJAuthorizationStatus) {
     PBJAuthorizationStatusNotDetermined = 0,
     PBJAuthorizationStatusAuthorized,
@@ -129,6 +135,8 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
 @property (nonatomic, readonly, getter=isFlashAvailable) BOOL flashAvailable;
+
+@property (nonatomic) PBJMirroringMode mirroringMode;
 
 // video output settings
 

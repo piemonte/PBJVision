@@ -115,6 +115,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     PBJFocusMode _focusMode;
     PBJExposureMode _exposureMode;
     PBJFlashMode _flashMode;
+    PBJMirroringMode _mirroringMode;
 
     NSString *_captureSessionPreset;
     PBJOutputFormat _outputFormat;
@@ -181,6 +182,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize focusMode = _focusMode;
 @synthesize exposureMode = _exposureMode;
 @synthesize flashMode = _flashMode;
+@synthesize mirroringMode = _mirroringMode;
 @synthesize outputFormat = _outputFormat;
 @synthesize context = _context;
 @synthesize presentationFrame = _presentationFrame;
@@ -347,6 +349,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     _cameraDevice = cameraDevice;
     _cameraMode = cameraMode;
     
+    [self setMirroringMode:_mirroringMode];
+
     _outputFormat = outputFormat;
     
     // since there is no session in progress, set and bail
@@ -670,7 +674,9 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         _previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:nil];
         
         _maximumCaptureDuration = kCMTimeInvalid;
-        
+
+        [self setMirroringMode:PBJMirroringAuto];
+
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationWillEnterForeground:) name:@"UIApplicationWillEnterForegroundNotification" object:[UIApplication sharedApplication]];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationDidEnterBackground:) name:@"UIApplicationDidEnterBackgroundNotification" object:[UIApplication sharedApplication]];
     }
@@ -1341,6 +1347,55 @@ typedef void (^PBJVisionBlock)();
     } else if (error) {
         DLog(@"error locking device for focus / exposure / white-balance adjustment (%@)", error);
     }
+}
+
+#pragma mark - mirroring
+
+- (void)setMirroringMode:(PBJMirroringMode)mirroringMode
+{
+	_mirroringMode = mirroringMode;
+    
+    AVCaptureConnection *videoConnection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
+	AVCaptureConnection *previewConnection = [_previewLayer connection];
+	
+    switch (_mirroringMode) {
+		case PBJMirroringOff:
+        {
+			if ([videoConnection isVideoMirroringSupported]) {
+				[videoConnection setVideoMirrored:NO];
+			}
+			if ([previewConnection isVideoMirroringSupported]) {
+				[previewConnection setAutomaticallyAdjustsVideoMirroring:NO];
+				[previewConnection setVideoMirrored:NO];
+			}			
+			break;
+		}
+        case PBJMirroringOn:
+        {
+			if ([videoConnection isVideoMirroringSupported]) {
+				[videoConnection setVideoMirrored:YES];
+			}
+			if ([previewConnection isVideoMirroringSupported]) {
+				[previewConnection setAutomaticallyAdjustsVideoMirroring:NO];
+				[previewConnection setVideoMirrored:YES];
+			}			
+			break;
+		}
+        case PBJMirroringAuto:
+        default:
+		{
+			BOOL mirror = (_cameraDevice == PBJCameraDeviceFront);
+        
+			if ([videoConnection isVideoMirroringSupported]) {
+				[videoConnection setVideoMirrored:mirror];
+			}
+			if ([previewConnection isVideoMirroringSupported]) {
+				[previewConnection setAutomaticallyAdjustsVideoMirroring:YES];
+			}
+
+			break;
+		}
+	}
 }
 
 #pragma mark - photo
