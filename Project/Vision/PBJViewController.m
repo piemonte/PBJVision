@@ -80,7 +80,7 @@
     UILabel *_instructionLabel;
     UIView *_gestureView;
     UILongPressGestureRecognizer *_longPressGestureRecognizer;
-    UITapGestureRecognizer *_tapGestureRecognizer;
+    UITapGestureRecognizer *_focusTapGestureRecognizer;
     
     BOOL _recording;
 
@@ -182,11 +182,11 @@
     _longPressGestureRecognizer.allowableMovement = 10.0f;
     
     // tap to focus
-    _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_handleFocusTapGesterRecognizer:)];
-    _tapGestureRecognizer.delegate = self;
-    _tapGestureRecognizer.numberOfTapsRequired = 1;
-    _tapGestureRecognizer.enabled = NO;
-    [_previewView addGestureRecognizer:_tapGestureRecognizer];
+    _focusTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_handleFocusTapGesterRecognizer:)];
+    _focusTapGestureRecognizer.delegate = self;
+    _focusTapGestureRecognizer.numberOfTapsRequired = 1;
+    _focusTapGestureRecognizer.enabled = NO;
+    [_previewView addGestureRecognizer:_focusTapGestureRecognizer];
     
     // gesture view to record
     _gestureView = [[UIView alloc] initWithFrame:CGRectZero];
@@ -195,6 +195,7 @@
     gestureFrame.size.height -= (40.0f + 85.0f);
     _gestureView.frame = gestureFrame;
     [self.view addSubview:_gestureView];
+    
     [_gestureView addGestureRecognizer:_longPressGestureRecognizer];
 
     // bottom dock
@@ -347,14 +348,14 @@
     _focusButton.selected = !_focusButton.selected;
     
     if (_focusButton.selected) {
-        _tapGestureRecognizer.enabled = YES;
+        _focusTapGestureRecognizer.enabled = YES;
         _gestureView.hidden = YES;
 
     } else {
         if (_focusView && [_focusView superview]) {
             [_focusView stopAnimation];
         }
-        _tapGestureRecognizer.enabled = NO;
+        _focusTapGestureRecognizer.enabled = NO;
         _gestureView.hidden = NO;
     }
     
