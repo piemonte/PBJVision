@@ -49,6 +49,7 @@ static CGFloat const PBJVisionThumbnailWidth = 160.0f;
 
 static NSString * const PBJVisionFocusObserverContext = @"PBJVisionFocusObserverContext";
 static NSString * const PBJVisionExposureObserverContext = @"PBJVisionExposureObserverContext";
+static NSString * const PBJVisionWhiteBalanceObserverContext = @"PBJVisionWhiteBalanceObserverContext";
 static NSString * const PBJVisionFlashModeObserverContext = @"PBJVisionFlashModeObserverContext";
 static NSString * const PBJVisionTorchModeObserverContext = @"PBJVisionTorchModeObserverContext";
 static NSString * const PBJVisionFlashAvailabilityObserverContext = @"PBJVisionFlashAvailabilityObserverContext";
@@ -840,15 +841,12 @@ typedef void (^PBJVisionBlock)();
     
     _captureDeviceAudio = nil;
     _captureDeviceInputAudio = nil;
-    
     _captureDeviceInputFront = nil;
     _captureDeviceInputBack = nil;
-
     _captureDeviceFront = nil;
     _captureDeviceBack = nil;
 
     _captureSession = nil;
-    
     _currentDevice = nil;
     _currentInput = nil;
     _currentOutput = nil;
@@ -1237,6 +1235,14 @@ typedef void (^PBJVisionBlock)();
     if ([_delegate respondsToSelector:@selector(visionDidChangeExposure:)])
         [_delegate visionDidChangeExposure:self];
     //    DLog(@"exposure change ended");
+}
+
+- (void)_whiteBalanceChangeStarted
+{
+}
+
+- (void)_whiteBalanceChangeEnded
+{
 }
 
 - (void)focusAtAdjustedPointOfInterest:(CGPoint)adjustedPoint
@@ -2150,8 +2156,18 @@ typedef void (^PBJVisionBlock)();
         }
         
     }
+    else if ( context == (__bridge void *)PBJVisionWhiteBalanceObserverContext ) {
+        
+        BOOL isWhiteBalanceChanging = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
+        if (isWhiteBalanceChanging) {
+            [self _whiteBalanceChangeStarted];
+        } else {
+            [self _whiteBalanceChangeEnded];
+        }
+        
+    }
     else if ( context == (__bridge void *)PBJVisionFlashAvailabilityObserverContext ||
-             context == (__bridge void *)PBJVisionTorchAvailabilityObserverContext ) {
+              context == (__bridge void *)PBJVisionTorchAvailabilityObserverContext ) {
         
         //        DLog(@"flash/torch availability did change");
         [self _enqueueBlockOnMainQueue:^{
@@ -2159,7 +2175,8 @@ typedef void (^PBJVisionBlock)();
                 [_delegate visionDidChangeFlashAvailablility:self];
         }];
         
-	} else if ( context == (__bridge void *)PBJVisionFlashModeObserverContext ||
+	}
+    else if ( context == (__bridge void *)PBJVisionFlashModeObserverContext ||
               context == (__bridge void *)PBJVisionTorchModeObserverContext ) {
         
         //        DLog(@"flash/torch mode did change");
@@ -2168,7 +2185,8 @@ typedef void (^PBJVisionBlock)();
                 [_delegate visionDidChangeFlashMode:self];
         }];
         
-	} else if ( context == (__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext) ) {
+	}
+    else if ( context == (__bridge void *)PBJVisionCaptureStillImageIsCapturingStillImageObserverContext ) {
     
 		BOOL isCapturingStillImage = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
 		if ( isCapturingStillImage ) {
