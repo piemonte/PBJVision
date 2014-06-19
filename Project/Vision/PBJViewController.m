@@ -129,8 +129,8 @@
 
     // done button
     _doneButton = [ExtendedHitButton extendedHitButton];
-    _doneButton.frame = CGRectMake(viewWidth - 20.0f - 20.0f, 20.0f, 20.0f, 20.0f);
-    UIImage *buttonImage = [UIImage imageNamed:@"capture_yep"];
+    _doneButton.frame = CGRectMake(viewWidth - 25.0f - 15.0f, 18.0f, 25.0f, 25.0f);
+    UIImage *buttonImage = [UIImage imageNamed:@"capture_done"];
     [_doneButton setImage:buttonImage forState:UIControlStateNormal];
     [_doneButton addTarget:self action:@selector(_handleDoneButton:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:_doneButton];
