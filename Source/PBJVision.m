@@ -111,6 +111,9 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     PBJCameraDevice _cameraDevice;
     PBJCameraMode _cameraMode;
     PBJCameraOrientation _cameraOrientation;
+	
+	PBJCameraOrientation _previewOrientation;
+	BOOL _autoUpdatePreviewOrientation;
     
     PBJFocusMode _focusMode;
     PBJExposureMode _exposureMode;
@@ -177,6 +180,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize previewLayer = _previewLayer;
 @synthesize cleanAperture = _cleanAperture;
 @synthesize cameraOrientation = _cameraOrientation;
+@synthesize previewOrientation = _previewOrientation;
+@synthesize autoUpdatePreviewOrientation = _autoUpdatePreviewOrientation;
 @synthesize cameraDevice = _cameraDevice;
 @synthesize cameraMode = _cameraMode;
 @synthesize focusMode = _focusMode;
@@ -278,8 +283,21 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         return;
      _cameraOrientation = cameraOrientation;
     
-    if ([_previewLayer.connection isVideoOrientationSupported])
+	if (self.autoUpdatePreviewOrientation) {
+		if ([_previewLayer.connection isVideoOrientationSupported]) {
+			[self _setOrientationForConnection:_previewLayer.connection];
+		}
+	}
+}
+
+- (void)setPreviewOrientation:(PBJCameraOrientation)previewOrientation {
+	if (previewOrientation == _previewOrientation)
+        return;
+	
+	if ([_previewLayer.connection isVideoOrientationSupported]) {
+		_previewOrientation = previewOrientation;
         [self _setOrientationForConnection:_previewLayer.connection];
+	}
 }
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
@@ -656,6 +674,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         
         _captureSessionPreset = AVCaptureSessionPresetMedium;
 
+		_autoUpdatePreviewOrientation = YES;
+		
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
         _videoBitRate = PBJVideoBitRate640x480;
