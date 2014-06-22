@@ -284,7 +284,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     _cameraOrientation = cameraOrientation;
 
     if (self.autoUpdatePreviewOrientation) {
-		[self setPreviewOrientation:cameraOrientation];
+        [self setPreviewOrientation:cameraOrientation];
     }
 }
 
