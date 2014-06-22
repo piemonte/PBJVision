@@ -279,25 +279,25 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 - (void)setCameraOrientation:(PBJCameraOrientation)cameraOrientation
 {
-     if (cameraOrientation == _cameraOrientation)
+    if (cameraOrientation == _cameraOrientation)
         return;
-     _cameraOrientation = cameraOrientation;
-    
-	if (self.autoUpdatePreviewOrientation) {
-		if ([_previewLayer.connection isVideoOrientationSupported]) {
-			[self _setOrientationForConnection:_previewLayer.connection];
-		}
-	}
+    _cameraOrientation = cameraOrientation;
+
+    if (self.autoUpdatePreviewOrientation) {
+        if ([_previewLayer.connection isVideoOrientationSupported]) {
+            [self _setOrientationForConnection:_previewLayer.connection];
+        }
+    }
 }
 
 - (void)setPreviewOrientation:(PBJCameraOrientation)previewOrientation {
-	if (previewOrientation == _previewOrientation)
+    if (previewOrientation == _previewOrientation)
         return;
-	
-	if ([_previewLayer.connection isVideoOrientationSupported]) {
-		_previewOrientation = previewOrientation;
+
+    if ([_previewLayer.connection isVideoOrientationSupported]) {
+        _previewOrientation = previewOrientation;
         [self _setOrientationForConnection:_previewLayer.connection];
-	}
+    }
 }
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
@@ -674,8 +674,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         
         _captureSessionPreset = AVCaptureSessionPresetMedium;
 
-		_autoUpdatePreviewOrientation = YES;
-		
+        _autoUpdatePreviewOrientation = YES;
+
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
         _videoBitRate = PBJVideoBitRate640x480;
