@@ -111,9 +111,9 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     PBJCameraDevice _cameraDevice;
     PBJCameraMode _cameraMode;
     PBJCameraOrientation _cameraOrientation;
-	
-	PBJCameraOrientation _previewOrientation;
-	BOOL _autoUpdatePreviewOrientation;
+
+    PBJCameraOrientation _previewOrientation;
+    BOOL _autoUpdatePreviewOrientation;
     
     PBJFocusMode _focusMode;
     PBJExposureMode _exposureMode;
