@@ -111,6 +111,9 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     PBJCameraDevice _cameraDevice;
     PBJCameraMode _cameraMode;
     PBJCameraOrientation _cameraOrientation;
+
+    PBJCameraOrientation _previewOrientation;
+    BOOL _autoUpdatePreviewOrientation;
     
     PBJFocusMode _focusMode;
     PBJExposureMode _exposureMode;
@@ -177,6 +180,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize previewLayer = _previewLayer;
 @synthesize cleanAperture = _cleanAperture;
 @synthesize cameraOrientation = _cameraOrientation;
+@synthesize previewOrientation = _previewOrientation;
+@synthesize autoUpdatePreviewOrientation = _autoUpdatePreviewOrientation;
 @synthesize cameraDevice = _cameraDevice;
 @synthesize cameraMode = _cameraMode;
 @synthesize focusMode = _focusMode;
@@ -274,12 +279,23 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 - (void)setCameraOrientation:(PBJCameraOrientation)cameraOrientation
 {
-     if (cameraOrientation == _cameraOrientation)
+    if (cameraOrientation == _cameraOrientation)
         return;
-     _cameraOrientation = cameraOrientation;
-    
-    if ([_previewLayer.connection isVideoOrientationSupported])
+    _cameraOrientation = cameraOrientation;
+
+    if (self.autoUpdatePreviewOrientation) {
+        [self setPreviewOrientation:cameraOrientation];
+    }
+}
+
+- (void)setPreviewOrientation:(PBJCameraOrientation)previewOrientation {
+    if (previewOrientation == _previewOrientation)
+        return;
+
+    if ([_previewLayer.connection isVideoOrientationSupported]) {
+        _previewOrientation = previewOrientation;
         [self _setOrientationForConnection:_previewLayer.connection];
+    }
 }
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
@@ -655,6 +671,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         [self _setupGL];
         
         _captureSessionPreset = AVCaptureSessionPresetMedium;
+
+        _autoUpdatePreviewOrientation = YES;
 
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
