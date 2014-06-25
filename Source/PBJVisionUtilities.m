@@ -33,7 +33,7 @@
     CGPoint pointOfInterest = CGPointMake(.5f, .5f);
     CGSize frameSize = frame.size;
     
-    switch ([[PBJVision sharedInstance] cameraOrientation]) {
+    switch ([[PBJVision sharedInstance] previewOrientation]) {
         case PBJCameraOrientationPortrait:
             break;
         case PBJCameraOrientationPortraitUpsideDown:
