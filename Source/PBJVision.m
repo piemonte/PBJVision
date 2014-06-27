@@ -116,6 +116,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     PBJFlashMode _flashMode;
 
     NSString *_captureSessionPreset;
+    NSString *_captureDirectory;
     PBJOutputFormat _outputFormat;
     
     CGFloat _videoBitRate;
@@ -181,6 +182,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize context = _context;
 @synthesize presentationFrame = _presentationFrame;
 @synthesize captureSessionPreset = _captureSessionPreset;
+@synthesize captureDirectory = _captureDirectory;
 @synthesize audioBitRate = _audioBitRate;
 @synthesize videoBitRate = _videoBitRate;
 @synthesize additionalCompressionProperties = _additionalCompressionProperties;
@@ -647,6 +649,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         [self _setupGL];
         
         _captureSessionPreset = AVCaptureSessionPresetMedium;
+        _captureDirectory = NSTemporaryDirectory();
 
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
@@ -1560,7 +1563,8 @@ typedef void (^PBJVisionBlock)();
             return;
 	
         NSString *guid = [[NSUUID new] UUIDString];
-        NSString *outputPath = [NSString stringWithFormat:@"%@video_%@.mp4", NSTemporaryDirectory(), guid];
+        NSString *outputFile = [NSString stringWithFormat:@"video_%@.mp4", guid];
+        NSString *outputPath = [_captureDirectory stringByAppendingPathComponent:outputFile];
         NSURL *outputURL = [NSURL fileURLWithPath:outputPath];
         if ([[NSFileManager defaultManager] fileExistsAtPath:outputPath]) {
             NSError *error = nil;
