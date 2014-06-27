@@ -649,7 +649,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         [self _setupGL];
         
         _captureSessionPreset = AVCaptureSessionPresetMedium;
-        _captureDirectory = NSTemporaryDirectory();
+        _captureDirectory = nil;
 
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
@@ -1564,7 +1564,8 @@ typedef void (^PBJVisionBlock)();
 	
         NSString *guid = [[NSUUID new] UUIDString];
         NSString *outputFile = [NSString stringWithFormat:@"video_%@.mp4", guid];
-        NSString *outputPath = [_captureDirectory stringByAppendingPathComponent:outputFile];
+        NSString *outputDirectory = (_captureDirectory == nil ? NSTemporaryDirectory() : _captureDirectory);
+        NSString *outputPath = [outputDirectory stringByAppendingPathComponent:outputFile];
         NSURL *outputURL = [NSURL fileURLWithPath:outputPath];
         if ([[NSFileManager defaultManager] fileExistsAtPath:outputPath]) {
             NSError *error = nil;
