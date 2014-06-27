@@ -197,6 +197,52 @@
 	return angle;
 }
 
++ (AVCaptureVideoOrientation)convertToCaptureVideoOrientationFromCameraOrientation:(PBJCameraOrientation)cameraOrientation {
+    AVCaptureVideoOrientation orientation = AVCaptureVideoOrientationPortrait;
+
+    switch (cameraOrientation) {
+        case PBJCameraOrientationPortraitUpsideDown:
+            orientation = AVCaptureVideoOrientationPortraitUpsideDown;
+            break;
+        case PBJCameraOrientationLandscapeRight:
+            orientation = AVCaptureVideoOrientationLandscapeRight;
+            break;
+        case PBJCameraOrientationLandscapeLeft:
+            orientation = AVCaptureVideoOrientationLandscapeLeft;
+            break;
+        default:
+        case PBJCameraOrientationPortrait:
+            orientation = AVCaptureVideoOrientationPortrait;
+            break;
+    }
+
+    return orientation;
+}
+
++ (PBJCameraOrientation)convertToCameraOrientationFromDeviceOrientation:(UIDeviceOrientation)deviceOrientation {
+    PBJCameraOrientation orientation = PBJCameraOrientationPortrait;
+    
+    switch (deviceOrientation) {
+        case UIDeviceOrientationPortrait:
+            orientation = PBJCameraOrientationPortrait;
+            break;
+            
+        case UIDeviceOrientationLandscapeLeft:
+            orientation = PBJCameraOrientationLandscapeRight;
+            break;
+            
+        case UIDeviceOrientationLandscapeRight:
+            orientation = PBJCameraOrientationLandscapeLeft;
+            break;
+            
+        default:
+            orientation = PBJCameraOrientationPortrait;
+            break;
+    }
+    
+    return orientation;
+}
+
 #pragma mark - memory
 
 + (uint64_t)availableDiskSpaceInBytes

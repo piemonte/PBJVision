@@ -25,6 +25,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+#import "PBJVisionTypes.h"
 
 @interface PBJVisionUtilities : NSObject
 
@@ -38,6 +39,9 @@
 + (CMSampleBufferRef)createOffsetSampleBufferWithSampleBuffer:(CMSampleBufferRef)sampleBuffer usingTimeOffset:(CMTime)timeOffset;
 
 + (CGFloat)angleOffsetFromPortraitOrientationToOrientation:(AVCaptureVideoOrientation)orientation;
+
++ (AVCaptureVideoOrientation)convertToCaptureVideoOrientationFromCameraOrientation:(PBJCameraOrientation)cameraOrientation;
++ (PBJCameraOrientation)convertToCameraOrientationFromDeviceOrientation:(UIDeviceOrientation)deviceOrientation;
 
 + (uint64_t)availableDiskSpaceInBytes;
 

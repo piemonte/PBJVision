@@ -293,33 +293,19 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         return;
 
     if ([_previewLayer.connection isVideoOrientationSupported]) {
+        AVCaptureVideoOrientation convertedOrientation = [PBJVisionUtilities convertToCaptureVideoOrientationFromCameraOrientation:previewOrientation];
+        [_previewLayer.connection setVideoOrientation:convertedOrientation];
         _previewOrientation = previewOrientation;
-        [self _setOrientationForConnection:_previewLayer.connection];
     }
 }
+
 
 - (void)_setOrientationForConnection:(AVCaptureConnection *)connection
 {
     if (!connection || ![connection isVideoOrientationSupported])
         return;
 
-    AVCaptureVideoOrientation orientation = AVCaptureVideoOrientationPortrait;
-    switch (_cameraOrientation) {
-        case PBJCameraOrientationPortraitUpsideDown:
-            orientation = AVCaptureVideoOrientationPortraitUpsideDown;
-            break;
-        case PBJCameraOrientationLandscapeRight:
-            orientation = AVCaptureVideoOrientationLandscapeRight;
-            break;
-        case PBJCameraOrientationLandscapeLeft:
-            orientation = AVCaptureVideoOrientationLandscapeLeft;
-            break;
-        default:
-        case PBJCameraOrientationPortrait:
-            orientation = AVCaptureVideoOrientationPortrait;
-            break;
-    }
-
+    AVCaptureVideoOrientation orientation = [PBJVisionUtilities convertToCaptureVideoOrientationFromCameraOrientation:_cameraOrientation];
     [connection setVideoOrientation:orientation];
 }
 
@@ -1156,7 +1142,9 @@ typedef void (^PBJVisionBlock)();
     
         if (_previewLayer && _previewLayer.session != _captureSession) {
             _previewLayer.session = _captureSession;
-            [self _setOrientationForConnection:_previewLayer.connection];
+            if (self.autoUpdatePreviewOrientation) {
+                [self setPreviewOrientation:_cameraOrientation];
+            }
         }
         
         if (![_captureSession isRunning]) {
