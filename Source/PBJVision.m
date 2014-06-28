@@ -66,7 +66,7 @@ NSString * const PBJVisionPhotoThumbnailKey = @"PBJVisionPhotoThumbnailKey";
 
 NSString * const PBJVisionVideoPathKey = @"PBJVisionVideoPathKey";
 NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
-NSString * const PBJVisionVideoThumbnailArrayKey = @"PBJVisionVideoThumbnailKey";
+NSString * const PBJVisionVideoThumbnailArrayKey = @"PBJVisionVideoThumbnailArrayKey";
 NSString * const PBJVisionVideoCapturedDurationKey = @"PBJVisionVideoCapturedDurationKey";
 
 
@@ -1757,13 +1757,17 @@ typedef void (^PBJVisionBlock)();
 - (void)captureVideoThumbnailAtTime:(Float64)seconds
 {
     NSNumber *frameNumber = @(seconds * (Float64)_videoFrameRate);
-    CMTime time = CMTimeMake([frameNumber longLongValue], _videoFrameRate);
+    NSNumber *frameRate = @(_videoFrameRate);
+    
+    CMTime time = CMTimeMake([frameNumber longLongValue], [frameRate intValue]);
     [_captureThumbnailTimes addObject:[NSValue valueWithCMTime:time]];
 }
 
 - (void)captureVideoThumbnailAtFrame:(int64_t)frame
 {
-    CMTime time = CMTimeMake(frame, _videoFrameRate);
+    NSNumber *frameRate = @(_videoFrameRate);
+
+    CMTime time = CMTimeMake(frame, [frameRate intValue]);
     [_captureThumbnailTimes addObject:[NSValue valueWithCMTime:time]];
 }
 
