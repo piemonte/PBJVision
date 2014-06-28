@@ -67,6 +67,7 @@ NSString * const PBJVisionPhotoThumbnailKey = @"PBJVisionPhotoThumbnailKey";
 
 NSString * const PBJVisionVideoPathKey = @"PBJVisionVideoPathKey";
 NSString * const PBJVisionVideoThumbnailKey = @"PBJVisionVideoThumbnailKey";
+NSString * const PBJVisionVideoThumbnailArrayKey = @"PBJVisionVideoThumbnailArrayKey";
 NSString * const PBJVisionVideoCapturedDurationKey = @"PBJVisionVideoCapturedDurationKey";
 
 
@@ -123,6 +124,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     NSString *_captureSessionPreset;
     NSString *_captureDirectory;
     PBJOutputFormat _outputFormat;
+    NSMutableSet* _captureThumbnailTimes;
     
     CGFloat _videoBitRate;
     NSInteger _audioBitRate;
@@ -1678,6 +1680,9 @@ typedef void (^PBJVisionBlock)();
         _flags.interrupted = NO;
         _flags.videoWritten = NO;
         
+        _captureThumbnailTimes = [NSMutableSet set];
+        [self captureVideoThumbnailAtFrame:0];
+        
         [self _enqueueBlockOnMainQueue:^{                
             if ([_delegate respondsToSelector:@selector(visionDidStartVideoCapture:)])
                 [_delegate visionDidStartVideoCapture:self];
@@ -1756,9 +1761,37 @@ typedef void (^PBJVisionBlock)();
             [self _enqueueBlockOnMainQueue:^{
                 NSMutableDictionary *videoDict = [[NSMutableDictionary alloc] init];
                 NSString *path = [_mediaWriter.outputURL path];
-                if (path)
+                if (path) {
                     [videoDict setObject:path forKey:PBJVisionVideoPathKey];
 
+                    AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:_mediaWriter.outputURL options:nil];
+                    AVAssetImageGenerator *generate = [[AVAssetImageGenerator alloc] initWithAsset:asset];
+                    generate.appliesPreferredTrackTransform = YES;
+                    
+                    NSMutableArray* thumbnails = [NSMutableArray array];
+                    
+                    for (NSValue *time in [_captureThumbnailTimes allObjects]) {
+                        CGImageRef imgRef = [generate copyCGImageAtTime:[time CMTimeValue] actualTime:NULL error:NULL];
+                        if (imgRef) {
+                            UIImage *image = [[UIImage alloc] initWithCGImage:imgRef];
+                            if (image) {
+                                [thumbnails addObject:image];
+                            }
+                            
+                            CGImageRelease(imgRef);
+                        }
+
+                        UIImage *defaultThumbnail = [thumbnails firstObject];
+                        if (defaultThumbnail) {
+                            [videoDict setObject:defaultThumbnail forKey:PBJVisionVideoThumbnailKey];
+                        }
+                        
+                        if (thumbnails.count) {
+                            [videoDict setObject:thumbnails forKey:PBJVisionVideoThumbnailArrayKey];
+                        }
+                    }
+                }
+                
                 [videoDict setObject:@(capturedDuration) forKey:PBJVisionVideoCapturedDurationKey];
 
                 NSError *error = [_mediaWriter error];
@@ -1779,6 +1812,8 @@ typedef void (^PBJVisionBlock)();
         _flags.recording = NO;
         _flags.paused = NO;
         
+        _captureThumbnailTimes = nil;
+        
         void (^finishWritingCompletionHandler)(void) = ^{
             _lastTimestamp = kCMTimeInvalid;
             _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
@@ -1793,6 +1828,30 @@ typedef void (^PBJVisionBlock)();
         };
         [_mediaWriter finishWritingWithCompletionHandler:finishWritingCompletionHandler];
     }];
+}
+
+- (void)captureCurrentVideoThumbnail
+{
+    if (_flags.recording) {
+        [self captureVideoThumbnailAtTime:self.capturedVideoSeconds];
+    }
+}
+
+- (void)captureVideoThumbnailAtTime:(Float64)seconds
+{
+    NSNumber *frameNumber = @(seconds * (Float64)_videoFrameRate);
+    NSNumber *frameRate = @(_videoFrameRate);
+    
+    CMTime time = CMTimeMake([frameNumber longLongValue], [frameRate intValue]);
+    [_captureThumbnailTimes addObject:[NSValue valueWithCMTime:time]];
+}
+
+- (void)captureVideoThumbnailAtFrame:(int64_t)frame
+{
+    NSNumber *frameRate = @(_videoFrameRate);
+
+    CMTime time = CMTimeMake(frame, [frameRate intValue]);
+    [_captureThumbnailTimes addObject:[NSValue valueWithCMTime:time]];
 }
 
 #pragma mark - sample buffer setup
