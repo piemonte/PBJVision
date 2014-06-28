@@ -103,6 +103,7 @@ extern NSString * const PBJVisionPhotoThumbnailKey; // 160x120
 
 extern NSString * const PBJVisionVideoPathKey;
 extern NSString * const PBJVisionVideoThumbnailKey;
+extern NSString * const PBJVisionVideoThumbnailArrayKey;
 extern NSString * const PBJVisionVideoCapturedDurationKey; // Captured duration in seconds
 
 // suggested videoBitRate constants
@@ -211,6 +212,10 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 - (void)resumeVideoCapture;
 - (void)endVideoCapture;
 - (void)cancelVideoCapture;
+
+- (void)captureCurrentVideoThumbnail;
+- (void)captureVideoThumbnailAtFrame:(int64_t)frame;
+- (void)captureVideoThumbnailAtTime:(Float64)seconds;
 
 @end
 
