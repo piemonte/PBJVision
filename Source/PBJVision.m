@@ -1600,7 +1600,10 @@ typedef void (^PBJVisionBlock)();
         
         _captureThumbnailTimes = [NSMutableSet set];
         _captureThumbnailFrames = [NSMutableSet set];
-        [self captureVideoThumbnailAtFrame:0];
+        
+        if (_flags.thumbnailEnabled) {
+            [self captureVideoThumbnailAtFrame:0];
+        }
         
         [self _enqueueBlockOnMainQueue:^{                
             if ([_delegate respondsToSelector:@selector(visionDidStartVideoCapture:)])
@@ -1682,55 +1685,14 @@ typedef void (^PBJVisionBlock)();
                 NSString *path = [_mediaWriter.outputURL path];
                 if (path) {
                     [videoDict setObject:path forKey:PBJVisionVideoPathKey];
-
-                    AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:_mediaWriter.outputURL options:nil];
-                    AVAssetImageGenerator *generate = [[AVAssetImageGenerator alloc] initWithAsset:asset];
-                    generate.appliesPreferredTrackTransform = YES;
                     
-                    int32_t timescale = [@([self videoFrameRate]) intValue];
-                    
-                    for (NSNumber* frameNumber in [_captureThumbnailFrames allObjects]) {
-                        CMTime time = CMTimeMake([frameNumber longLongValue], timescale);
-                        Float64 timeInSeconds = CMTimeGetSeconds(time);
-                        [self captureVideoThumbnailAtTime:timeInSeconds];
-                    }
-                    
-                    NSMutableSet* captureTimes = [NSMutableSet set];
-                    NSArray* thumbnailTimes = [_captureThumbnailTimes allObjects];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wselector"
-                   NSArray* sortedThumbnailTimes = [thumbnailTimes sortedArrayUsingSelector:@selector(compare:)];
-#pragma clang diagnostic pop
-
-                    for (NSNumber* seconds in sortedThumbnailTimes) {
-                        CMTime time = CMTimeMakeWithSeconds([seconds doubleValue], timescale);
-                        [captureTimes addObject:[NSValue valueWithCMTime:time]];
-                    }
-                    
-                    NSMutableArray* thumbnails = [NSMutableArray array];
-
-                    for (NSValue *time in [captureTimes allObjects]) {
-                        CGImageRef imgRef = [generate copyCGImageAtTime:[time CMTimeValue] actualTime:NULL error:NULL];
-                        if (imgRef) {
-                            UIImage *image = [[UIImage alloc] initWithCGImage:imgRef];
-                            if (image) {
-                                [thumbnails addObject:image];
-                            }
-                            
-                            CGImageRelease(imgRef);
-                        }
-
-                        UIImage *defaultThumbnail = [thumbnails firstObject];
-                        if (defaultThumbnail) {
-                            [videoDict setObject:defaultThumbnail forKey:PBJVisionVideoThumbnailKey];
-                        }
+                    if (_flags.thumbnailEnabled) {
+                        [self captureVideoThumbnailAtTime:capturedDuration];
                         
-                        if (thumbnails.count) {
-                            [videoDict setObject:thumbnails forKey:PBJVisionVideoThumbnailArrayKey];
-                        }
+                        [self generateThumbnailsForVideoWithURL:_mediaWriter.outputURL inDictionary:videoDict];
                     }
                 }
-                
+
                 [videoDict setObject:@(capturedDuration) forKey:PBJVisionVideoCapturedDurationKey];
 
                 NSError *error = [_mediaWriter error];
@@ -1785,6 +1747,56 @@ typedef void (^PBJVisionBlock)();
 - (void)captureVideoThumbnailAtFrame:(int64_t)frame
 {
     [_captureThumbnailFrames addObject:@(frame)];
+}
+
+- (void)generateThumbnailsForVideoWithURL:(NSURL*)url inDictionary:(NSMutableDictionary*)videoDict
+{
+    AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:url options:nil];
+    AVAssetImageGenerator *generate = [[AVAssetImageGenerator alloc] initWithAsset:asset];
+    generate.appliesPreferredTrackTransform = YES;
+    
+    int32_t timescale = [@([self videoFrameRate]) intValue];
+    
+    for (NSNumber *frameNumber in [_captureThumbnailFrames allObjects]) {
+        CMTime time = CMTimeMake([frameNumber longLongValue], timescale);
+        Float64 timeInSeconds = CMTimeGetSeconds(time);
+        [self captureVideoThumbnailAtTime:timeInSeconds];
+    }
+    
+    NSMutableArray *captureTimes = [NSMutableArray array];
+    NSArray *thumbnailTimes = [_captureThumbnailTimes allObjects];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wselector"
+    NSArray *sortedThumbnailTimes = [thumbnailTimes sortedArrayUsingSelector:@selector(compare:)];
+#pragma clang diagnostic pop
+    
+    for (NSNumber *seconds in sortedThumbnailTimes) {
+        CMTime time = CMTimeMakeWithSeconds([seconds doubleValue], timescale);
+        [captureTimes addObject:[NSValue valueWithCMTime:time]];
+    }
+    
+    NSMutableArray *thumbnails = [NSMutableArray array];
+    
+    for (NSValue *time in captureTimes) {
+        CGImageRef imgRef = [generate copyCGImageAtTime:[time CMTimeValue] actualTime:NULL error:NULL];
+        if (imgRef) {
+            UIImage *image = [[UIImage alloc] initWithCGImage:imgRef];
+            if (image) {
+                [thumbnails addObject:image];
+            }
+            
+            CGImageRelease(imgRef);
+        }
+    }
+    
+    UIImage *defaultThumbnail = [thumbnails firstObject];
+    if (defaultThumbnail) {
+        [videoDict setObject:defaultThumbnail forKey:PBJVisionVideoThumbnailKey];
+    }
+    
+    if (thumbnails.count) {
+        [videoDict setObject:thumbnails forKey:PBJVisionVideoThumbnailArrayKey];
+    }
 }
 
 #pragma mark - sample buffer setup
