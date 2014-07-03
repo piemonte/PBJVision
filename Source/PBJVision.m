@@ -120,6 +120,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     NSString *_captureDirectory;
     PBJOutputFormat _outputFormat;
     NSMutableSet* _captureThumbnailTimes;
+    NSMutableSet* _captureThumbnailFrames;
     
     CGFloat _videoBitRate;
     NSInteger _audioBitRate;
@@ -1598,6 +1599,7 @@ typedef void (^PBJVisionBlock)();
         _flags.videoWritten = NO;
         
         _captureThumbnailTimes = [NSMutableSet set];
+        _captureThumbnailFrames = [NSMutableSet set];
         [self captureVideoThumbnailAtFrame:0];
         
         [self _enqueueBlockOnMainQueue:^{                
@@ -1685,9 +1687,29 @@ typedef void (^PBJVisionBlock)();
                     AVAssetImageGenerator *generate = [[AVAssetImageGenerator alloc] initWithAsset:asset];
                     generate.appliesPreferredTrackTransform = YES;
                     
-                    NSMutableArray* thumbnails = [NSMutableArray array];
+                    int32_t timescale = [@([self videoFrameRate]) intValue];
                     
-                    for (NSValue *time in [_captureThumbnailTimes allObjects]) {
+                    for (NSNumber* frameNumber in [_captureThumbnailFrames allObjects]) {
+                        CMTime time = CMTimeMake([frameNumber longLongValue], timescale);
+                        Float64 timeInSeconds = CMTimeGetSeconds(time);
+                        [self captureVideoThumbnailAtTime:timeInSeconds];
+                    }
+                    
+                    NSMutableSet* captureTimes = [NSMutableSet set];
+                    NSArray* thumbnailTimes = [_captureThumbnailTimes allObjects];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wselector"
+                   NSArray* sortedThumbnailTimes = [thumbnailTimes sortedArrayUsingSelector:@selector(compare:)];
+#pragma clang diagnostic pop
+
+                    for (NSNumber* seconds in sortedThumbnailTimes) {
+                        CMTime time = CMTimeMakeWithSeconds([seconds doubleValue], timescale);
+                        [captureTimes addObject:[NSValue valueWithCMTime:time]];
+                    }
+                    
+                    NSMutableArray* thumbnails = [NSMutableArray array];
+
+                    for (NSValue *time in [captureTimes allObjects]) {
                         CGImageRef imgRef = [generate copyCGImageAtTime:[time CMTimeValue] actualTime:NULL error:NULL];
                         if (imgRef) {
                             UIImage *image = [[UIImage alloc] initWithCGImage:imgRef];
@@ -1729,7 +1751,8 @@ typedef void (^PBJVisionBlock)();
         _flags.recording = NO;
         _flags.paused = NO;
         
-        _captureThumbnailTimes = nil;
+        [_captureThumbnailTimes removeAllObjects];
+        [_captureThumbnailFrames removeAllObjects];
         
         void (^finishWritingCompletionHandler)(void) = ^{
             _lastTimestamp = kCMTimeInvalid;
@@ -1756,19 +1779,12 @@ typedef void (^PBJVisionBlock)();
 
 - (void)captureVideoThumbnailAtTime:(Float64)seconds
 {
-    NSNumber *frameNumber = @(seconds * (Float64)_videoFrameRate);
-    NSNumber *frameRate = @(_videoFrameRate);
-    
-    CMTime time = CMTimeMake([frameNumber longLongValue], [frameRate intValue]);
-    [_captureThumbnailTimes addObject:[NSValue valueWithCMTime:time]];
+    [_captureThumbnailTimes addObject:@(seconds)];
 }
 
 - (void)captureVideoThumbnailAtFrame:(int64_t)frame
 {
-    NSNumber *frameRate = @(_videoFrameRate);
-
-    CMTime time = CMTimeMake(frame, [frameRate intValue]);
-    [_captureThumbnailTimes addObject:[NSValue valueWithCMTime:time]];
+    [_captureThumbnailFrames addObject:@(frame)];
 }
 
 #pragma mark - sample buffer setup
