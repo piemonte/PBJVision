@@ -187,8 +187,6 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 @property (nonatomic, readonly) BOOL canCapturePhoto;
 - (void)capturePhoto;
 
-@property (nonatomic) BOOL thumbnailEnabled; // thumbnail generation, disabling reduces processing time for a photo
-
 // video
 // use pause/resume if a session is in progress, end finalizes that recording session
 
@@ -212,6 +210,10 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 - (void)resumeVideoCapture;
 - (void)endVideoCapture;
 - (void)cancelVideoCapture;
+
+// thumbnails
+
+@property (nonatomic) BOOL thumbnailEnabled; // thumbnail generation, disabling reduces processing time for a photo or video
 
 - (void)captureCurrentVideoThumbnail;
 - (void)captureVideoThumbnailAtFrame:(int64_t)frame;
