@@ -100,7 +100,7 @@
         _videoTimestamp = kCMTimeInvalid;
 
         // It's possible to capture video without audio or audio without video.
-        // If the user has denied access to a device, or asked been asked, we don't need to set it up
+        // If the user has denied access to a device, or hasn't even been asked, we don't need to set it up
         if ([[AVCaptureDevice class] respondsToSelector:@selector(authorizationStatusForMediaType:)]) {
             AVAuthorizationStatus audioAuthorizationStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio];
             
