@@ -1998,7 +1998,7 @@ typedef void (^PBJVisionBlock)();
         DLog(@"ready for video (%d)", _mediaWriter.isVideoReady);
     }
 
-    BOOL isReadyToRecord = (_mediaWriter.isAudioReady && _mediaWriter.isVideoReady);
+    BOOL isReadyToRecord = ((!_flags.audioCaptureEnabled || _mediaWriter.isAudioReady) && _mediaWriter.isVideoReady);
     if (!isReadyToRecord) {
         CFRelease(sampleBuffer);
         return;
