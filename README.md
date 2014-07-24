@@ -92,7 +92,7 @@ pod 'PBJVision'
 
 ## Contributing
 
-See the [CONTRIBUTING](https://github.com/piemonte/PBJVision/blob/master/CONTRIBUTING.md) file for information on how to collaborate and help out. The [github issues page](https://github.com/piemonte/PBJVision/issues) is a great place to start a discussion and also allows others to benefit and chime-in too.
+See the [CONTRIBUTING](https://github.com/piemonte/PBJVision/blob/master/CONTRIBUTING.md) file for information on how to collaborate and help out. The [github issues page](https://github.com/piemonte/PBJVision/issues) is a the place to file a bug, [Stack Overflow](http://stackoverflow.com/questions/tagged/pbjvision) is a great place to start a discussion and also allows others to benefit and chime-in too.
 
 ## License
 
