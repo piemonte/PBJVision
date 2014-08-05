@@ -1650,6 +1650,11 @@ typedef void (^PBJVisionBlock)();
 	
         NSString *guid = [[NSUUID new] UUIDString];
         NSString *outputFile = [NSString stringWithFormat:@"video_%@.mp4", guid];
+        
+        if ([_delegate respondsToSelector:@selector(vision:willCaptureVideoToFileNamed:)]) {
+            outputFile = [_delegate vision:self willCaptureVideoToFileNamed:outputFile];
+        }
+        
         NSString *outputDirectory = (_captureDirectory == nil ? NSTemporaryDirectory() : _captureDirectory);
         NSString *outputPath = [outputDirectory stringByAppendingPathComponent:outputFile];
         NSURL *outputURL = [NSURL fileURLWithPath:outputPath];
