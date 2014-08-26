@@ -8,7 +8,5 @@ branches:
 
 before_install:
   - export LANG=en_US.UTF-8
-  - brew update
-  - brew upgrade xctool
 
 script: xctool -project Project/Vision.xcodeproj -scheme Debug -sdk iphonesimulator7.1 build analyze test
