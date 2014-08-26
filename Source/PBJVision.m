@@ -1667,7 +1667,7 @@ typedef void (^PBJVisionBlock)();
         if ([_delegate respondsToSelector:@selector(vision:willStartVideoCaptureToFile:)]) {
             outputFile = [_delegate vision:self willStartVideoCaptureToFile:outputFile];
             
-            if (outputFile == nil) {
+            if (!outputFile) {
                 [self _failVideoCaptureWithErrorCode:PBJVisionErrorBadOutputFile];
                 return;
             }
@@ -1918,9 +1918,9 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_failVideoCaptureWithErrorCode:(NSInteger)errorCode
 {
-    if (errorCode && [_delegate respondsToSelector:@selector(vision:couldNotStartVideoCapture:)]) {
+    if (errorCode && [_delegate respondsToSelector:@selector(vision:capturedVideo:error:)]) {
         NSError *error = [NSError errorWithDomain:PBJVisionErrorDomain code:errorCode userInfo:nil];
-        [_delegate vision:self couldNotStartVideoCapture:error];
+        [_delegate vision:self capturedVideo:nil error:error];
     }
 }
 
