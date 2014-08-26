@@ -170,6 +170,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         unsigned int videoRenderingEnabled:1;
         unsigned int audioCaptureEnabled:1;
         unsigned int thumbnailEnabled:1;
+        unsigned int defaultVideoThumbnails:1;
     } __block _flags;
 }
 
@@ -259,6 +260,16 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 - (BOOL)thumbnailEnabled
 {
     return _flags.thumbnailEnabled;
+}
+
+- (void)setDefaultVideoThumbnails:(BOOL)defaultVideoThumbnails
+{
+    _flags.defaultVideoThumbnails = (unsigned int)defaultVideoThumbnails;
+}
+
+- (BOOL)defaultVideoThumbnails
+{
+    return _flags.defaultVideoThumbnails;
 }
 
 - (Float64)capturedAudioSeconds
@@ -689,6 +700,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         
         // default flags
         _flags.thumbnailEnabled = YES;
+        _flags.defaultVideoThumbnails = YES;
         _flags.audioCaptureEnabled = YES;
 
         // setup queues
@@ -1637,6 +1649,7 @@ typedef void (^PBJVisionBlock)();
 - (void)startVideoCapture
 {
     if (![self _canSessionCaptureWithOutput:_currentOutput]) {
+        [self _failVideoCaptureWithErrorCode:PBJVisionErrorSessionFailed];
         DLog(@"session is not setup properly for capture");
         return;
     }
@@ -1650,20 +1663,36 @@ typedef void (^PBJVisionBlock)();
 	
         NSString *guid = [[NSUUID new] UUIDString];
         NSString *outputFile = [NSString stringWithFormat:@"video_%@.mp4", guid];
+        
+        if ([_delegate respondsToSelector:@selector(vision:willStartVideoCaptureToFile:)]) {
+            outputFile = [_delegate vision:self willStartVideoCaptureToFile:outputFile];
+            
+            if (outputFile == nil) {
+                [self _failVideoCaptureWithErrorCode:PBJVisionErrorBadOutputFile];
+                return;
+            }
+        }
+        
         NSString *outputDirectory = (_captureDirectory == nil ? NSTemporaryDirectory() : _captureDirectory);
         NSString *outputPath = [outputDirectory stringByAppendingPathComponent:outputFile];
         NSURL *outputURL = [NSURL fileURLWithPath:outputPath];
         if ([[NSFileManager defaultManager] fileExistsAtPath:outputPath]) {
             NSError *error = nil;
             if (![[NSFileManager defaultManager] removeItemAtPath:outputPath error:&error]) {
-                DLog(@"could not setup an output file");
+                [self _failVideoCaptureWithErrorCode:PBJVisionErrorBadOutputFile];
+
+                DLog(@"could not setup an output file (file exists)");
                 return;
             }
         }
 
-        if (!outputPath || [outputPath length] == 0)
+        if (!outputPath || [outputPath length] == 0) {
+            [self _failVideoCaptureWithErrorCode:PBJVisionErrorBadOutputFile];
+            
+            DLog(@"could not setup an output file");
             return;
-
+        }
+        
         if (_mediaWriter)
             _mediaWriter.delegate = nil;
         
@@ -1684,7 +1713,7 @@ typedef void (^PBJVisionBlock)();
         _captureThumbnailTimes = [NSMutableSet set];
         _captureThumbnailFrames = [NSMutableSet set];
         
-        if (_flags.thumbnailEnabled) {
+        if (_flags.thumbnailEnabled && _flags.defaultVideoThumbnails) {
             [self captureVideoThumbnailAtFrame:0];
         }
         
@@ -1770,9 +1799,11 @@ typedef void (^PBJVisionBlock)();
                     [videoDict setObject:path forKey:PBJVisionVideoPathKey];
                     
                     if (_flags.thumbnailEnabled) {
-                        [self captureVideoThumbnailAtTime:capturedDuration];
+                        if (_flags.defaultVideoThumbnails) {
+                            [self captureVideoThumbnailAtTime:capturedDuration];
+                        }
                         
-                        [self generateThumbnailsForVideoWithURL:_mediaWriter.outputURL inDictionary:videoDict];
+                        [self _generateThumbnailsForVideoWithURL:_mediaWriter.outputURL inDictionary:videoDict];
                     }
                 }
 
@@ -1832,8 +1863,11 @@ typedef void (^PBJVisionBlock)();
     [_captureThumbnailFrames addObject:@(frame)];
 }
 
-- (void)generateThumbnailsForVideoWithURL:(NSURL*)url inDictionary:(NSMutableDictionary*)videoDict
+- (void)_generateThumbnailsForVideoWithURL:(NSURL*)url inDictionary:(NSMutableDictionary*)videoDict
 {
+    if (_captureThumbnailFrames.count == 0 && _captureThumbnailTimes == 0)
+        return;
+    
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:url options:nil];
     AVAssetImageGenerator *generate = [[AVAssetImageGenerator alloc] initWithAsset:asset];
     generate.appliesPreferredTrackTransform = YES;
@@ -1879,6 +1913,14 @@ typedef void (^PBJVisionBlock)();
     
     if (thumbnails.count) {
         [videoDict setObject:thumbnails forKey:PBJVisionVideoThumbnailArrayKey];
+    }
+}
+
+- (void)_failVideoCaptureWithErrorCode:(NSInteger)errorCode
+{
+    if (errorCode && [_delegate respondsToSelector:@selector(vision:couldNotStartVideoCapture:)]) {
+        NSError *error = [NSError errorWithDomain:PBJVisionErrorDomain code:errorCode userInfo:nil];
+        [_delegate vision:self couldNotStartVideoCapture:error];
     }
 }
 

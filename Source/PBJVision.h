@@ -89,7 +89,9 @@ extern NSString * const PBJVisionErrorDomain;
 typedef NS_ENUM(NSInteger, PBJVisionErrorType)
 {
     PBJVisionErrorUnknown = -1,
-    PBJVisionErrorCancelled = 100
+    PBJVisionErrorCancelled = 100,
+    PBJVisionErrorSessionFailed = 101,
+    PBJVisionErrorBadOutputFile = 102
 };
 
 // photo dictionary keys
@@ -214,6 +216,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 // thumbnails
 
 @property (nonatomic) BOOL thumbnailEnabled; // thumbnail generation, disabling reduces processing time for a photo or video
+@property (nonatomic) BOOL defaultVideoThumbnails; // capture first and last frames of video
 
 - (void)captureCurrentVideoThumbnail;
 - (void)captureVideoThumbnailAtFrame:(int64_t)frame;
@@ -276,6 +279,8 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 // video
 
+- (NSString*)vision:(PBJVision*)vision willStartVideoCaptureToFile:(NSString*)fileName;
+- (void)vision:(PBJVision*)vision couldNotStartVideoCapture:(NSError*)error;
 - (void)visionDidStartVideoCapture:(PBJVision *)vision;
 - (void)visionDidPauseVideoCapture:(PBJVision *)vision; // stopped but not ended
 - (void)visionDidResumeVideoCapture:(PBJVision *)vision;
