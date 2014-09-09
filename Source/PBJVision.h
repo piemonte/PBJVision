@@ -163,12 +163,14 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 @property (nonatomic, readonly) AVCaptureVideoPreviewLayer *previewLayer;
 @property (nonatomic) BOOL autoUpdatePreviewOrientation;
 @property (nonatomic) PBJCameraOrientation previewOrientation;
+@property (nonatomic) BOOL autoFreezePreviewDuringCapture;
 @property (nonatomic, readonly) CGRect cleanAperture;
 
 - (void)startPreview;
 - (void)stopPreview;
 
-- (void)unfreezePreview; // preview is automatically timed and frozen with photo capture
+- (void)freezePreview;
+- (void)unfreezePreview;
 
 // focus, exposure, white balance
 
