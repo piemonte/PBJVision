@@ -115,7 +115,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
     PBJCameraOrientation _previewOrientation;
     BOOL _autoUpdatePreviewOrientation;
-    
+    BOOL _autoFreezePreviewDuringCapture;
+
     PBJFocusMode _focusMode;
     PBJExposureMode _exposureMode;
     PBJFlashMode _flashMode;
@@ -187,6 +188,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize cameraOrientation = _cameraOrientation;
 @synthesize previewOrientation = _previewOrientation;
 @synthesize autoUpdatePreviewOrientation = _autoUpdatePreviewOrientation;
+@synthesize autoFreezePreviewDuringCapture = _autoFreezePreviewDuringCapture;
 @synthesize cameraDevice = _cameraDevice;
 @synthesize cameraMode = _cameraMode;
 @synthesize focusMode = _focusMode;
@@ -690,6 +692,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         _captureDirectory = nil;
 
         _autoUpdatePreviewOrientation = YES;
+        _autoFreezePreviewDuringCapture = YES;
 
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
@@ -1213,6 +1216,12 @@ typedef void (^PBJVisionBlock)();
     }];
 }
 
+- (void)freezePreview
+{
+    if (_previewLayer)
+        _previewLayer.connection.enabled = NO;
+}
+
 - (void)unfreezePreview
 {
     if (_previewLayer)
@@ -1552,8 +1561,8 @@ typedef void (^PBJVisionBlock)();
     if ([_delegate respondsToSelector:@selector(visionWillCapturePhoto:)])
         [_delegate visionWillCapturePhoto:self];
     
-    // freeze preview
-    _previewLayer.connection.enabled = NO;
+    if (_autoFreezePreviewDuringCapture)
+        [self freezePreview];
 }
 
 - (void)_didCapturePhoto
