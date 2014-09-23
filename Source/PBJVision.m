@@ -894,6 +894,8 @@ typedef void (^PBJVisionBlock)();
     // capture device notifications
     [notificationCenter removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:nil];
 
+    [_captureOutputPhoto removeObserver:self forKeyPath:@"capturingStillImage"];
+
     _captureOutputPhoto = nil;
     _captureOutputAudio = nil;
     _captureOutputVideo = nil;
