@@ -877,6 +877,9 @@ typedef void (^PBJVisionBlock)();
     [self removeObserver:self forKeyPath:@"currentDevice.torchMode"];
     [self removeObserver:self forKeyPath:@"currentDevice.flashAvailable"];
     [self removeObserver:self forKeyPath:@"currentDevice.torchAvailable"];
+    
+    // capture events KVO notifications
+    [_captureOutputPhoto removeObserver:self forKeyPath:@"capturingStillImage"];
 
     // remove notification observers (we don't want to just 'remove all' because we're also observing background notifications
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
