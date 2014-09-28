@@ -1805,6 +1805,9 @@ typedef void (^PBJVisionBlock)();
             _flags.interrupted = NO;
 
             [self _enqueueBlockOnMainQueue:^{
+                if ([_delegate respondsToSelector:@selector(visionDidEndVideoCapture:)])
+                    [_delegate visionDidEndVideoCapture:self];
+
                 NSMutableDictionary *videoDict = [[NSMutableDictionary alloc] init];
                 NSString *path = [_mediaWriter.outputURL path];
                 if (path) {
