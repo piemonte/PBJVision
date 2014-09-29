@@ -190,7 +190,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize previewOrientation = _previewOrientation;
 @synthesize autoUpdatePreviewOrientation = _autoUpdatePreviewOrientation;
 @synthesize autoFreezePreviewDuringCapture = _autoFreezePreviewDuringCapture;
-@synthesize usesApplicationAudioSession = _usesApplicationAudioSession
+@synthesize usesApplicationAudioSession = _usesApplicationAudioSession;
 @synthesize cameraDevice = _cameraDevice;
 @synthesize cameraMode = _cameraMode;
 @synthesize focusMode = _focusMode;
