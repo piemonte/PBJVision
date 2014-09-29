@@ -794,7 +794,6 @@ typedef void (^PBJVisionBlock)();
     _captureSession = [[AVCaptureSession alloc] init];
 
     if (_usesApplicationAudioSession) {
-        _captureSession.automaticallyConfiguresApplicationAudioSession = NO;
         _captureSession.usesApplicationAudioSession = YES;
     }
 
