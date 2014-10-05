@@ -134,6 +134,9 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 @property (nonatomic) PBJCameraOrientation cameraOrientation;
 @property (nonatomic) PBJCameraMode cameraMode;
 @property (nonatomic) PBJCameraDevice cameraDevice;
+// Indicates whether the capture session will make use of the app’s shared audio session. Allows you to
+// use a previously configured audios session with a category such as AVAudioSessionCategoryAmbient.
+@property (nonatomic) BOOL usesApplicationAudioSession;
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice;
 
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
@@ -164,6 +167,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 @property (nonatomic) BOOL autoUpdatePreviewOrientation;
 @property (nonatomic) PBJCameraOrientation previewOrientation;
 @property (nonatomic) BOOL autoFreezePreviewDuringCapture;
+
 @property (nonatomic, readonly) CGRect cleanAperture;
 
 - (void)startPreview;
