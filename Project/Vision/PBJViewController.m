@@ -81,6 +81,7 @@
     UIView *_gestureView;
     UILongPressGestureRecognizer *_longPressGestureRecognizer;
     UITapGestureRecognizer *_focusTapGestureRecognizer;
+	UITapGestureRecognizer *_photoTapGestureRecognizer;
     
     BOOL _recording;
 
@@ -105,6 +106,7 @@
 {
     [UIApplication sharedApplication].idleTimerDisabled = NO;
     _longPressGestureRecognizer.delegate = nil;
+	_photoTapGestureRecognizer.delegate = nil;
 }
 
 #pragma mark - view lifecycle
@@ -168,7 +170,8 @@
     _instructionLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:15.0f];
     _instructionLabel.textColor = [UIColor whiteColor];
     _instructionLabel.backgroundColor = [UIColor blackColor];
-    _instructionLabel.text = NSLocalizedString(@"Touch and hold to record", @"Instruction message for capturing video.");
+	_instructionLabel.numberOfLines = 2;
+    _instructionLabel.text = NSLocalizedString(@"Touch to capture photo,\n hold to record video", @"Instruction message for capturing video.");
     [_instructionLabel sizeToFit];
     CGPoint labelCenter = _previewView.center;
     labelCenter.y += ((CGRectGetHeight(_previewView.frame) * 0.5f) + 35.0f);
@@ -178,16 +181,20 @@
     // touch to record
     _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(_handleLongPressGestureRecognizer:)];
     _longPressGestureRecognizer.delegate = self;
-    _longPressGestureRecognizer.minimumPressDuration = 0.05f;
+//    _longPressGestureRecognizer.minimumPressDuration = 0.05f;
     _longPressGestureRecognizer.allowableMovement = 10.0f;
-    
+	
+	// tap to capture photo
+	_photoTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_handlePhotoTapGestureRecognizer:)];
+	_photoTapGestureRecognizer.delegate = self;
+	
     // tap to focus
     _focusTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_handleFocusTapGesterRecognizer:)];
     _focusTapGestureRecognizer.delegate = self;
     _focusTapGestureRecognizer.numberOfTapsRequired = 1;
     _focusTapGestureRecognizer.enabled = NO;
     [_previewView addGestureRecognizer:_focusTapGestureRecognizer];
-    
+	
     // gesture view to record
     _gestureView = [[UIView alloc] initWithFrame:CGRectZero];
     CGRect gestureFrame = self.view.bounds;
@@ -195,8 +202,9 @@
     gestureFrame.size.height -= (40.0f + 85.0f);
     _gestureView.frame = gestureFrame;
     [self.view addSubview:_gestureView];
-    
+	
     [_gestureView addGestureRecognizer:_longPressGestureRecognizer];
+    [_gestureView addGestureRecognizer:_photoTapGestureRecognizer];
 
     // bottom dock
     _captureDock = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.view.bounds) - 60.0f, CGRectGetWidth(self.view.bounds), 60.0f)];
@@ -315,6 +323,7 @@
 {
     [_strobeView stop];
     _longPressGestureRecognizer.enabled = YES;
+	_photoTapGestureRecognizer.enabled = YES;
 
     PBJVision *vision = [PBJVision sharedInstance];
     vision.delegate = self;
@@ -335,6 +344,11 @@
     vision.additionalCompressionProperties = @{AVVideoProfileLevelKey : AVVideoProfileLevelH264Baseline30}; // AVVideoProfileLevelKey requires specific captureSessionPreset
 }
 
+- (void)_capturePhoto
+{
+	[[PBJVision sharedInstance] captureCurrentVideoFrame];
+}
+
 #pragma mark - UIButton
 
 - (void)_handleFlipButton:(UIButton *)button
@@ -349,6 +363,7 @@
     
     if (_focusButton.selected) {
         _focusTapGestureRecognizer.enabled = YES;
+		_photoTapGestureRecognizer.enabled = NO;
         _gestureView.hidden = YES;
 
     } else {
@@ -356,6 +371,7 @@
             [_focusView stopAnimation];
         }
         _focusTapGestureRecognizer.enabled = NO;
+		_photoTapGestureRecognizer.enabled = YES;
         _gestureView.hidden = NO;
     }
     
@@ -401,6 +417,11 @@
 }
 
 #pragma mark - UIGestureRecognizer
+
+- (void)_handlePhotoTapGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+{
+	[self _capturePhoto];
+}
 
 - (void)_handleLongPressGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
 {
@@ -566,7 +587,17 @@
 
 - (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error
 {
-    // photo captured, PBJVisionPhotoJPEGKey
+	UIImage *capturedImage = photoDict[PBJVisionPhotoImageKey];
+	UIImageWriteToSavedPhotosAlbum(capturedImage, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+}
+
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo: (void *) contextInfo;
+{
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Photo Saved!" message: @"Saved to the camera roll."
+												   delegate:self
+										  cancelButtonTitle:nil
+										  otherButtonTitles:@"OK", nil];
+	[alert show];
 }
 
 // video capture
