@@ -385,8 +385,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     _cameraDevice = cameraDevice;
     _cameraMode = cameraMode;
     
-    [self setMirroringMode:_mirroringMode];
-
     _outputFormat = outputFormat;
     
     // since there is no session in progress, set and bail
@@ -409,6 +407,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     [self _enqueueBlockOnCaptureSessionQueue:^{
         // camera is already setup, no need to call _setupCamera
         [self _setupSession];
+
+        [self setMirroringMode:_mirroringMode];
         
         [self _enqueueBlockOnMainQueue:^{
             _flags.changingModes = NO;
@@ -1184,6 +1184,8 @@ typedef void (^PBJVisionBlock)();
             [self _setupCamera];
             [self _setupSession];
         }
+
+        [self setMirroringMode:_mirroringMode];
     
         if (_previewLayer && _previewLayer.session != _captureSession) {
             _previewLayer.session = _captureSession;
