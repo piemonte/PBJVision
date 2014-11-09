@@ -87,14 +87,18 @@ pod 'PBJVision'
 }
 ```
 
+## Community
+
+- Need help? Use [Stack Overflow](http://stackoverflow.com/questions/tagged/pbjvision) with the tag 'pbjvision'.
+- Questions? Use [Stack Overflow](http://stackoverflow.com/questions/tagged/pbjvision) with the tag 'pbjvision'.
+- Found a bug? Open an [issue](https://github.com/piemonte/PBJVision/issues).
+- Feature idea? Open an [issue](https://github.com/piemonte/PBJVision/issues).
+- Want to contribute? Submit a [pull request](https://github.com/piemonte/PBJVision/blob/master/CONTRIBUTING.md).
+
 ## Resources
 
 * [AV Foundation Programming Guide](https://developer.apple.com/library/ios/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/00_Introduction.html)
 * [PBJVideoPlayer, a simple iOS video player](https://github.com/piemonte/PBJVideoPlayer)
-
-## Contributing
-
-See the [CONTRIBUTING](https://github.com/piemonte/PBJVision/blob/master/CONTRIBUTING.md) file for information on how to collaborate and help out. The [github issues page](https://github.com/piemonte/PBJVision/issues) is a the place to file a bug, [Stack Overflow](http://stackoverflow.com/questions/tagged/pbjvision) is a great place to start a discussion and also allows others to benefit and chime-in too.
 
 ## License
 
