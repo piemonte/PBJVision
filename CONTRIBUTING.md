@@ -1,6 +1,6 @@
 ## Contributing
 
-Vision is a community project in which contributing should be as easy and fun as possible. If you encounter bugs or have feature ideas, please open an issue or create a pull request.
+Vision is a community project in which contributing should be as easy and fun as possible. If you encounter bugs or have feature ideas, please open an [issue](https://github.com/piemonte/PBJVision/issues) or submit a [pull request](https://github.com/piemonte/PBJVision/pulls).
 
 ## Pull Requests
 
