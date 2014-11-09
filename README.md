@@ -1,14 +1,12 @@
 ![PBJVision](https://raw.github.com/piemonte/PBJVision/master/pbj.gif)
 
-## Vision
+## PBJVision
 
-Vision is an iOS camera engine that supports touch-to-record video, slow motion video (120 fps for supporting hardware, which is currently only iPhone 5S), and photo capture. It is compatible with both iOS 7 and iOS 8 but also supports 64-bit. Pause and resume video capture is also possible without having to use a touch gesture as the sample project provides.
+`PBJVision` is an iOS camera engine that supports touch-to-record video, slow motion video (120 fps on [supported hardware](https://www.apple.com/iphone/compare/)), and photo capture. It is compatible with both iOS 7 and iOS 8 and is 64-bit ready. Pause and resume video capture is also possible without having to use a touch gesture as the sample project provides.
 
-iOS 6 is supported in versions v0.3.2 and below but may slowly start dropping support future.
+I created this library at [DIY](http://diy.org) as a fun means for kids to author video and share their skills. This same recording interaction was pioneered by [Vine](http://vine.co) and also adopted by [Instagram](http://instagram.com).
 
-I created this component at [DIY](http://diy.org) as a fun means for kids to author video and share their skills. This same recording interaction was pioneered by [Vine](http://vine.co) and also [Instagram](http://instagram.com).
-
-Please review the [release history](https://github.com/piemonte/PBJVision/releases) for a summary of the latest changes and more information.
+Please review the [release history](https://github.com/piemonte/PBJVision/releases) for a summary of the latest changes and more information. Contributions and help are welcome!
 
 [![Build Status](https://travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 
