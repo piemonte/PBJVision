@@ -7,6 +7,9 @@ branches:
     - master
 
 before_install:
-  - export LANG=en_US.UTF-8
+  - brew update
+  - brew reinstall xctool
+  - gem update cocoapods
+  - pod install
 
-script: xctool -project Project/Vision.xcodeproj -scheme Debug -sdk iphonesimulator7.1 build analyze test
+script: xctool -project Project/Vision.xcodeproj -scheme Debug -sdk iphonesimulator8.0 build analyze
