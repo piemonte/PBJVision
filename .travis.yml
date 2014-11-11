@@ -9,7 +9,5 @@ branches:
 before_install:
   - brew update
   - brew reinstall xctool
-  - gem update cocoapods
-  - pod install
 
 script: xctool -project Project/Vision.xcodeproj -scheme Debug -sdk iphonesimulator8.0 build analyze
