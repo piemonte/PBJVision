@@ -431,7 +431,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     [self _setCameraMode:_cameraMode cameraDevice:cameraDevice outputFormat:_outputFormat];
 }
 
-- (void) setCaptureSessionPreset:(NSString *)captureSessionPreset
+- (void)setCaptureSessionPreset:(NSString *)captureSessionPreset
 {
     _captureSessionPreset = captureSessionPreset;
     if ([_captureSession canSetSessionPreset:captureSessionPreset]){
@@ -783,7 +783,7 @@ typedef void (^PBJVisionBlock)();
     });
 }
 
-- (void) _commitBlock:(void(^)())block
+- (void)_commitBlock:(PBJVisionBlock)block
 {
     [_captureSession beginConfiguration];
     block();
