@@ -2,9 +2,11 @@
 
 ## PBJVision
 
-`PBJVision` is an iOS camera engine that supports touch-to-record video, slow motion video (120 fps on [supported hardware](https://www.apple.com/iphone/compare/)), and photo capture. It is compatible with both iOS 7 and iOS 8 and is 64-bit ready. Pause and resume video capture is also possible without having to use a touch gesture as the sample project provides.
+`PBJVision` is an iOS camera engine that supports touch-to-record video, slow motion video (120 fps on [supported hardware](https://www.apple.com/iphone/compare/)), and photo capture. It is compatible with both iOS 7 and iOS 8 and is 64-bit ready. Pause and resume video capture is also possible without having to use the touch gesture interactions as the sample project provides.
 
-I created this library at [DIY](http://diy.org) as a fun means for kids to author video and share their skills. This same recording interaction was pioneered by [Vine](http://vine.co) and also adopted by [Instagram](http://instagram.com).
+I created this library at [DIY](http://diy.org) as a fun means for young people to author video and share their skills. The touch-to-record interaction was originally pioneered by [Vine](http://vine.co) and also adopted by [Instagram](http://instagram.com). Thanks to everyone who has contributed and helped make this a fun project and community.
+
+If you need a video player, check out [PBJVideoPlayer](https://github.com/piemonte/PBJVideoPlayer) and [Player](https://github.com/piemonte/player).
 
 Please review the [release history](https://github.com/piemonte/PBJVision/releases) for a summary of the latest changes and more information. Contributions and help are welcome!
 
@@ -96,7 +98,8 @@ pod 'PBJVision'
 ## Resources
 
 * [AV Foundation Programming Guide](https://developer.apple.com/library/ios/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/00_Introduction.html)
-* [PBJVideoPlayer, a simple iOS video player](https://github.com/piemonte/PBJVideoPlayer)
+* [PBJVideoPlayer, a simple iOS video player in Objective-C](https://github.com/piemonte/PBJVideoPlayer)
+* [Player, a simple iOS video player in Swift](https://github.com/piemonte/player)
 
 ## License
 
