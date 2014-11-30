@@ -23,9 +23,28 @@ pod 'PBJVision'
 ```
 
 ## Usage
+
+Import the header.
+
 ```objective-c
 #import "PBJVision.h"
 ```
+
+Setup the camera preview using `[[PBJVision sharedInstance] previewLayer]`.
+
+```objective-c
+    // preview and AV layer
+    _previewView = [[UIView alloc] initWithFrame:CGRectZero];
+    _previewView.backgroundColor = [UIColor blackColor];
+    CGRect previewFrame = CGRectMake(0, 60.0f, CGRectGetWidth(self.view.frame), CGRectGetWidth(self.view.frame));
+    _previewView.frame = previewFrame;
+    _previewLayer = [[PBJVision sharedInstance] previewLayer];
+    _previewLayer.frame = _previewView.bounds;
+    _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    [_previewView.layer addSublayer:_previewLayer];
+```
+
+Setup and configuration the `PBJVision` controller, and start the camera preview.
 
 ```objective-c
 - (void)_setup
@@ -34,14 +53,16 @@ pod 'PBJVision'
 
     PBJVision *vision = [PBJVision sharedInstance];
     vision.delegate = self;
-    [vision setCameraMode:PBJCameraModeVideo];
-    [vision setCameraDevice:PBJCameraDeviceBack];
-    [vision setCameraOrientation:PBJCameraOrientationPortrait];
-    [vision setFocusMode:PBJFocusModeAutoFocus];
+    vision.cameraMode = PBJCameraModeVideo;
+    vision.cameraOrientation = PBJCameraOrientationPortrait;
+    vision.focusMode = PBJFocusModeContinuousAutoFocus;
+    vision.outputFormat = PBJOutputFormatSquare;
 
     [vision startPreview];
 }
 ```
+
+Start/pause/resume recording.
 
 ```objective-c
 - (void)_handleLongPressGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
@@ -68,25 +89,44 @@ pod 'PBJVision'
 }
 ```
 
+End capture.
+
 ```objective-c
-- (void)_handleDoneButton:(UIButton *)button
-{
-    [self _endCapture];
-}
+    [[PBJVision sharedInstance] endVideoCapture];
 ```
+
+Handle the final video output or error accordingly.
 
 ```objective-c
 - (void)vision:(PBJVision *)vision capturedVideo:(NSDictionary *)videoDict error:(NSError *)error
 {   
+    if (error && [error.domain isEqual:PBJVisionErrorDomain] && error.code == PBJVisionErrorCancelled) {
+        NSLog(@"recording session cancelled");
+        return;
+    } else if (error) {
+        NSLog(@"encounted an error in video capture (%@)", error);
+        return;
+    }
+
+    _currentVideo = videoDict;
+    
     NSString *videoPath = [_currentVideo  objectForKey:PBJVisionVideoPathKey];
     [_assetLibrary writeVideoAtPathToSavedPhotosAlbum:[NSURL URLWithString:videoPath] completionBlock:^(NSURL *assetURL, NSError *error1) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Saved!" message: @"Saved to the camera roll."
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Video Saved!" message: @"Saved to the camera roll."
                                                        delegate:self
                                               cancelButtonTitle:nil
                                               otherButtonTitles:@"OK", nil];
         [alert show];
     }];
 }
+```
+
+To adjust the video compression bit rate, modify the following properties on the `PBJVision` controller.
+
+```objective-c
+    @property (nonatomic) CGFloat videoBitRate;
+    @property (nonatomic) NSInteger audioBitRate;
+    @property (nonatomic) NSDictionary *additionalCompressionProperties;
 ```
 
 ## Community
