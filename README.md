@@ -44,7 +44,7 @@ Setup the camera preview using `[[PBJVision sharedInstance] previewLayer]`.
     [_previewView.layer addSublayer:_previewLayer];
 ```
 
-Setup and configuration the `PBJVision` controller, and start the camera preview.
+Setup and configure the `PBJVision` controller, then start the camera preview.
 
 ```objective-c
 - (void)_setup
@@ -89,7 +89,7 @@ Start/pause/resume recording.
 }
 ```
 
-End capture.
+End recording.
 
 ```objective-c
     [[PBJVision sharedInstance] endVideoCapture];
