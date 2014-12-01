@@ -250,12 +250,12 @@
                 }
 			}
 		} else if (mediaType == AVMediaTypeAudio) {
+			_audioTimestamp = timestamp;
 			if (_assetWriterAudioIn.readyForMoreMediaData) {
-				if ([_assetWriterAudioIn appendSampleBuffer:sampleBuffer]) {
-                    _audioTimestamp = timestamp;
-				} else {
+				if ([_assetWriterAudioIn appendSampleBuffer:sampleBuffer])
+				else 
 					DLog(@"writer error appending audio (%@)", [_assetWriter error]);
-                }
+                
 			}
 		}
         
