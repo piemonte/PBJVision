@@ -123,9 +123,11 @@ Handle the final video output or error accordingly.
 }
 ```
 
-To adjust the video compression bit rate, modify the following properties on the `PBJVision` controller.
+To adjust the video quality and compression bit rate, modify the following properties on the `PBJVision` controller.
 
 ```objective-c
+    @property (nonatomic, copy) NSString *captureSessionPreset;
+
     @property (nonatomic) CGFloat videoBitRate;
     @property (nonatomic) NSInteger audioBitRate;
     @property (nonatomic) NSDictionary *additionalCompressionProperties;
