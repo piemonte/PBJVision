@@ -25,62 +25,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
-
-// vision types
-
-typedef NS_ENUM(NSInteger, PBJCameraDevice) {
-    PBJCameraDeviceBack = UIImagePickerControllerCameraDeviceRear,
-    PBJCameraDeviceFront = UIImagePickerControllerCameraDeviceFront
-};
-
-typedef NS_ENUM(NSInteger, PBJCameraMode) {
-    PBJCameraModePhoto = UIImagePickerControllerCameraCaptureModePhoto,
-    PBJCameraModeVideo = UIImagePickerControllerCameraCaptureModeVideo
-};
-
-typedef NS_ENUM(NSInteger, PBJCameraOrientation) {
-    PBJCameraOrientationPortrait = AVCaptureVideoOrientationPortrait,
-    PBJCameraOrientationPortraitUpsideDown = AVCaptureVideoOrientationPortraitUpsideDown,
-    PBJCameraOrientationLandscapeRight = AVCaptureVideoOrientationLandscapeRight,
-    PBJCameraOrientationLandscapeLeft = AVCaptureVideoOrientationLandscapeLeft,
-};
-
-typedef NS_ENUM(NSInteger, PBJFocusMode) {
-    PBJFocusModeLocked = AVCaptureFocusModeLocked,
-    PBJFocusModeAutoFocus = AVCaptureFocusModeAutoFocus,
-    PBJFocusModeContinuousAutoFocus = AVCaptureFocusModeContinuousAutoFocus
-};
-
-typedef NS_ENUM(NSInteger, PBJExposureMode) {
-    PBJExposureModeLocked = AVCaptureExposureModeLocked,
-    PBJExposureModeAutoExpose = AVCaptureExposureModeAutoExpose,
-    PBJExposureModeContinuousAutoExposure = AVCaptureExposureModeContinuousAutoExposure
-};
-
-typedef NS_ENUM(NSInteger, PBJFlashMode) {
-    PBJFlashModeOff  = AVCaptureFlashModeOff,
-    PBJFlashModeOn   = AVCaptureFlashModeOn,
-    PBJFlashModeAuto = AVCaptureFlashModeAuto
-};
-
-typedef NS_ENUM(NSInteger, PBJMirroringMode) {
-	PBJMirroringAuto,
-	PBJMirroringOn,
-	PBJMirroringOff
-};
-
-typedef NS_ENUM(NSInteger, PBJAuthorizationStatus) {
-    PBJAuthorizationStatusNotDetermined = 0,
-    PBJAuthorizationStatusAuthorized,
-    PBJAuthorizationStatusAudioDenied
-};
-
-typedef NS_ENUM(NSInteger, PBJOutputFormat) {
-    PBJOutputFormatPreset = 0,
-    PBJOutputFormatSquare,
-    PBJOutputFormatWidescreen,
-    PBJOutputFormatStandard /* 4:3 */
-};
+#import "PBJVisionTypes.h"
 
 // PBJError
 
