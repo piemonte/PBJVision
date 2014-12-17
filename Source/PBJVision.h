@@ -29,13 +29,13 @@
 // vision types
 
 typedef NS_ENUM(NSInteger, PBJCameraDevice) {
-    PBJCameraDeviceBack = UIImagePickerControllerCameraDeviceRear,
-    PBJCameraDeviceFront = UIImagePickerControllerCameraDeviceFront
+    PBJCameraDeviceBack = 0,
+    PBJCameraDeviceFront
 };
 
 typedef NS_ENUM(NSInteger, PBJCameraMode) {
-    PBJCameraModePhoto = UIImagePickerControllerCameraCaptureModePhoto,
-    PBJCameraModeVideo = UIImagePickerControllerCameraCaptureModeVideo
+    PBJCameraModePhoto = 0,
+    PBJCameraModeVideo
 };
 
 typedef NS_ENUM(NSInteger, PBJCameraOrientation) {
@@ -58,13 +58,13 @@ typedef NS_ENUM(NSInteger, PBJExposureMode) {
 };
 
 typedef NS_ENUM(NSInteger, PBJFlashMode) {
-    PBJFlashModeOff  = AVCaptureFlashModeOff,
-    PBJFlashModeOn   = AVCaptureFlashModeOn,
+    PBJFlashModeOff = AVCaptureFlashModeOff,
+    PBJFlashModeOn = AVCaptureFlashModeOn,
     PBJFlashModeAuto = AVCaptureFlashModeAuto
 };
 
 typedef NS_ENUM(NSInteger, PBJMirroringMode) {
-	PBJMirroringAuto,
+	PBJMirroringAuto = 0,
 	PBJMirroringOn,
 	PBJMirroringOff
 };
