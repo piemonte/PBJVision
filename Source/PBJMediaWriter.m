@@ -39,8 +39,8 @@
 @interface PBJMediaWriter ()
 {
     AVAssetWriter *_assetWriter;
-	AVAssetWriterInput *_assetWriterAudioIn;
-	AVAssetWriterInput *_assetWriterVideoIn;
+	AVAssetWriterInput *_assetWriterAudioInput;
+	AVAssetWriterInput *_assetWriterVideoInput;
     
     NSURL *_outputURL;
     
@@ -91,6 +91,8 @@
             _assetWriter = nil;
             return nil;
         }
+        
+        [_assetWriter startSessionAtSourceTime:kCMTimeZero];
 
         _outputURL = outputURL;
         _assetWriter.shouldOptimizeForNetworkUse = YES;
@@ -161,16 +163,16 @@
 {
 	if ([_assetWriter canApplyOutputSettings:audioSettings forMediaType:AVMediaTypeAudio]) {
     
-		_assetWriterAudioIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeAudio outputSettings:audioSettings];
-		_assetWriterAudioIn.expectsMediaDataInRealTime = YES;
+		_assetWriterAudioInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:audioSettings];
+		_assetWriterAudioInput.expectsMediaDataInRealTime = YES;
         
-        DLog(@"prepared audio-in with compression settings sampleRate (%f) channels (%lu) bitRate (%ld)",
+        DLog(@"setup audio input with settings sampleRate (%f) channels (%lu) bitRate (%ld)",
                     [[audioSettings objectForKey:AVSampleRateKey] floatValue],
                     (unsigned long)[[audioSettings objectForKey:AVNumberOfChannelsKey] unsignedIntegerValue],
                     (long)[[audioSettings objectForKey:AVEncoderBitRateKey] integerValue]);
         
-		if ([_assetWriter canAddInput:_assetWriterAudioIn]) {
-			[_assetWriter addInput:_assetWriterAudioIn];
+		if ([_assetWriter canAddInput:_assetWriterAudioInput]) {
+			[_assetWriter addInput:_assetWriterAudioInput];
             _audioReady = YES;
 		} else {
 			DLog(@"couldn't add asset writer audio input");
@@ -189,20 +191,21 @@
 {
 	if ([_assetWriter canApplyOutputSettings:videoSettings forMediaType:AVMediaTypeVideo]) {
     
-		_assetWriterVideoIn = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeVideo outputSettings:videoSettings];
-		_assetWriterVideoIn.expectsMediaDataInRealTime = YES;
-		_assetWriterVideoIn.transform = CGAffineTransformIdentity;
+		_assetWriterVideoInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:videoSettings];
+		_assetWriterVideoInput.expectsMediaDataInRealTime = YES;
+		_assetWriterVideoInput.transform = CGAffineTransformIdentity;
 
 #if !defined(NDEBUG) && LOG_WRITER
         NSDictionary *videoCompressionProperties = [videoSettings objectForKey:AVVideoCompressionPropertiesKey];
-        if (videoCompressionProperties)
+        if (videoCompressionProperties) {
             DLog(@"prepared video-in with compression settings bps (%f) frameInterval (%ld)",
                     [[videoCompressionProperties objectForKey:AVVideoAverageBitRateKey] floatValue],
                     (long)[[videoCompressionProperties objectForKey:AVVideoMaxKeyFrameIntervalKey] integerValue]);
+        }
 #endif
 
-		if ([_assetWriter canAddInput:_assetWriterVideoIn]) {
-			[_assetWriter addInput:_assetWriterVideoIn];
+		if ([_assetWriter canAddInput:_assetWriterVideoInput]) {
+			[_assetWriter addInput:_assetWriterVideoInput];
             _videoReady = YES;
 		} else {
 			DLog(@"couldn't add asset writer video input");
@@ -242,16 +245,16 @@
 		
         CMTime timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
 		if (mediaType == AVMediaTypeVideo) {
-			if (_assetWriterVideoIn.readyForMoreMediaData) {
-				if ([_assetWriterVideoIn appendSampleBuffer:sampleBuffer]) {
+			if (_assetWriterVideoInput.readyForMoreMediaData) {
+				if ([_assetWriterVideoInput appendSampleBuffer:sampleBuffer]) {
                     _videoTimestamp = timestamp;
 				} else {
 					DLog(@"writer error appending video (%@)", [_assetWriter error]);
                 }
 			}
 		} else if (mediaType == AVMediaTypeAudio) {
-			if (_assetWriterAudioIn.readyForMoreMediaData) {
-				if ([_assetWriterAudioIn appendSampleBuffer:sampleBuffer]) {
+			if (_assetWriterAudioInput.readyForMoreMediaData) {
+				if ([_assetWriterAudioInput appendSampleBuffer:sampleBuffer]) {
                     _audioTimestamp = timestamp;
 				} else {
 					DLog(@"writer error appending audio (%@)", [_assetWriter error]);
