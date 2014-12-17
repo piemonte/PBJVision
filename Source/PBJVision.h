@@ -77,9 +77,9 @@ typedef NS_ENUM(NSInteger, PBJAuthorizationStatus) {
 
 typedef NS_ENUM(NSInteger, PBJOutputFormat) {
     PBJOutputFormatPreset = 0,
-    PBJOutputFormatSquare,
-    PBJOutputFormatWidescreen,
-    PBJOutputFormatStandard /* 4:3 */
+    PBJOutputFormatSquare, // 1:1
+    PBJOutputFormatWidescreen, // 16:9
+    PBJOutputFormatStandard // 4:3
 };
 
 // PBJError

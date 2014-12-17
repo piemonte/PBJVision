@@ -2017,7 +2017,7 @@ typedef void (^PBJVisionBlock)();
         case PBJOutputFormatWidescreen:
         {
             videoDimensions.width = dimensions.width;
-            videoDimensions.height = (int32_t)(dimensions.width / 1.5f);
+            videoDimensions.height = (int32_t)(dimensions.width * 9 / 16.0f);
             break;
         }
         case PBJOutputFormatStandard:
