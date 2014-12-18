@@ -173,6 +173,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         unsigned int audioCaptureEnabled:1;
         unsigned int thumbnailEnabled:1;
         unsigned int defaultVideoThumbnails:1;
+		unsigned int captureNextFrame:1;
+		unsigned int orientationForNextFrameDidUpdated:1;
     } __block _flags;
 }
 
@@ -1121,12 +1123,13 @@ typedef void (^PBJVisionBlock)();
             }
         }
 
-        NSDictionary *videoSettings = nil;
-        if (supportsFullRangeYUV) {
-            videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) };
-        } else if (supportsVideoRangeYUV) {
-            videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) };
-        }
+		NSDictionary *videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA) };
+//		if (supportsFullRangeYUV) {
+//			videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) };
+//		} else if (supportsVideoRangeYUV) {
+//			videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) };
+//		}
+		
         if (videoSettings)
             [_captureOutputVideo setVideoSettings:videoSettings];
         
@@ -1892,6 +1895,12 @@ typedef void (^PBJVisionBlock)();
     }];
 }
 
+- (void)captureCurrentVideoFrame
+{
+	_flags.captureNextFrame = YES;
+	_flags.orientationForNextFrameDidUpdated = NO;
+}
+
 - (void)captureCurrentVideoThumbnail
 {
     if (_flags.recording) {
@@ -2063,6 +2072,49 @@ typedef void (^PBJVisionBlock)();
         CFRelease(sampleBuffer);
         return;
     }
+	
+	if (_flags.captureNextFrame) {
+		
+		if (!_flags.captureNextFrame) {
+			[self _setOrientationForConnection:connection];
+			_flags.orientationForNextFrameDidUpdated = YES;
+			CFRelease(sampleBuffer);
+			return;
+		}
+		
+		_flags.captureNextFrame = NO;
+		
+		CMSampleBufferRef bufferToWrite = NULL;
+		
+		if (_lastTimestamp.value > 0) {
+			bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer usingTimeOffset:_lastTimestamp];
+			if (!bufferToWrite) {
+				DLog(@"error subtracting the timeoffset from the sampleBuffer");
+			}
+		} else {
+			bufferToWrite = sampleBuffer;
+			CFRetain(bufferToWrite);
+		}
+		
+		[self _enqueueBlockOnCaptureVideoQueue:^{
+			[self _processSampleBuffer:bufferToWrite];
+			
+			UIImage *image = [self _imageFromSampleBuffer:sampleBuffer];
+			if (!image)
+			{
+				_flags.captureNextFrame = YES;
+				CFRelease(sampleBuffer);
+				return;
+			}
+			
+			[self _executeBlockOnMainQueue:^{
+				[self.delegate vision:self capturedPhoto:@{ PBJVisionPhotoImageKey : image } error:nil];
+			}];
+			
+			CFRelease(sampleBuffer);
+		}];
+		return;
+	}
 
     if (!_flags.recording || _flags.paused) {
         CFRelease(sampleBuffer);
@@ -2550,6 +2602,42 @@ typedef void (^PBJVisionBlock)();
         return;
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+- (UIImage *)_imageFromSampleBuffer:(CMSampleBufferRef)sampleBuffer
+{
+	CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+	CVPixelBufferLockBaseAddress(imageBuffer, 0);
+	
+	void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
+	
+	size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+	size_t width = CVPixelBufferGetWidth(imageBuffer);
+	size_t height = CVPixelBufferGetHeight(imageBuffer);
+	
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	
+	CGContextRef context = CGBitmapContextCreate(baseAddress, width, height, 8,
+												 bytesPerRow, colorSpace, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast);
+	
+	if (!context)
+	{
+		DLog(@"can not get image from sample buffer, will try it next frame");
+		CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+		return nil;
+	}
+	
+	CGImageRef quartzImage = CGBitmapContextCreateImage(context);
+	CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+	
+	CGContextRelease(context);
+	CGColorSpaceRelease(colorSpace);
+	
+	UIImage *image = [UIImage imageWithCGImage:quartzImage];
+	
+	CGImageRelease(quartzImage);
+	
+	return image;
 }
 
 - (void)_cleanUpTextures
