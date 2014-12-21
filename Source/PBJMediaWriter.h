@@ -44,12 +44,12 @@
 - (BOOL)setupAudioOutputDeviceWithSettings:(NSDictionary *)audioSettings;
 - (BOOL)setupVideoOutputDeviceWithSettings:(NSDictionary *)videoSettings;
 
-// write
+// write methods, last time offsets
 
 @property (nonatomic, readonly) CMTime audioTimestamp;
 @property (nonatomic, readonly) CMTime videoTimestamp;
 
-- (void)writeSampleBuffer:(CMSampleBufferRef)sampleBuffer ofType:(NSString *)mediaType;
+- (void)writeSampleBuffer:(CMSampleBufferRef)sampleBuffer withMediaTypeVideo:(BOOL)video;
 - (void)finishWritingWithCompletionHandler:(void (^)(void))handler;
 
 @end

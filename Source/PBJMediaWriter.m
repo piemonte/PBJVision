@@ -222,8 +222,12 @@
 
 #pragma mark - sample buffer writing
 
-- (void)writeSampleBuffer:(CMSampleBufferRef)sampleBuffer ofType:(NSString *)mediaType
+- (void)writeSampleBuffer:(CMSampleBufferRef)sampleBuffer withMediaTypeVideo:(BOOL)video
 {
+    if (!CMSampleBufferDataIsReady(sampleBuffer)) {
+        return;
+    }
+
 	if ( _assetWriter.status == AVAssetWriterStatusUnknown ) {
     
         if ([_assetWriter startWriting]) {
@@ -242,9 +246,10 @@
     }
 	
 	if ( _assetWriter.status == AVAssetWriterStatusWriting ) {
-		
+
         CMTime timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-		if (mediaType == AVMediaTypeVideo) {
+
+		if (video) {
 			if (_assetWriterVideoInput.readyForMoreMediaData) {
 				if ([_assetWriterVideoInput appendSampleBuffer:sampleBuffer]) {
                     _videoTimestamp = timestamp;
@@ -252,7 +257,7 @@
 					DLog(@"writer error appending video (%@)", [_assetWriter error]);
                 }
 			}
-		} else if (mediaType == AVMediaTypeAudio) {
+		} else {
 			if (_assetWriterAudioInput.readyForMoreMediaData) {
 				if ([_assetWriterAudioInput appendSampleBuffer:sampleBuffer]) {
                     _audioTimestamp = timestamp;
@@ -263,7 +268,6 @@
 		}
         
 	}
-    
 }
 
 - (void)finishWritingWithCompletionHandler:(void (^)(void))handler
@@ -276,7 +280,7 @@
     [_assetWriter finishWritingWithCompletionHandler:handler];
     
     _audioReady = NO;
-    _videoReady = NO;    
+    _videoReady = NO;
 }
 
 
