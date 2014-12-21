@@ -1969,7 +1969,7 @@ typedef void (^PBJVisionBlock)();
     }
 }
 
-#pragma mark - sample buffer setup
+#pragma mark - media writer setup
 
 - (BOOL)_setupMediaWriterAudioInputWithSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
@@ -2049,6 +2049,29 @@ typedef void (^PBJVisionBlock)();
                                      AVVideoCompressionPropertiesKey : compressionSettings };
     
     return [_mediaWriter setupVideoOutputDeviceWithSettings:videoSettings];
+}
+
+- (void)_automaticallyEndCaptureIfMaximumDurationReachedWithSampleBuffer:(CMSampleBufferRef)sampleBuffer
+{
+    CMTime currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+
+    if (!_flags.interrupted && CMTIME_IS_VALID(currentTimestamp) && CMTIME_IS_VALID(_startTimestamp) && CMTIME_IS_VALID(_maximumCaptureDuration)) {
+        if (CMTIME_IS_VALID(_timeOffset)) {
+            // Current time stamp is actually timstamp with data from globalClock
+            // In case, if we had interruption, then _lastTimeStamp
+            // will have information about the time diff between globalClock and assetWriterClock
+            // So in case if we had interruption we need to remove that offset from "currentTimestamp"
+            currentTimestamp = CMTimeSubtract(currentTimestamp, _timeOffset);
+        }
+        CMTime currentCaptureDuration = CMTimeSubtract(currentTimestamp, _startTimestamp);
+        if (CMTIME_IS_VALID(currentCaptureDuration)) {
+            if (CMTIME_COMPARE_INLINE(currentCaptureDuration, >=, _maximumCaptureDuration)) {
+                [self _enqueueBlockOnMainQueue:^{
+                    [self endVideoCapture];
+                }];
+            }
+        }
+    }
 }
 
 #pragma mark - AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate
@@ -2172,26 +2195,7 @@ typedef void (^PBJVisionBlock)();
         }
     }
     
-    currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-    
-    if (!_flags.interrupted && CMTIME_IS_VALID(currentTimestamp) && CMTIME_IS_VALID(_startTimestamp) && CMTIME_IS_VALID(_maximumCaptureDuration)) {
-        
-        if (CMTIME_IS_VALID(_lastTimestamp)) {
-            // Current time stamp is actually timstamp with data from globalClock
-            // In case, if we had interruption, then _lastTimeStamp
-            // will have infromation about the time diff between globalClock and assetWriterClock
-            // So in case if we had interruption we need to remove that offset from "currentTimestamp"
-            currentTimestamp = CMTimeSubtract(currentTimestamp, _lastTimestamp);
-        }
-        CMTime currentCaptureDuration = CMTimeSubtract(currentTimestamp, _startTimestamp);
-        if (CMTIME_IS_VALID(currentCaptureDuration)) {
-            if (CMTIME_COMPARE_INLINE(currentCaptureDuration, >=, _maximumCaptureDuration)) {
-                [self _enqueueBlockOnMainQueue:^{
-                    [self endVideoCapture];
-                }];
-            }
-        }
-    }
+    [self _automaticallyEndCaptureIfMaximumDurationReachedWithSampleBuffer:sampleBuffer];
         
     if (bufferToWrite) {
         CFRelease(bufferToWrite);
