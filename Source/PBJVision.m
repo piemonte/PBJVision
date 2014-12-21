@@ -107,7 +107,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     PBJMediaWriter *_mediaWriter;
 
     dispatch_queue_t _captureSessionDispatchQueue;
-    dispatch_queue_t _captureVideoDispatchQueue;
+    dispatch_queue_t _captureCaptureDispatchQueue;
 
     PBJCameraDevice _cameraDevice;
     PBJCameraMode _cameraMode;
@@ -142,8 +142,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     CGRect _cleanAperture;
 
     CMTime _startTimestamp;
-    CMTime _lastTimestamp;
-    
+    CMTime _timeOffset;
     CMTime _maximumCaptureDuration;
 
     // sample buffer rendering
@@ -721,7 +720,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
         // setup queues
         _captureSessionDispatchQueue = dispatch_queue_create("PBJVisionSession", DISPATCH_QUEUE_SERIAL); // protects session
-        _captureVideoDispatchQueue = dispatch_queue_create("PBJVisionVideo", DISPATCH_QUEUE_SERIAL); // protects capture
+        _captureCaptureDispatchQueue = dispatch_queue_create("PBJVisionCapture", DISPATCH_QUEUE_SERIAL); // protects capture
         
         _previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:nil];
         
@@ -764,7 +763,7 @@ typedef void (^PBJVisionBlock)();
 
 - (void)_enqueueBlockOnCaptureVideoQueue:(PBJVisionBlock)block
 {
-    dispatch_async(_captureVideoDispatchQueue, ^{
+    dispatch_async(_captureCaptureDispatchQueue, ^{
         block();
     });
 }
@@ -849,9 +848,9 @@ typedef void (^PBJVisionBlock)();
     _captureOutputVideo = [[AVCaptureVideoDataOutput alloc] init];
     
     if (_cameraMode != PBJCameraModePhoto && _flags.audioCaptureEnabled) {
-    	[_captureOutputAudio setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
+    	[_captureOutputAudio setSampleBufferDelegate:self queue:_captureCaptureDispatchQueue];
     }
-    [_captureOutputVideo setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
+    [_captureOutputVideo setSampleBufferDelegate:self queue:_captureCaptureDispatchQueue];
 
     // capture device initial settings
     _videoFrameRate = 30;
@@ -1033,7 +1032,7 @@ typedef void (^PBJVisionBlock)();
             }
 
             _captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
-            [_captureOutputAudio setSampleBufferDelegate:self queue:_captureVideoDispatchQueue];
+            [_captureOutputAudio setSampleBufferDelegate:self queue:_captureCaptureDispatchQueue];
             
         }
         
@@ -1746,7 +1745,7 @@ typedef void (^PBJVisionBlock)();
         [self _setOrientationForConnection:videoConnection];
 
         _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
-        _lastTimestamp = kCMTimeInvalid;
+        _timeOffset = kCMTimeInvalid;
         
         _flags.recording = YES;
         _flags.paused = NO;
@@ -1831,7 +1830,7 @@ typedef void (^PBJVisionBlock)();
         void (^finishWritingCompletionHandler)(void) = ^{
             Float64 capturedDuration = self.capturedVideoSeconds;
             
-            _lastTimestamp = kCMTimeInvalid;
+            _timeOffset = kCMTimeInvalid;
             _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
             _flags.interrupted = NO;
 
@@ -1877,7 +1876,7 @@ typedef void (^PBJVisionBlock)();
         [_captureThumbnailFrames removeAllObjects];
         
         void (^finishWritingCompletionHandler)(void) = ^{
-            _lastTimestamp = kCMTimeInvalid;
+            _timeOffset = kCMTimeInvalid;
             _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
             _flags.interrupted = NO;
 
@@ -2115,7 +2114,7 @@ typedef void (^PBJVisionBlock)();
     CMSampleBufferRef bufferToWrite = NULL;
 
     if (_lastTimestamp.value > 0) {
-        bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer usingTimeOffset:_lastTimestamp];
+        bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer usingTimeOffset:_timeOffset];
         if (!bufferToWrite) {
             DLog(@"error subtracting the timeoffset from the sampleBuffer");
         }
@@ -2194,8 +2193,9 @@ typedef void (^PBJVisionBlock)();
         }
     }
         
-    if (bufferToWrite)
+    if (bufferToWrite) {
         CFRelease(bufferToWrite);
+    }
     
     CFRelease(sampleBuffer);
 
