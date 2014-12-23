@@ -46,6 +46,7 @@
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
+    // Note: endCapture may take more time than permitted, if the user enters the background
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application

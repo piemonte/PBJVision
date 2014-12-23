@@ -613,12 +613,12 @@
 
 // progress
 
-- (void)visionDidCaptureAudioSample:(PBJVision *)vision
+- (void)vision:(PBJVision *)vision didCaptureVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
 //    NSLog(@"captured audio (%f) seconds", vision.capturedAudioSeconds);
 }
 
-- (void)visionDidCaptureVideoSample:(PBJVision *)vision
+- (void)vision:(PBJVision *)vision didCaptureAudioSample:(CMSampleBufferRef)sampleBuffer
 {
 //    NSLog(@"captured video (%f) seconds", vision.capturedVideoSeconds);
 }
