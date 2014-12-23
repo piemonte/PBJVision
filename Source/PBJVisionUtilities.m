@@ -138,7 +138,7 @@
 	return nil;
 }
 
-+ (CMSampleBufferRef)createOffsetSampleBufferWithSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset duration:(CMTime)duration
++ (CMSampleBufferRef)createOffsetSampleBufferWithSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset
 {
     CMItemCount itemCount;
     
@@ -162,7 +162,6 @@
     for (CMItemCount i = 0; i < itemCount; i++) {
         timingInfo[i].presentationTimeStamp = CMTimeSubtract(timingInfo[i].presentationTimeStamp, timeOffset);
         timingInfo[i].decodeTimeStamp = CMTimeSubtract(timingInfo[i].decodeTimeStamp, timeOffset);
-        timingInfo[i].duration = duration;
     }
     
     CMSampleBufferRef offsetSampleBuffer;

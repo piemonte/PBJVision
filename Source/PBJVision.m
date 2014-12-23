@@ -31,7 +31,7 @@
 #import <ImageIO/ImageIO.h>
 #import <OpenGLES/EAGL.h>
 
-#define LOG_VISION 0
+#define LOG_VISION 1
 #ifndef DLog
 #if !defined(NDEBUG) && LOG_VISION
 #   define DLog(fmt, ...) NSLog((@"VISION: " fmt), ##__VA_ARGS__);
@@ -278,7 +278,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 - (Float64)capturedAudioSeconds
 {
     if (_mediaWriter && CMTIME_IS_VALID(_mediaWriter.audioTimestamp)) {
-        return CMTimeGetSeconds(CMTimeSubtract(_mediaWriter.audioTimestamp, _startTimestamp));
+        return CMTimeGetSeconds(_mediaWriter.audioTimestamp);
     } else {
         return 0.0;
     }
@@ -290,7 +290,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         if (CMTimeGetSeconds(CMTimeSubtract(_mediaWriter.videoTimestamp, _startTimestamp)) < 0) {
             _startTimestamp = _mediaWriter.videoTimestamp;
         }
-        return CMTimeGetSeconds(CMTimeSubtract(_mediaWriter.videoTimestamp, _startTimestamp));
+        return CMTimeGetSeconds(_mediaWriter.videoTimestamp);
     } else {
         return 0.0;
     }
@@ -1637,7 +1637,7 @@ typedef void (^PBJVisionBlock)();
         // add photo metadata (ie EXIF: Aperture, Brightness, Exposure, FocalLength, etc)
         metadata = (__bridge NSDictionary *)CMCopyDictionaryOfAttachments(kCFAllocatorDefault, imageDataSampleBuffer, kCMAttachmentMode_ShouldPropagate);
         if (metadata) {
-            [photoDict setObject:metadata forKey:PBJVisionPhotoMetadataKey];
+            photoDict[PBJVisionPhotoMetadataKey] = metadata;
             CFRelease((__bridge CFTypeRef)(metadata));
         } else {
             DLog(@"failed to generate metadata for photo");
@@ -1647,22 +1647,23 @@ typedef void (^PBJVisionBlock)();
         NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
         if (jpegData) {
             // add JPEG
-            [photoDict setObject:jpegData forKey:PBJVisionPhotoJPEGKey];
+            photoDict[PBJVisionPhotoJPEGKey] = jpegData;
             
             // add image
             UIImage *image = [self _uiimageFromJPEGData:jpegData];
             if (image) {
-                [photoDict setObject:image forKey:PBJVisionPhotoImageKey];
+                photoDict[PBJVisionPhotoImageKey] = image;
             } else {
                 DLog(@"failed to create image from JPEG");
-                // TODO: return delegate on error
+                error = [NSError errorWithDomain:PBJVisionErrorDomain code:PBJVisionErrorCaptureFailed userInfo:nil];
             }
             
             // add thumbnail
             if (_flags.thumbnailEnabled) {
                 UIImage *thumbnail = [self _thumbnailJPEGData:jpegData];
-                if (thumbnail)
-                    [photoDict setObject:thumbnail forKey:PBJVisionPhotoThumbnailKey];
+                if (thumbnail) {
+                    photoDict[PBJVisionPhotoThumbnailKey] = thumbnail;
+                }
             }
             
         }
@@ -1843,7 +1844,7 @@ typedef void (^PBJVisionBlock)();
                 NSMutableDictionary *videoDict = [[NSMutableDictionary alloc] init];
                 NSString *path = [_mediaWriter.outputURL path];
                 if (path) {
-                    [videoDict setObject:path forKey:PBJVisionVideoPathKey];
+                    videoDict[PBJVisionVideoPathKey] = path;
                     
                     if (_flags.thumbnailEnabled) {
                         if (_flags.defaultVideoThumbnails) {
@@ -1854,7 +1855,7 @@ typedef void (^PBJVisionBlock)();
                     }
                 }
 
-                [videoDict setObject:@(capturedDuration) forKey:PBJVisionVideoCapturedDurationKey];
+                videoDict[PBJVisionVideoCapturedDurationKey] = @(capturedDuration);
 
                 NSError *error = [_mediaWriter error];
                 if ([_delegate respondsToSelector:@selector(vision:capturedVideo:error:)]) {
@@ -2117,29 +2118,31 @@ typedef void (^PBJVisionBlock)();
     
     CMTime currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
 
-    // calculate the length of the interruption
-    if (_flags.interrupted && !isVideo) {
-        _flags.interrupted = NO;
-
+    // calculate the length of the interruption and store the offsets
+    if (_flags.interrupted) {
+        if (isVideo) {
+            CFRelease(sampleBuffer);
+            return;
+        }
+        
         // calculate the appropriate time offset
-        if (CMTIME_IS_VALID(currentTimestamp)) {
+        if (CMTIME_IS_VALID(currentTimestamp) && CMTIME_IS_VALID(_mediaWriter.audioTimestamp)) {
             if (CMTIME_IS_VALID(_timeOffset)) {
                 currentTimestamp = CMTimeSubtract(currentTimestamp, _timeOffset);
             }
             
             CMTime offset = CMTimeSubtract(currentTimestamp, _mediaWriter.audioTimestamp);
-            _timeOffset = (_timeOffset.value == 0) ? offset : CMTimeAdd(_timeOffset, offset);
+            _timeOffset = CMTIME_IS_INVALID(_timeOffset) ? offset : CMTimeAdd(_timeOffset, offset);
             DLog(@"new calculated offset %f valid (%d)", CMTimeGetSeconds(_timeOffset), CMTIME_IS_VALID(_timeOffset));
-        } else {
-            DLog(@"invalid audio timestamp, no offset update");
         }
+        _flags.interrupted = NO;
     }
     
     // adjust the sample buffer if there is a time offset
     CMSampleBufferRef bufferToWrite = NULL;
-
-    if (_timeOffset.value > 0) {
-        bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer withTimeOffset:_timeOffset duration:kCMTimeInvalid];
+    if (CMTIME_IS_VALID(_timeOffset)) {
+        //CMTime duration = CMSampleBufferGetDuration(sampleBuffer);
+        bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer withTimeOffset:_timeOffset];
         if (!bufferToWrite) {
             DLog(@"error subtracting the timeoffset from the sampleBuffer");
         }
@@ -2147,21 +2150,16 @@ typedef void (^PBJVisionBlock)();
         bufferToWrite = sampleBuffer;
         CFRetain(bufferToWrite);
     }
+    
+    // write the sample buffer
+    if (bufferToWrite && !_flags.interrupted) {
+    
+        if (isVideo) {
 
-    if (isVideo && !_flags.interrupted) {
+            [_mediaWriter writeSampleBuffer:bufferToWrite withMediaTypeVideo:isVideo];
+
+            _flags.videoWritten = YES;
         
-        if (bufferToWrite) {
-            // update video and the last timestamp
-            CMTime time = CMSampleBufferGetPresentationTimeStamp(bufferToWrite);
-            CMTime duration = CMSampleBufferGetDuration(bufferToWrite);
-            if (duration.value > 0)
-                time = CMTimeAdd(time, duration);
-            
-            if (time.value > _mediaWriter.videoTimestamp.value) {
-                [_mediaWriter writeSampleBuffer:bufferToWrite withMediaTypeVideo:isVideo];
-                _flags.videoWritten = YES;
-            }
-            
             // process the sample buffer for rendering
             if (_flags.videoRenderingEnabled && _flags.videoWritten) {
                 [self _executeBlockOnMainQueue:^{
@@ -2174,20 +2172,10 @@ typedef void (^PBJVisionBlock)();
                     [_delegate vision:self didCaptureVideoSampleBuffer:bufferToWrite];
                 }
             }];
-        }
         
-    } else if (!isVideo && !_flags.interrupted) {
-
-        if (bufferToWrite && _flags.videoWritten) {
-            // update the last audio timestamp
-            CMTime time = CMSampleBufferGetPresentationTimeStamp(bufferToWrite);
-            CMTime duration = CMSampleBufferGetDuration(bufferToWrite);
-            if (duration.value > 0)
-                time = CMTimeAdd(time, duration);
-
-            if (time.value > _mediaWriter.audioTimestamp.value) {
-                [_mediaWriter writeSampleBuffer:bufferToWrite withMediaTypeVideo:isVideo];
-            }
+        } else if (!isVideo && _flags.videoWritten) {
+            
+            [_mediaWriter writeSampleBuffer:bufferToWrite withMediaTypeVideo:isVideo];
             
             [self _enqueueBlockOnMainQueue:^{
                 if ([_delegate respondsToSelector:@selector(vision:didCaptureAudioSample:)]) {

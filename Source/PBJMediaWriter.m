@@ -29,7 +29,7 @@
 #import <UIKit/UIDevice.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 
-#define LOG_WRITER 1
+#define LOG_WRITER 0
 #if !defined(NDEBUG) && LOG_WRITER
 #   define DLog(fmt, ...) NSLog((@"writer: " fmt), ##__VA_ARGS__);
 #else
@@ -272,6 +272,10 @@
 	if ( _assetWriter.status == AVAssetWriterStatusWriting ) {
 
         CMTime timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+        CMTime duration = CMSampleBufferGetDuration(sampleBuffer);
+        if (duration.value > 0) {
+            timestamp = CMTimeAdd(timestamp, duration);
+        }
         
 		if (video) {
 			if (_assetWriterVideoInput.readyForMoreMediaData) {
