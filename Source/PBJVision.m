@@ -1721,7 +1721,7 @@ typedef void (^PBJVisionBlock)();
         if ([[NSFileManager defaultManager] fileExistsAtPath:outputPath]) {
             NSError *error = nil;
             if (![[NSFileManager defaultManager] removeItemAtPath:outputPath error:&error]) {
-                [self _failVideoCaptureWithErrorCode:PBJVisionErrorBadOutputFile];
+                [self _failVideoCaptureWithErrorCode:PBJVisionErrorOutputFileExists];
 
                 DLog(@"could not setup an output file (file exists)");
                 return;

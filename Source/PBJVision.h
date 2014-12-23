@@ -91,7 +91,8 @@ typedef NS_ENUM(NSInteger, PBJVisionErrorType)
     PBJVisionErrorUnknown = -1,
     PBJVisionErrorCancelled = 100,
     PBJVisionErrorSessionFailed = 101,
-    PBJVisionErrorBadOutputFile = 102
+    PBJVisionErrorBadOutputFile = 102,
+    PBJVisionErrorOutputFileExists = 103
 };
 
 // photo dictionary keys
