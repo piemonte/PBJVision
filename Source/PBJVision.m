@@ -2137,7 +2137,7 @@ typedef void (^PBJVisionBlock)();
     CMSampleBufferRef bufferToWrite = NULL;
 
     if (_lastTimestamp.value > 0) {
-        bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer usingTimeOffset:_timeOffset];
+        bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer withTimeOffset:_timeOffset duration:kCMTimeInvalid];
         if (!bufferToWrite) {
             DLog(@"error subtracting the timeoffset from the sampleBuffer");
         }
