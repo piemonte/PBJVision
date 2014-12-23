@@ -278,7 +278,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 - (Float64)capturedAudioSeconds
 {
     if (_mediaWriter && CMTIME_IS_VALID(_mediaWriter.audioTimestamp)) {
-        return CMTimeGetSeconds(_mediaWriter.audioTimestamp);
+        return CMTimeGetSeconds(CMTimeSubtract(_mediaWriter.audioTimestamp, _startTimestamp));
     } else {
         return 0.0;
     }
@@ -287,10 +287,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 - (Float64)capturedVideoSeconds
 {
     if (_mediaWriter && CMTIME_IS_VALID(_mediaWriter.videoTimestamp)) {
-        if (CMTimeGetSeconds(CMTimeSubtract(_mediaWriter.videoTimestamp, _startTimestamp)) < 0) {
-            _startTimestamp = _mediaWriter.videoTimestamp;
-        }
-        return CMTimeGetSeconds(_mediaWriter.videoTimestamp);
+        return CMTimeGetSeconds(CMTimeSubtract(_mediaWriter.videoTimestamp, _startTimestamp));
     } else {
         return 0.0;
     }
