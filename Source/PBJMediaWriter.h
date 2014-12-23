@@ -36,15 +36,15 @@
 @property (nonatomic, readonly) NSURL *outputURL;
 @property (nonatomic, readonly) NSError *error;
 
-// setup output devices before writing
+// configure settings before writing
 
 @property (nonatomic, readonly, getter=isAudioReady) BOOL audioReady;
 @property (nonatomic, readonly, getter=isVideoReady) BOOL videoReady;
 
-- (BOOL)setupAudioOutputDeviceWithSettings:(NSDictionary *)audioSettings;
-- (BOOL)setupVideoOutputDeviceWithSettings:(NSDictionary *)videoSettings;
+- (BOOL)setupAudioWithSettings:(NSDictionary *)audioSettings;
+- (BOOL)setupVideoWithSettings:(NSDictionary *)videoSettings;
 
-// write methods, last time offsets
+// write methods, time durations
 
 @property (nonatomic, readonly) CMTime audioTimestamp;
 @property (nonatomic, readonly) CMTime videoTimestamp;

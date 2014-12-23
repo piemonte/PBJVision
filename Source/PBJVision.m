@@ -1126,8 +1126,9 @@ typedef void (^PBJVisionBlock)();
         } else if (supportsVideoRangeYUV) {
             videoSettings = @{ (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) };
         }
-        if (videoSettings)
+        if (videoSettings) {
             [_captureOutputVideo setVideoSettings:videoSettings];
+        }
         
         // setup video device configuration
         if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
@@ -1735,9 +1736,10 @@ typedef void (^PBJVisionBlock)();
             return;
         }
         
-        if (_mediaWriter)
+        if (_mediaWriter) {
             _mediaWriter.delegate = nil;
-        
+            _mediaWriter = nil;
+        }
         _mediaWriter = [[PBJMediaWriter alloc] initWithOutputURL:outputURL];
         _mediaWriter.delegate = self;
 
@@ -1996,7 +1998,7 @@ typedef void (^PBJVisionBlock)();
                                                 AVEncoderBitRateKey : @(_audioBitRate),
                                                 AVChannelLayoutKey : currentChannelLayoutData };
 
-    return [_mediaWriter setupAudioOutputDeviceWithSettings:audioCompressionSettings];
+    return [_mediaWriter setupAudioWithSettings:audioCompressionSettings];
 }
 
 - (BOOL)_setupMediaWriterVideoInputWithSampleBuffer:(CMSampleBufferRef)sampleBuffer
@@ -2034,8 +2036,8 @@ typedef void (^PBJVisionBlock)();
     
     if (_additionalCompressionProperties && [_additionalCompressionProperties count] > 0) {
         NSMutableDictionary *mutableDictionary = [NSMutableDictionary dictionaryWithDictionary:_additionalCompressionProperties];
-        [mutableDictionary setObject:@(_videoBitRate) forKey:AVVideoAverageBitRateKey];
-        [mutableDictionary setObject:@(_videoFrameRate) forKey:AVVideoMaxKeyFrameIntervalKey];
+        mutableDictionary[AVVideoAverageBitRateKey] = @(_videoBitRate);
+        mutableDictionary[AVVideoMaxKeyFrameIntervalKey] = @(_videoFrameRate);
         compressionSettings = mutableDictionary;
     } else {
         compressionSettings = @{ AVVideoAverageBitRateKey : @(_videoBitRate),
@@ -2048,7 +2050,7 @@ typedef void (^PBJVisionBlock)();
                                      AVVideoHeightKey : @(videoDimensions.height),
                                      AVVideoCompressionPropertiesKey : compressionSettings };
     
-    return [_mediaWriter setupVideoOutputDeviceWithSettings:videoSettings];
+    return [_mediaWriter setupVideoWithSettings:videoSettings];
 }
 
 - (void)_automaticallyEndCaptureIfMaximumDurationReachedWithSampleBuffer:(CMSampleBufferRef)sampleBuffer
@@ -2058,7 +2060,7 @@ typedef void (^PBJVisionBlock)();
     if (!_flags.interrupted && CMTIME_IS_VALID(currentTimestamp) && CMTIME_IS_VALID(_startTimestamp) && CMTIME_IS_VALID(_maximumCaptureDuration)) {
         if (CMTIME_IS_VALID(_timeOffset)) {
             // Current time stamp is actually timstamp with data from globalClock
-            // In case, if we had interruption, then _lastTimeStamp
+            // In case, if we had interruption, then _timeOffset
             // will have information about the time diff between globalClock and assetWriterClock
             // So in case if we had interruption we need to remove that offset from "currentTimestamp"
             currentTimestamp = CMTimeSubtract(currentTimestamp, _timeOffset);
@@ -2097,9 +2099,8 @@ typedef void (^PBJVisionBlock)();
     }
     
     // setup media writer
-    BOOL isAudio = (connection == [_captureOutputAudio connectionWithMediaType:AVMediaTypeAudio]);
-    BOOL isVideo = (connection == [_captureOutputVideo connectionWithMediaType:AVMediaTypeVideo]);
-    if (isAudio && !_mediaWriter.isAudioReady) {
+    BOOL isVideo = (captureOutput == _captureOutputVideo);
+    if (!isVideo && !_mediaWriter.isAudioReady) {
         [self _setupMediaWriterAudioInputWithSampleBuffer:sampleBuffer];
         DLog(@"ready for audio (%d)", _mediaWriter.isAudioReady);
     }
@@ -2113,30 +2114,31 @@ typedef void (^PBJVisionBlock)();
         CFRelease(sampleBuffer);
         return;
     }
-
+    
     CMTime currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
 
     // calculate the length of the interruption
-    if (_flags.interrupted && isAudio) {
+    if (_flags.interrupted && !isVideo) {
         _flags.interrupted = NO;
 
         // calculate the appropriate time offset
         if (CMTIME_IS_VALID(currentTimestamp)) {
-            if (CMTIME_IS_VALID(_lastTimestamp)) {
-                currentTimestamp = CMTimeSubtract(currentTimestamp, _lastTimestamp);
+            if (CMTIME_IS_VALID(_timeOffset)) {
+                currentTimestamp = CMTimeSubtract(currentTimestamp, _timeOffset);
             }
             
             CMTime offset = CMTimeSubtract(currentTimestamp, _mediaWriter.audioTimestamp);
-            _lastTimestamp = (_lastTimestamp.value == 0) ? offset : CMTimeAdd(_lastTimestamp, offset);
-            DLog(@"new calculated offset %f valid (%d)", CMTimeGetSeconds(_lastTimestamp), CMTIME_IS_VALID(_lastTimestamp));
+            _timeOffset = (_timeOffset.value == 0) ? offset : CMTimeAdd(_timeOffset, offset);
+            DLog(@"new calculated offset %f valid (%d)", CMTimeGetSeconds(_timeOffset), CMTIME_IS_VALID(_timeOffset));
         } else {
             DLog(@"invalid audio timestamp, no offset update");
         }
     }
     
+    // adjust the sample buffer if there is a time offset
     CMSampleBufferRef bufferToWrite = NULL;
 
-    if (_lastTimestamp.value > 0) {
+    if (_timeOffset.value > 0) {
         bufferToWrite = [PBJVisionUtilities createOffsetSampleBufferWithSampleBuffer:sampleBuffer withTimeOffset:_timeOffset duration:kCMTimeInvalid];
         if (!bufferToWrite) {
             DLog(@"error subtracting the timeoffset from the sampleBuffer");
@@ -2156,7 +2158,7 @@ typedef void (^PBJVisionBlock)();
                 time = CMTimeAdd(time, duration);
             
             if (time.value > _mediaWriter.videoTimestamp.value) {
-                [_mediaWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeVideo];
+                [_mediaWriter writeSampleBuffer:bufferToWrite withMediaTypeVideo:isVideo];
                 _flags.videoWritten = YES;
             }
             
@@ -2174,7 +2176,7 @@ typedef void (^PBJVisionBlock)();
             }];
         }
         
-    } else if (isAudio && !_flags.interrupted) {
+    } else if (!isVideo && !_flags.interrupted) {
 
         if (bufferToWrite && _flags.videoWritten) {
             // update the last audio timestamp
@@ -2184,7 +2186,7 @@ typedef void (^PBJVisionBlock)();
                 time = CMTimeAdd(time, duration);
 
             if (time.value > _mediaWriter.audioTimestamp.value) {
-                [_mediaWriter writeSampleBuffer:bufferToWrite ofType:AVMediaTypeAudio];
+                [_mediaWriter writeSampleBuffer:bufferToWrite withMediaTypeVideo:isVideo];
             }
             
             [self _enqueueBlockOnMainQueue:^{
@@ -2192,7 +2194,9 @@ typedef void (^PBJVisionBlock)();
                     [_delegate vision:self didCaptureAudioSample:bufferToWrite];
                 }
             }];
+        
         }
+    
     }
     
     [self _automaticallyEndCaptureIfMaximumDurationReachedWithSampleBuffer:sampleBuffer];
