@@ -123,6 +123,12 @@ Handle the final video output or error accordingly.
 }
 ```
 
+To specify an automatic end capture maximum duration, set the following property on the 'PBJVision' controller.
+
+```objective-c
+    [[PBJVision sharedInstance] setMaximumCaptureDuration:CMTimeMakeWithSeconds(5, 600)]; // ~ 5 seconds
+```
+
 To adjust the video quality and compression bit rate, modify the following properties on the `PBJVision` controller.
 
 ```objective-c
