@@ -86,6 +86,7 @@
 
     ALAssetsLibrary *_assetLibrary;
     __block NSDictionary *_currentVideo;
+    __block NSDictionary *_currentPhoto;
 }
 
 @end
@@ -328,6 +329,7 @@
     }
     
     vision.cameraMode = PBJCameraModeVideo;
+    //vision.cameraMode = PBJCameraModePhoto; // PHOTO: uncomment to test photo capture
     vision.cameraOrientation = PBJCameraOrientationPortrait;
     vision.focusMode = PBJFocusModeContinuousAutoFocus;
     vision.outputFormat = PBJOutputFormatSquare;
@@ -407,6 +409,12 @@
 
 - (void)_handleLongPressGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
 {
+    // PHOTO: uncomment to test photo capture
+//    if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+//        [[PBJVision sharedInstance] capturePhoto];
+//        return;
+//    }
+
     switch (gestureRecognizer.state) {
       case UIGestureRecognizerStateBegan:
         {
@@ -569,7 +577,52 @@
 
 - (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error
 {
-    // photo captured, PBJVisionPhotoJPEGKey
+    if (error) {
+        // handle error properly
+        return;
+    }
+    _currentPhoto = photoDict;
+    
+    // save to library
+    NSData *photoData = _currentPhoto[PBJVisionPhotoJPEGKey];
+    NSDictionary *metadata = _currentPhoto[PBJVisionPhotoMetadataKey];
+   [_assetLibrary writeImageDataToSavedPhotosAlbum:photoData metadata:metadata completionBlock:^(NSURL *assetURL, NSError *error1) {
+        if (error1 || !assetURL) {
+            // handle error properly
+            return;
+        }
+       
+        NSString *albumName = @"PBJVision";
+        __block BOOL albumFound = NO;
+        [_assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAlbum usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+            if ([albumName compare:[group valueForProperty:ALAssetsGroupPropertyName]] == NSOrderedSame) {
+                albumFound = YES;
+                [_assetLibrary assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+                    [group addAsset:asset];
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Photo Saved!" message: @"Saved to the camera roll."
+                                                       delegate:nil
+                                              cancelButtonTitle:nil
+                                              otherButtonTitles:@"OK", nil];
+                    [alert show];
+                } failureBlock:nil];
+            }
+            if (!group && !albumFound) {
+                __weak ALAssetsLibrary *blockSafeLibrary = _assetLibrary;
+                [_assetLibrary addAssetsGroupAlbumWithName:albumName resultBlock:^(ALAssetsGroup *group1) {
+                    [blockSafeLibrary assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+                        [group1 addAsset:asset];
+                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Photo Saved!" message: @"Saved to the camera roll."
+                                                       delegate:nil
+                                              cancelButtonTitle:nil
+                                              otherButtonTitles:@"OK", nil];
+                        [alert show];
+                    } failureBlock:nil];
+                } failureBlock:nil];
+            }
+        } failureBlock:nil];
+    }];
+    
+    _currentPhoto = nil;
 }
 
 // video capture
