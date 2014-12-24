@@ -41,6 +41,7 @@
 		06B7D035179F357600F3F527 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D032179F357600F3F527 /* Default-568h@2x.png */; };
 		06B7D036179F357600F3F527 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D033179F357600F3F527 /* Default.png */; };
 		06B7D037179F357600F3F527 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D034179F357600F3F527 /* Default@2x.png */; };
+		06C216CF1A4A924700C83065 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06C216CE1A4A924700C83065 /* CoreImage.framework */; };
 		06DF60741896B535000870C9 /* PBJMediaWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 06DF60731896B535000870C9 /* PBJMediaWriter.m */; };
 		06FEB59F18F5C15600AFD4DB /* PBJGLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 06FEB59E18F5C15600AFD4DB /* PBJGLProgram.m */; };
 /* End PBXBuildFile section */
@@ -92,6 +93,7 @@
 		06B7D032179F357600F3F527 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		06B7D033179F357600F3F527 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		06B7D034179F357600F3F527 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		06C216CE1A4A924700C83065 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		06DF60721896B535000870C9 /* PBJMediaWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PBJMediaWriter.h; path = ../Source/PBJMediaWriter.h; sourceTree = "<group>"; };
 		06DF60731896B535000870C9 /* PBJMediaWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PBJMediaWriter.m; path = ../Source/PBJMediaWriter.m; sourceTree = "<group>"; };
 		06FEB59D18F5C15600AFD4DB /* PBJGLProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PBJGLProgram.h; path = ../Source/PBJGLProgram.h; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06C216CF1A4A924700C83065 /* CoreImage.framework in Frameworks */,
 				067D52F817D8574200541B5E /* GLKit.framework in Frameworks */,
 				0624D09A17D43D5D00665930 /* OpenGLES.framework in Frameworks */,
 				060F7B0F179F459900E27091 /* AssetsLibrary.framework in Frameworks */,
@@ -167,6 +170,7 @@
 		0683D1C0179F2E1700EE66D6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				06C216CE1A4A924700C83065 /* CoreImage.framework */,
 				060F7B0E179F459900E27091 /* AssetsLibrary.framework */,
 				06B7D027179F307D00F3F527 /* AVFoundation.framework */,
 				0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */,

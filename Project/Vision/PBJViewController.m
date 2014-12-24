@@ -81,6 +81,7 @@
     UIView *_gestureView;
     UILongPressGestureRecognizer *_longPressGestureRecognizer;
     UITapGestureRecognizer *_focusTapGestureRecognizer;
+    UITapGestureRecognizer *_photoTapGestureRecognizer;
     
     BOOL _recording;
 
@@ -106,6 +107,8 @@
 {
     [UIApplication sharedApplication].idleTimerDisabled = NO;
     _longPressGestureRecognizer.delegate = nil;
+    _focusTapGestureRecognizer.delegate = nil;
+    _photoTapGestureRecognizer.delegate = nil;
 }
 
 #pragma mark - view lifecycle
@@ -378,15 +381,15 @@
 
 - (void)_handleFrameRateChangeButton:(UIButton *)button
 {
-    
 }
 
 - (void)_handleOnionSkinningButton:(UIButton *)button
 {
     _onionButton.selected = !_onionButton.selected;
     
-    if (_recording)
+    if (_recording) {
         _effectsViewController.view.hidden = !_onionButton.selected;
+    }
 }
 
 - (void)_handleDoneButton:(UIButton *)button

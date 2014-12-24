@@ -28,6 +28,7 @@
 #import "PBJMediaWriter.h"
 #import "PBJGLProgram.h"
 
+#import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 #import <OpenGLES/EAGL.h>
 
@@ -159,6 +160,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     CVOpenGLESTextureRef _chromaTexture;
     CVOpenGLESTextureCacheRef _videoTextureCache;
     
+    CIContext *_ciContext;
+    
     // flags
     
     struct {
@@ -172,6 +175,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         unsigned int audioCaptureEnabled:1;
         unsigned int thumbnailEnabled:1;
         unsigned int defaultVideoThumbnails:1;
+        unsigned int videoCaptureFrame:1;
     } __block _flags;
 }
 
@@ -1590,8 +1594,9 @@ typedef void (^PBJVisionBlock)();
     if ([_delegate respondsToSelector:@selector(visionWillCapturePhoto:)])
         [_delegate visionWillCapturePhoto:self];
     
-    if (_autoFreezePreviewDuringCapture)
+    if (_autoFreezePreviewDuringCapture) {
         [self freezePreview];
+    }
 }
 
 - (void)_didCapturePhoto
@@ -1599,6 +1604,72 @@ typedef void (^PBJVisionBlock)();
     if ([_delegate respondsToSelector:@selector(visionDidCapturePhoto:)])
         [_delegate visionDidCapturePhoto:self];
     DLog(@"did capture photo");
+}
+
+- (void)_capturePhotoFromSampleBuffer:(CMSampleBufferRef)sampleBuffer
+{
+    if (!sampleBuffer) {
+        return;
+    }
+    DLog(@"capturing photo from sample buffer");
+
+    // create associated data
+    NSMutableDictionary *photoDict = [[NSMutableDictionary alloc] init];
+    NSDictionary *metadata = nil;
+    NSError *error = nil;
+
+    // add photo metadata (ie EXIF: Aperture, Brightness, Exposure, FocalLength, etc)
+    metadata = (__bridge NSDictionary *)CMCopyDictionaryOfAttachments(kCFAllocatorDefault, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
+    if (metadata) {
+        photoDict[PBJVisionPhotoMetadataKey] = metadata;
+        CFRelease((__bridge CFTypeRef)(metadata));
+    } else {
+        DLog(@"failed to generate metadata for photo");
+    }
+    
+    if (!_ciContext) {
+        _ciContext = [CIContext contextWithEAGLContext:[[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2]];
+    }
+
+    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    CIImage *ciImage = [CIImage imageWithCVPixelBuffer:pixelBuffer];
+    
+    CGImageRef cgImage = [_ciContext createCGImage:ciImage fromRect:CGRectMake(0, 0, CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer))];
+
+    // add UIImage
+    UIImage *uiImage = [UIImage imageWithCGImage:cgImage];
+    
+    if (cgImage) {
+        CFRelease(cgImage);
+    }
+    
+    if (uiImage) {
+        photoDict[PBJVisionPhotoImageKey] = uiImage;
+        
+        // add JPEG, thumbnail
+        NSData *jpegData = UIImageJPEGRepresentation(uiImage, 0);
+        if (jpegData) {
+            // add JPEG
+            photoDict[PBJVisionPhotoJPEGKey] = jpegData;
+            
+            // add thumbnail
+            if (_flags.thumbnailEnabled) {
+                UIImage *thumbnail = [self _thumbnailJPEGData:jpegData];
+                if (thumbnail) {
+                    photoDict[PBJVisionPhotoThumbnailKey] = thumbnail;
+                }
+            }
+        }
+    } else {
+        DLog(@"failed to create image from JPEG");
+        error = [NSError errorWithDomain:PBJVisionErrorDomain code:PBJVisionErrorCaptureFailed userInfo:nil];
+    }
+    
+    [self _enqueueBlockOnMainQueue:^{
+        if ([_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {
+            [_delegate vision:self capturedPhoto:photoDict error:error];
+        }
+    }];
 }
 
 - (void)capturePhoto
@@ -1889,6 +1960,11 @@ typedef void (^PBJVisionBlock)();
     }];
 }
 
+- (void)captureVideoFrameAsPhoto
+{
+    _flags.videoCaptureFrame = YES;
+}
+
 - (void)captureCurrentVideoThumbnail
 {
     if (_flags.recording) {
@@ -2155,10 +2231,17 @@ typedef void (^PBJVisionBlock)();
 
             _flags.videoWritten = YES;
         
-            // process the sample buffer for rendering
-            if (_flags.videoRenderingEnabled && _flags.videoWritten) {
+            // process the sample buffer for rendering onion layer or capturing video photo
+            if ( (_flags.videoRenderingEnabled || _flags.videoCaptureFrame) && _flags.videoWritten) {
                 [self _executeBlockOnMainQueue:^{
                     [self _processSampleBuffer:bufferToWrite];
+                    
+                    if (_flags.videoCaptureFrame) {
+                        _flags.videoCaptureFrame = NO;
+                        [self _willCapturePhoto];
+                        [self _capturePhotoFromSampleBuffer:bufferToWrite];
+                        [self _didCapturePhoto];
+                    }
                 }];
             }
             
@@ -2559,7 +2642,6 @@ typedef void (^PBJVisionBlock)();
 }
 
 #pragma mark - OpenGLES context support
-// TODO: abstract this in future, put in separate file
 
 - (void)_setupBuffers
 {
