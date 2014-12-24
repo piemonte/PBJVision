@@ -330,9 +330,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         case PBJCameraOrientationLandscapeLeft:
             orientation = AVCaptureVideoOrientationLandscapeLeft;
             break;
-        default:
         case PBJCameraOrientationPortrait:
-            orientation = AVCaptureVideoOrientationPortrait;
+        default:
             break;
     }
 
@@ -1458,9 +1457,8 @@ typedef void (^PBJVisionBlock)();
         case PBJMirroringAuto:
         default:
 		{
-			BOOL mirror = (_cameraDevice == PBJCameraDeviceFront);
-        
 			if ([videoConnection isVideoMirroringSupported]) {
+                BOOL mirror = (_cameraDevice == PBJCameraDeviceFront);
 				[videoConnection setVideoMirrored:mirror];
 			}
 			if ([previewConnection isVideoMirroringSupported]) {
