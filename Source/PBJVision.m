@@ -1531,9 +1531,9 @@ typedef void (^PBJVisionBlock)();
         if (imageSource) {
             if (CGImageSourceGetCount(imageSource) > 0) {
                 NSMutableDictionary *options = [[NSMutableDictionary alloc] initWithCapacity:3];
-                [options setObject:@(YES) forKey:(id)kCGImageSourceCreateThumbnailFromImageAlways];
-                [options setObject:@(PBJVisionThumbnailWidth) forKey:(id)kCGImageSourceThumbnailMaxPixelSize];
-                [options setObject:@(YES) forKey:(id)kCGImageSourceCreateThumbnailWithTransform];
+                options[(id)kCGImageSourceCreateThumbnailFromImageAlways] = @(YES);
+                options[(id)kCGImageSourceThumbnailMaxPixelSize] = @(PBJVisionThumbnailWidth);
+                options[(id)kCGImageSourceCreateThumbnailWithTransform] = @(YES);
                 thumbnailCGImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, (__bridge CFDictionaryRef)options);
             }
             CFRelease(imageSource);
