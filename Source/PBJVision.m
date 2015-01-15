@@ -105,7 +105,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
     // vision core
 
-    __block PBJMediaWriter *_mediaWriter;
+    PBJMediaWriter *_mediaWriter;
 
     dispatch_queue_t _captureSessionDispatchQueue;
     dispatch_queue_t _captureCaptureDispatchQueue;
@@ -1905,10 +1905,9 @@ typedef void (^PBJVisionBlock)();
             _flags.interrupted = NO;
 
             [self _enqueueBlockOnMainQueue:^{
-                if ([_delegate respondsToSelector:@selector(visionDidEndVideoCapture:)]) {
+                if ([_delegate respondsToSelector:@selector(visionDidEndVideoCapture:)])
                     [_delegate visionDidEndVideoCapture:self];
-                }
-                
+
                 NSMutableDictionary *videoDict = [[NSMutableDictionary alloc] init];
                 NSString *path = [_mediaWriter.outputURL path];
                 if (path) {
@@ -1950,9 +1949,6 @@ typedef void (^PBJVisionBlock)();
             _timeOffset = kCMTimeInvalid;
             _startTimestamp = CMClockGetTime(CMClockGetHostTimeClock());
             _flags.interrupted = NO;
-
-            _mediaWriter.delegate = nil;
-            _mediaWriter = nil;
 
             [self _enqueueBlockOnMainQueue:^{
                 NSError *error = [NSError errorWithDomain:PBJVisionErrorDomain code:PBJVisionErrorCancelled userInfo:nil];
