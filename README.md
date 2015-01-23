@@ -15,6 +15,7 @@ Please review the [release history](https://github.com/piemonte/PBJVision/releas
 Contributions are welcome!
 
 [![Build Status](https://travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
+[![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
 
 ## Installation
 
