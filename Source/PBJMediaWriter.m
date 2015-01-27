@@ -149,10 +149,7 @@
     AVMutableMetadataItem *softwareItem = [[AVMutableMetadataItem alloc] init];
     [softwareItem setKeySpace:AVMetadataKeySpaceCommon];
     [softwareItem setKey:AVMetadataCommonKeySoftware];
-    NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
-    NSString *appVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-    NSString *softwareName = [NSString stringWithFormat:@"%@ %@ PBJVision %@ %@", [currentDevice systemName], [currentDevice systemVersion], appName, appVersion];
-    [softwareItem setValue:softwareName];
+    [softwareItem setValue:@"PBJVision"];
 
     // creation date
     AVMutableMetadataItem *creationDateItem = [[AVMutableMetadataItem alloc] init];

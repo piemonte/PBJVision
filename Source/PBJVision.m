@@ -1613,6 +1613,11 @@ typedef void (^PBJVisionBlock)();
     NSDictionary *metadata = nil;
     NSError *error = nil;
 
+    // add any attachments to propagate
+    NSDictionary *tiffDict = @{ (NSString *)kCGImagePropertyTIFFSoftware : @"PBJVision",
+                                    (NSString *)kCGImagePropertyTIFFDateTime : [NSString PBJformattedTimestampStringFromDate:[NSDate date]] };
+    CMSetAttachment(sampleBuffer, kCGImagePropertyTIFFDictionary, (__bridge CFTypeRef)(tiffDict), kCMAttachmentMode_ShouldPropagate);
+
     // add photo metadata (ie EXIF: Aperture, Brightness, Exposure, FocalLength, etc)
     metadata = (__bridge NSDictionary *)CMCopyDictionaryOfAttachments(kCFAllocatorDefault, sampleBuffer, kCMAttachmentMode_ShouldPropagate);
     if (metadata) {
@@ -1677,9 +1682,7 @@ typedef void (^PBJVisionBlock)();
     AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
     [self _setOrientationForConnection:connection];
     
-    [_captureOutputPhoto captureStillImageAsynchronouslyFromConnection:connection completionHandler:
-    ^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
-        
+    [_captureOutputPhoto captureStillImageAsynchronouslyFromConnection:connection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
         if (!imageDataSampleBuffer) {
             DLog(@"failed to obtain image data sample buffer");
             return;
@@ -1691,6 +1694,11 @@ typedef void (^PBJVisionBlock)();
             }
             return;
         }
+        
+        // add any attachments to propagate
+        NSDictionary *tiffDict = @{ (NSString *)kCGImagePropertyTIFFSoftware : @"PBJVision",
+                                    (NSString *)kCGImagePropertyTIFFDateTime : [NSString PBJformattedTimestampStringFromDate:[NSDate date]] };
+        CMSetAttachment(imageDataSampleBuffer, kCGImagePropertyTIFFDictionary, (__bridge CFTypeRef)(tiffDict), kCMAttachmentMode_ShouldPropagate);
     
         NSMutableDictionary *photoDict = [[NSMutableDictionary alloc] init];
         NSDictionary *metadata = nil;
