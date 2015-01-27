@@ -1550,7 +1550,7 @@ typedef void (^PBJVisionBlock)();
     return thumbnail;
 }
 
-
+// http://sylvana.net/jpegcrop/exif_orientation.html
 - (UIImageOrientation)_imageOrientationFromExifOrientation:(NSInteger)exifOrientation
 {
     UIImageOrientation imageOrientation = UIImageOrientationUp;
