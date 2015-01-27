@@ -1555,11 +1555,8 @@ typedef void (^PBJVisionBlock)();
 - (UIImageOrientation)_imageOrientationFromExifOrientation:(NSInteger)exifOrientation
 {
     UIImageOrientation imageOrientation = UIImageOrientationUp;
-    
+
     switch (exifOrientation) {
-        case 1:
-            imageOrientation = UIImageOrientationUp;
-            break;
         case 2:
             imageOrientation = UIImageOrientationUpMirrored;
             break;
@@ -1581,7 +1578,9 @@ typedef void (^PBJVisionBlock)();
         case 8:
             imageOrientation = UIImageOrientationLeft;
             break;
+        case 1:
         default:
+            // UIImageOrientationUp;
             break;
     }
     
