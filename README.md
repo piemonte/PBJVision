@@ -6,8 +6,6 @@
 
 The library also supports features such as onion skinning (ghosting), flash/torch usage, white balance adjustment, focus adjustment, exposure adjustment, and mirroring. Pause and resume video capture is also possible without having to use the touch-to-record gesture interaction as the sample project provides.
 
-I created this library at [DIY](http://diy.org) as a fun means for young people to author video and share their skills. The touch-to-record interaction was originally pioneered by [Vine](http://vine.co) and also adopted by [Instagram](http://instagram.com). Thanks to everyone who has contributed and helped make this a fun project and community.
-
 If you need a video player, check out [PBJVideoPlayer (obj-c)](https://github.com/piemonte/PBJVideoPlayer) and [Player (Swift)](https://github.com/piemonte/player).
 
 Please review the [release history](https://github.com/piemonte/PBJVision/releases) for a summary of the latest changes and more information.
@@ -17,9 +15,19 @@ Contributions are welcome!
 [![Build Status](https://travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 [![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
 
+## About
+
+This library was originally created at [DIY](http://diy.org) as a fun means for young people to author video and share their [skills](http://diy.org/skills). The touch-to-record interaction was originally pioneered by [Vine](http://vine.co) and [Instagram](http://instagram.com).
+
+Thanks to everyone who has contributed and helped make this a fun project and community.
+
 ## Installation
 
-[CocoaPods](http://cocoapods.org) is the recommended method of installing PBJVision, just add the following line to your `Podfile`:
+### CocoaPods
+
+`PBJVision` is available and recommended for installation using the Cocoa dependency manager [CocoaPods](http://cocoapods.org/). 
+
+To integrate, just add the following line to your `Podfile`:
 
 ```ruby
 pod 'PBJVision'
