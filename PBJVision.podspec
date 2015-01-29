@@ -3,6 +3,7 @@ Pod::Spec.new do |s|
   s.version      = "0.4.0"
   s.summary      = "iOS camera engine, supports touch-to-record video, slow motion video, and photo capture."
   s.homepage     = "https://github.com/piemonte/PBJVision"
+  s.social_media_url = 'http://twitter.com/piemonte'
   s.license      = "MIT"
   s.authors      = { "patrick piemonte" => "piemonte@alumni.cmu.edu" }
   s.source       = { :git => "https://github.com/piemonte/PBJVision.git", :tag => "v0.4.0" }
