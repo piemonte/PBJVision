@@ -1230,7 +1230,7 @@ typedef void (^PBJVisionBlock)();
             return;
 
         if (_previewLayer)
-            _previewLayer.connection.enabled = YES;
+            _previewLayer.connection.enabled = NO;
 
         if ([_captureSession isRunning])
             [_captureSession stopRunning];
