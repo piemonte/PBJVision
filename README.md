@@ -4,11 +4,19 @@
 
 `PBJVision` is an iOS camera engine library that supports touch-to-record video, slow motion video (120 fps on [supported hardware](https://www.apple.com/iphone/compare/)), and photo capture.
 
-The library also supports features such as onion skinning (ghosting), flash/torch usage, white balance adjustment, focus adjustment, exposure adjustment, and mirroring. Pause and resume video capture is also possible without having to use the touch-to-record gesture interaction as the sample project provides.
+### Features
+- [x] touch-to-record video capture
+- [x] slow motion capture
+- [x] photo capture
+- [x] customizable UI and user interactions
+- [x] ghosting (onion skinning) of last recorded segment
+- [x] flash/torch support
+- [x] white balance, focus, and exposure adjustment support
+- [x] mirroring support
+
+Capture is possible without having to use the touch-to-record gesture interaction as the sample project provides.
 
 If you need a video player, check out [PBJVideoPlayer (obj-c)](https://github.com/piemonte/PBJVideoPlayer) and [Player (Swift)](https://github.com/piemonte/player).
-
-Please review the [release history](https://github.com/piemonte/PBJVision/releases) for a summary of the latest changes and more information.
 
 Contributions are welcome!
 
