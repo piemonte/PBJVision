@@ -23,7 +23,7 @@ Contributions are welcome!
 [![Build Status](https://travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 [![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
 
-## About
+### About
 
 This library was originally created at [DIY](http://diy.org) as a fun means for young people to author video and share their [skills](http://diy.org/skills). The touch-to-record interaction was originally pioneered by [Vine](http://vine.co) and [Instagram](http://instagram.com).
 
