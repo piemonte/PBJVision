@@ -4,6 +4,9 @@
 
 `PBJVision` is an iOS camera engine library that allows easy integration of special capture features and camera customization in your iOS app.
 
+[![Build Status](https://travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
+[![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
+
 ### Features
 - [x] touch-to-record video capture
 - [x] slow motion capture (120 fps on [supported hardware](https://www.apple.com/iphone/compare/))
@@ -19,9 +22,6 @@ Capture is possible without having to use the touch-to-record gesture interactio
 If you need a video player, check out [PBJVideoPlayer (obj-c)](https://github.com/piemonte/PBJVideoPlayer) and [Player (Swift)](https://github.com/piemonte/player).
 
 Contributions are welcome!
-
-[![Build Status](https://travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
-[![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
 
 ### About
 
