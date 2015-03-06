@@ -2,11 +2,11 @@
 
 ## PBJVision
 
-`PBJVision` is an iOS camera engine library that supports touch-to-record video, slow motion video (120 fps on [supported hardware](https://www.apple.com/iphone/compare/)), and photo capture.
+`PBJVision` is an iOS camera engine library that allows easy integration of special capture features and camera customization in your iOS app.
 
 ### Features
 - [x] touch-to-record video capture
-- [x] slow motion capture
+- [x] slow motion capture (120 fps on [supported hardware](https://www.apple.com/iphone/compare/))
 - [x] photo capture
 - [x] customizable UI and user interactions
 - [x] ghosting (onion skinning) of last recorded segment
