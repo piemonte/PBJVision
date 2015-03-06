@@ -1,6 +1,6 @@
 //
 //  PBJVision.m
-//  Vision
+//  PBJVision
 //
 //  Created by Patrick Piemonte on 4/30/13.
 //  Copyright (c) 2013-present, Patrick Piemonte, http://patrickpiemonte.com
