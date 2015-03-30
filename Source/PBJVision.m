@@ -1959,6 +1959,7 @@ typedef void (^PBJVisionBlock)();
                 }
             }];
         };
+
         [_mediaWriter finishWritingWithCompletionHandler:finishWritingCompletionHandler];
     }];
 }
