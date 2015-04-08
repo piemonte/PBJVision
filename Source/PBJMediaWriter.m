@@ -301,7 +301,8 @@
         DLog(@"asset writer is in an unknown state, wasn't recording");
         return;
     }
-
+    [_assetWriterVideoInput markAsFinished];
+    [_assetWriterAudioInput markAsFinished];
     [_assetWriter finishWritingWithCompletionHandler:handler];
 }
 
