@@ -1209,6 +1209,9 @@ typedef void (^PBJVisionBlock)();
             [self _setOrientationForConnection:_previewLayer.connection];
         }
         
+        if (_previewLayer)
+            _previewLayer.connection.enabled = YES;
+        
         if (![_captureSession isRunning]) {
             [_captureSession startRunning];
             
