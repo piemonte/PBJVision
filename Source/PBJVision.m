@@ -586,7 +586,9 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         
         if (supportingFormat) {
             NSError *error = nil;
+            [_captureSession beginConfiguration];  // the session to which the receiver's AVCaptureDeviceInput is added.
             if ([_currentDevice lockForConfiguration:&error]) {
+                [_currentDevice setActiveFormat:supportingFormat];
                 _currentDevice.activeVideoMinFrameDuration = fps;
                 _currentDevice.activeVideoMaxFrameDuration = fps;
                 _videoFrameRate = videoFrameRate;
@@ -595,7 +597,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
                 DLog(@"error locking device for frame rate change (%@)", error);
             }
         }
-        
+        [_captureSession commitConfiguration];
         [self _enqueueBlockOnMainQueue:^{
             if ([_delegate respondsToSelector:@selector(visionDidChangeVideoFormatAndFrameRate:)])
                 [_delegate visionDidChangeVideoFormatAndFrameRate:self];
