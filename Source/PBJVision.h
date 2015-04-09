@@ -26,6 +26,15 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
+// support for swift compiler
+#ifndef NS_ASSUME_NONNULL_BEGIN
+# define NS_ASSUME_NONNULL_BEGIN
+# define nullable
+# define NS_ASSUME_NONNULL_END
+#endif
+
+NS_ASSUME_NONNULL_BEGIN
+
 // vision types
 
 typedef NS_ENUM(NSInteger, PBJCameraDevice) {
@@ -292,11 +301,13 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 - (void)visionDidPauseVideoCapture:(PBJVision *)vision; // stopped but not ended
 - (void)visionDidResumeVideoCapture:(PBJVision *)vision;
 - (void)visionDidEndVideoCapture:(PBJVision *)vision;
-- (void)vision:(PBJVision *)vision capturedVideo:(NSDictionary *)videoDict error:(NSError *)error;
+- (void)vision:(PBJVision *)vision capturedVideo:(nullable NSDictionary *)videoDict error:(nullable NSError *)error;
 
 // video capture progress
 
 - (void)vision:(PBJVision *)vision didCaptureVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer;
 - (void)vision:(PBJVision *)vision didCaptureAudioSample:(CMSampleBufferRef)sampleBuffer;
+
+NS_ASSUME_NONNULL_END
 
 @end
