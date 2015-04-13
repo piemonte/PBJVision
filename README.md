@@ -169,6 +169,7 @@ To adjust the video quality and compression bit rate, modify the following prope
 * [AV Foundation Programming Guide](https://developer.apple.com/library/ios/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/00_Introduction.html)
 * [AV Foundation Framework Reference](https://developer.apple.com/library/ios/documentation/AVFoundation/Reference/AVFoundationFramework/)
 * [objc.io Camera and Photos](http://www.objc.io/issue-21/)
+* [objc.io Video] (http://www.objc.io/issue-23/)
 * [PBJVideoPlayer, a simple iOS video player in Objective-C](https://github.com/piemonte/PBJVideoPlayer)
 * [Player, a simple iOS video player in Swift](https://github.com/piemonte/player)
 
