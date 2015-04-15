@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.authors = { 'patrick piemonte' => 'piemonte@alumni.cmu.edu' }
   s.source = { :git => 'https://github.com/piemonte/PBJVision.git', :tag => 'v0.4.0' }
   s.frameworks = 'Foundation', 'AVFoundation', 'CoreGraphics', 'CoreMedia', 'CoreVideo', 'CoreImage', 'MobileCoreServices', 'ImageIO', 'QuartzCore', 'OpenGLES', 'UIKit'
-  s.platform = :ios, '6.0'
+  s.platform = :ios, '7.0'
   s.source_files = 'Source'
   s.resources = 'Source/Shaders/*'
   s.requires_arc = true
