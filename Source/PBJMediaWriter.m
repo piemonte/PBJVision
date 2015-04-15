@@ -279,7 +279,7 @@
 				if ([_assetWriterVideoInput appendSampleBuffer:sampleBuffer]) {
                     _videoTimestamp = timestamp;
 				} else {
-					DLog(@"writer error appending video (%@)", [_assetWriter error]);
+					DLog(@"writer error appending video (%@)", _assetWriter.error);
                 }
 			}
 		} else {
@@ -287,7 +287,7 @@
 				if ([_assetWriterAudioInput appendSampleBuffer:sampleBuffer]) {
                     _audioTimestamp = timestamp;
 				} else {
-					DLog(@"writer error appending audio (%@)", [_assetWriter error]);
+					DLog(@"writer error appending audio (%@)", _assetWriter.error);
                 }
 			}
 		}
@@ -297,8 +297,9 @@
 
 - (void)finishWritingWithCompletionHandler:(void (^)(void))handler
 {
-    if (_assetWriter.status == AVAssetWriterStatusUnknown) {
-        DLog(@"asset writer is in an unknown state, wasn't recording");
+    if (_assetWriter.status == AVAssetWriterStatusUnknown ||
+        _assetWriter.status == AVAssetWriterStatusCompleted) {
+        DLog(@"asset writer was in an unexpected state (%@)", @(_assetWriter.status));
         return;
     }
     [_assetWriterVideoInput markAsFinished];
