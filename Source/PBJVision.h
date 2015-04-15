@@ -294,7 +294,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 - (void)visionWillCapturePhoto:(PBJVision *)vision;
 - (void)visionDidCapturePhoto:(PBJVision *)vision;
-- (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error;
+- (void)vision:(PBJVision *)vision capturedPhoto:(nullable NSDictionary *)photoDict error:(nullable NSError *)error;
 
 // video
 
