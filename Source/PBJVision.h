@@ -196,10 +196,12 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 @property (nonatomic) PBJFocusMode focusMode;
 @property (nonatomic, readonly, getter=isFocusLockSupported) BOOL focusLockSupported;
 - (void)focusAtAdjustedPointOfInterest:(CGPoint)adjustedPoint;
+- (BOOL)isAdjustingFocus;
 
 @property (nonatomic) PBJExposureMode exposureMode;
 @property (nonatomic, readonly, getter=isExposureLockSupported) BOOL exposureLockSupported;
 - (void)exposeAtAdjustedPointOfInterest:(CGPoint)adjustedPoint;
+- (BOOL)isAdjustingExposure;
 
 // photo
 
