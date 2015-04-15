@@ -1356,6 +1356,11 @@ typedef void (^PBJVisionBlock)();
     }
 }
 
+- (BOOL)isAdjustingFocus
+{
+    return [_currentDevice isAdjustingFocus];
+}
+
 - (void)exposeAtAdjustedPointOfInterest:(CGPoint)adjustedPoint
 {
     if ([_currentDevice isAdjustingExposure])
@@ -1375,6 +1380,11 @@ typedef void (^PBJVisionBlock)();
     } else if (error) {
         DLog(@"error locking device for exposure adjustment (%@)", error);
     }
+}
+
+- (BOOL)isAdjustingExposure
+{
+    return [_currentDevice isAdjustingExposure];
 }
 
 - (void)_adjustFocusExposureAndWhiteBalance
