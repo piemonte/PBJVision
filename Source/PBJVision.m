@@ -185,6 +185,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @implementation PBJVision
 
 @synthesize delegate = _delegate;
+@synthesize frameDelegate = _frameDelegate;
 @synthesize currentDevice = _currentDevice;
 @synthesize previewLayer = _previewLayer;
 @synthesize cleanAperture = _cleanAperture;
@@ -2122,6 +2123,12 @@ typedef void (^PBJVisionBlock)();
         CFRelease(sampleBuffer);
         return;
     }
+
+	if( self.frameDelegate != nil ) {
+		if ([self.frameDelegate respondsToSelector:@selector(vision:didCaptureFrameSampleBuffer:)]) {
+			[self.frameDelegate vision:self didCaptureFrameSampleBuffer:sampleBuffer];
+		}
+	}
 
     if (!_flags.recording || _flags.paused) {
         CFRelease(sampleBuffer);
