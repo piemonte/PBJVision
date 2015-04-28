@@ -134,7 +134,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 + (PBJVision *)sharedInstance;
 
-@property (nonatomic, weak) id<PBJVisionDelegate> delegate;
+@property (nonatomic, weak, nullable) id<PBJVisionDelegate> delegate;
 
 // session
 
