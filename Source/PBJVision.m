@@ -2062,6 +2062,14 @@ typedef void (^PBJVisionBlock)();
             videoDimensions.height = (int32_t)(dimensions.width * 3 / 4.0f);
             break;
         }
+        case PBJOutputFormatCustom:
+        {
+            if (_customVideoSize.width > 0 && _customVideoSize.height > 0) {
+                videoDimensions.width = (int32_t)_customVideoSize.width;
+                videoDimensions.height = (int32_t)_customVideoSize.height;
+            }
+            break;
+        }
         case PBJOutputFormatPreset:
         default:
             break;

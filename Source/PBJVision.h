@@ -88,7 +88,8 @@ typedef NS_ENUM(NSInteger, PBJOutputFormat) {
     PBJOutputFormatPreset = 0,
     PBJOutputFormatSquare, // 1:1
     PBJOutputFormatWidescreen, // 16:9
-    PBJOutputFormatStandard // 4:3
+    PBJOutputFormatStandard, // 4:3
+    PBJOutputFormatCustom // custom aspect ratio
 };
 
 // PBJError
@@ -157,6 +158,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 // video output settings
 
+@property (nonatomic) CGSize customVideoSize;
 @property (nonatomic, copy) NSString *captureSessionPreset;
 @property (nonatomic, copy) NSString *captureDirectory;
 @property (nonatomic) PBJOutputFormat outputFormat;
