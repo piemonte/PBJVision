@@ -31,6 +31,7 @@
 		0683D1CE179F2E1700EE66D6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0683D1CD179F2E1700EE66D6 /* main.m */; };
 		0683D1D2179F2E1700EE66D6 /* PBJAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0683D1D1179F2E1700EE66D6 /* PBJAppDelegate.m */; };
 		0683D1D8179F2E1700EE66D6 /* PBJViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0683D1D7179F2E1700EE66D6 /* PBJViewController.m */; };
+		06B5F9331AAA1CF3007E330C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 06B5F9321AAA1CF3007E330C /* Images.xcassets */; };
 		06B7D01E179F2E7700F3F527 /* PBJVision.m in Sources */ = {isa = PBXBuildFile; fileRef = 06B7D01B179F2E7700F3F527 /* PBJVision.m */; };
 		06B7D01F179F2E7700F3F527 /* PBJVisionUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 06B7D01D179F2E7700F3F527 /* PBJVisionUtilities.m */; };
 		06B7D028179F307D00F3F527 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D027179F307D00F3F527 /* AVFoundation.framework */; };
@@ -38,9 +39,8 @@
 		06B7D02C179F313800F3F527 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D02B179F313800F3F527 /* CoreVideo.framework */; };
 		06B7D02F179F333400F3F527 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D02D179F330E00F3F527 /* MobileCoreServices.framework */; };
 		06B7D031179F33B500F3F527 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D030179F33B500F3F527 /* ImageIO.framework */; };
-		06B7D035179F357600F3F527 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D032179F357600F3F527 /* Default-568h@2x.png */; };
-		06B7D036179F357600F3F527 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D033179F357600F3F527 /* Default.png */; };
-		06B7D037179F357600F3F527 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 06B7D034179F357600F3F527 /* Default@2x.png */; };
+		06BB5D511AAA50040023C3FC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06BB5D501AAA50040023C3FC /* QuartzCore.framework */; };
+		06C216CF1A4A924700C83065 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06C216CE1A4A924700C83065 /* CoreImage.framework */; };
 		06DF60741896B535000870C9 /* PBJMediaWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 06DF60731896B535000870C9 /* PBJMediaWriter.m */; };
 		06FEB59F18F5C15600AFD4DB /* PBJGLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 06FEB59E18F5C15600AFD4DB /* PBJGLProgram.m */; };
 /* End PBXBuildFile section */
@@ -77,6 +77,7 @@
 		0683D1D1179F2E1700EE66D6 /* PBJAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PBJAppDelegate.m; sourceTree = "<group>"; };
 		0683D1D6179F2E1700EE66D6 /* PBJViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PBJViewController.h; sourceTree = "<group>"; };
 		0683D1D7179F2E1700EE66D6 /* PBJViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PBJViewController.m; sourceTree = "<group>"; };
+		06B5F9321AAA1CF3007E330C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		06B7D01A179F2E7700F3F527 /* PBJVision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PBJVision.h; path = ../Source/PBJVision.h; sourceTree = "<group>"; };
 		06B7D01B179F2E7700F3F527 /* PBJVision.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PBJVision.m; path = ../Source/PBJVision.m; sourceTree = "<group>"; };
 		06B7D01C179F2E7700F3F527 /* PBJVisionUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PBJVisionUtilities.h; path = ../Source/PBJVisionUtilities.h; sourceTree = "<group>"; };
@@ -89,9 +90,8 @@
 		06B7D02B179F313800F3F527 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		06B7D02D179F330E00F3F527 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		06B7D030179F33B500F3F527 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
-		06B7D032179F357600F3F527 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		06B7D033179F357600F3F527 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
-		06B7D034179F357600F3F527 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		06BB5D501AAA50040023C3FC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		06C216CE1A4A924700C83065 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		06DF60721896B535000870C9 /* PBJMediaWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PBJMediaWriter.h; path = ../Source/PBJMediaWriter.h; sourceTree = "<group>"; };
 		06DF60731896B535000870C9 /* PBJMediaWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PBJMediaWriter.m; path = ../Source/PBJMediaWriter.m; sourceTree = "<group>"; };
 		06FEB59D18F5C15600AFD4DB /* PBJGLProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PBJGLProgram.h; path = ../Source/PBJGLProgram.h; sourceTree = "<group>"; };
@@ -103,6 +103,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06BB5D511AAA50040023C3FC /* QuartzCore.framework in Frameworks */,
+				06C216CF1A4A924700C83065 /* CoreImage.framework in Frameworks */,
 				067D52F817D8574200541B5E /* GLKit.framework in Frameworks */,
 				0624D09A17D43D5D00665930 /* OpenGLES.framework in Frameworks */,
 				060F7B0F179F459900E27091 /* AssetsLibrary.framework in Frameworks */,
@@ -120,7 +122,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		060F7B1B179F50C300E27091 /* UI */ = {
+		060F7B1B179F50C300E27091 /* Interface */ = {
 			isa = PBXGroup;
 			children = (
 				060F7B1C179F550800E27091 /* capture_flip@2x.png */,
@@ -134,7 +136,7 @@
 				060F7B15179F50B800E27091 /* capture_rec_off@2x.png */,
 				060F7B16179F50B800E27091 /* capture_done@2x.png */,
 			);
-			name = UI;
+			name = Interface;
 			sourceTree = "<group>";
 		};
 		067D52F917D8577D00541B5E /* Shaders */ = {
@@ -167,6 +169,8 @@
 		0683D1C0179F2E1700EE66D6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				06BB5D501AAA50040023C3FC /* QuartzCore.framework */,
+				06C216CE1A4A924700C83065 /* CoreImage.framework */,
 				060F7B0E179F459900E27091 /* AssetsLibrary.framework */,
 				06B7D027179F307D00F3F527 /* AVFoundation.framework */,
 				0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */,
@@ -202,17 +206,15 @@
 		0683D1C8179F2E1700EE66D6 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				060F7B1B179F50C300E27091 /* UI */,
+				060F7B1B179F50C300E27091 /* Interface */,
+				06B5F9321AAA1CF3007E330C /* Images.xcassets */,
 				06B7D020179F2EDC00F3F527 /* Base.xcconfig */,
 				06B7D021179F2EDC00F3F527 /* Debug.xcconfig */,
 				06B7D022179F2EDC00F3F527 /* Release.xcconfig */,
 				0683D1C9179F2E1700EE66D6 /* Vision-Info.plist */,
+				0683D1CF179F2E1700EE66D6 /* Vision-Prefix.pch */,
 				0683D1CA179F2E1700EE66D6 /* InfoPlist.strings */,
 				0683D1CD179F2E1700EE66D6 /* main.m */,
-				0683D1CF179F2E1700EE66D6 /* Vision-Prefix.pch */,
-				06B7D032179F357600F3F527 /* Default-568h@2x.png */,
-				06B7D033179F357600F3F527 /* Default.png */,
-				06B7D034179F357600F3F527 /* Default@2x.png */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -300,13 +302,11 @@
 				060F7B18179F50B800E27091 /* capture_rec_blink@2x.png in Resources */,
 				0679DF03185539CC00A831EF /* capture_focus_button_active@2x.png in Resources */,
 				0624D09717D43BB500665930 /* capture_onion_selected@2x.png in Resources */,
-				06B7D036179F357600F3F527 /* Default.png in Resources */,
 				0683D1CC179F2E1700EE66D6 /* InfoPlist.strings in Resources */,
 				060F7B17179F50B800E27091 /* capture_rec_base@2x.png in Resources */,
 				060F7B1D179F550800E27091 /* capture_flip@2x.png in Resources */,
-				06B7D035179F357600F3F527 /* Default-568h@2x.png in Resources */,
+				06B5F9331AAA1CF3007E330C /* Images.xcassets in Resources */,
 				060F7B1A179F50B800E27091 /* capture_done@2x.png in Resources */,
-				06B7D037179F357600F3F527 /* Default@2x.png in Resources */,
 				060F7B19179F50B800E27091 /* capture_rec_off@2x.png in Resources */,
 				0624D09817D43BB500665930 /* capture_onion@2x.png in Resources */,
 				061858ED1846B05300DEC416 /* capture_focus@2x.png in Resources */,
@@ -365,6 +365,8 @@
 		0683D1F1179F2E1700EE66D6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 			};
 			name = Debug;
@@ -372,6 +374,8 @@
 		0683D1F2179F2E1700EE66D6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 			};
 			name = Release;

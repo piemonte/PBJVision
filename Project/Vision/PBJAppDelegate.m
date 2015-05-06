@@ -1,6 +1,6 @@
 //
 //  PBJAppDelegate.m
-//  Vision
+//  PBJVision
 //
 //  Created by Patrick Piemonte on 7/23/13.
 //  Copyright (c) 2013-present, Patrick Piemonte, http://patrickpiemonte.com
@@ -46,6 +46,7 @@
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
+    // Note: endCapture may take more time than permitted, if the user enters the background
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application

@@ -28,16 +28,25 @@
 
 @interface PBJVisionUtilities : NSObject
 
+// coordinate conversion
+
 + (CGPoint)convertToPointOfInterestFromViewCoordinates:(CGPoint)viewCoordinates inFrame:(CGRect)frame;
+
+// devices and connections
 
 + (AVCaptureDevice *)captureDeviceForPosition:(AVCaptureDevicePosition)position;
 + (AVCaptureDevice *)audioDevice;
-
 + (AVCaptureConnection *)connectionWithMediaType:(NSString *)mediaType fromConnections:(NSArray *)connections;
 
-+ (CMSampleBufferRef)createOffsetSampleBufferWithSampleBuffer:(CMSampleBufferRef)sampleBuffer usingTimeOffset:(CMTime)timeOffset;
+// sample buffers
+
++ (CMSampleBufferRef)createOffsetSampleBufferWithSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset;
+
+// orientation
 
 + (CGFloat)angleOffsetFromPortraitOrientationToOrientation:(AVCaptureVideoOrientation)orientation;
+
+// storage
 
 + (uint64_t)availableDiskSpaceInBytes;
 

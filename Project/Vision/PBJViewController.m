@@ -1,6 +1,6 @@
 //
 //  PBJViewController.m
-//  Vision
+//  PBJVision
 //
 //  Created by Patrick Piemonte on 7/23/13.
 //  Copyright (c) 2013-present, Patrick Piemonte, http://patrickpiemonte.com
@@ -81,11 +81,13 @@
     UIView *_gestureView;
     UILongPressGestureRecognizer *_longPressGestureRecognizer;
     UITapGestureRecognizer *_focusTapGestureRecognizer;
+    UITapGestureRecognizer *_photoTapGestureRecognizer;
     
     BOOL _recording;
 
     ALAssetsLibrary *_assetLibrary;
     __block NSDictionary *_currentVideo;
+    __block NSDictionary *_currentPhoto;
 }
 
 @end
@@ -105,6 +107,8 @@
 {
     [UIApplication sharedApplication].idleTimerDisabled = NO;
     _longPressGestureRecognizer.delegate = nil;
+    _focusTapGestureRecognizer.delegate = nil;
+    _photoTapGestureRecognizer.delegate = nil;
 }
 
 #pragma mark - view lifecycle
@@ -328,11 +332,15 @@
     }
     
     vision.cameraMode = PBJCameraModeVideo;
+    //vision.cameraMode = PBJCameraModePhoto; // PHOTO: uncomment to test photo capture
     vision.cameraOrientation = PBJCameraOrientationPortrait;
     vision.focusMode = PBJFocusModeContinuousAutoFocus;
     vision.outputFormat = PBJOutputFormatSquare;
     vision.videoRenderingEnabled = YES;
     vision.additionalCompressionProperties = @{AVVideoProfileLevelKey : AVVideoProfileLevelH264Baseline30}; // AVVideoProfileLevelKey requires specific captureSessionPreset
+    
+    // specify a maximum duration with the following property
+    // vision.maximumCaptureDuration = CMTimeMakeWithSeconds(5, 600); // ~ 5 seconds
 }
 
 #pragma mark - UIButton
@@ -373,15 +381,15 @@
 
 - (void)_handleFrameRateChangeButton:(UIButton *)button
 {
-    
 }
 
 - (void)_handleOnionSkinningButton:(UIButton *)button
 {
     _onionButton.selected = !_onionButton.selected;
     
-    if (_recording)
+    if (_recording) {
         _effectsViewController.view.hidden = !_onionButton.selected;
+    }
 }
 
 - (void)_handleDoneButton:(UIButton *)button
@@ -404,6 +412,12 @@
 
 - (void)_handleLongPressGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
 {
+    // PHOTO: uncomment to test photo capture
+//    if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
+//        [[PBJVision sharedInstance] capturePhoto];
+//        return;
+//    }
+
     switch (gestureRecognizer.state) {
       case UIGestureRecognizerStateBegan:
         {
@@ -566,7 +580,52 @@
 
 - (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error
 {
-    // photo captured, PBJVisionPhotoJPEGKey
+    if (error) {
+        // handle error properly
+        return;
+    }
+    _currentPhoto = photoDict;
+    
+    // save to library
+    NSData *photoData = _currentPhoto[PBJVisionPhotoJPEGKey];
+    NSDictionary *metadata = _currentPhoto[PBJVisionPhotoMetadataKey];
+   [_assetLibrary writeImageDataToSavedPhotosAlbum:photoData metadata:metadata completionBlock:^(NSURL *assetURL, NSError *error1) {
+        if (error1 || !assetURL) {
+            // handle error properly
+            return;
+        }
+       
+        NSString *albumName = @"PBJVision";
+        __block BOOL albumFound = NO;
+        [_assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAlbum usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+            if ([albumName compare:[group valueForProperty:ALAssetsGroupPropertyName]] == NSOrderedSame) {
+                albumFound = YES;
+                [_assetLibrary assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+                    [group addAsset:asset];
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Photo Saved!" message: @"Saved to the camera roll."
+                                                       delegate:nil
+                                              cancelButtonTitle:nil
+                                              otherButtonTitles:@"OK", nil];
+                    [alert show];
+                } failureBlock:nil];
+            }
+            if (!group && !albumFound) {
+                __weak ALAssetsLibrary *blockSafeLibrary = _assetLibrary;
+                [_assetLibrary addAssetsGroupAlbumWithName:albumName resultBlock:^(ALAssetsGroup *group1) {
+                    [blockSafeLibrary assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+                        [group1 addAsset:asset];
+                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Photo Saved!" message: @"Saved to the camera roll."
+                                                       delegate:nil
+                                              cancelButtonTitle:nil
+                                              otherButtonTitles:@"OK", nil];
+                        [alert show];
+                    } failureBlock:nil];
+                } failureBlock:nil];
+            }
+        } failureBlock:nil];
+    }];
+    
+    _currentPhoto = nil;
 }
 
 // video capture
@@ -613,12 +672,12 @@
 
 // progress
 
-- (void)visionDidCaptureAudioSample:(PBJVision *)vision
+- (void)vision:(PBJVision *)vision didCaptureVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
 //    NSLog(@"captured audio (%f) seconds", vision.capturedAudioSeconds);
 }
 
-- (void)visionDidCaptureVideoSample:(PBJVision *)vision
+- (void)vision:(PBJVision *)vision didCaptureAudioSample:(CMSampleBufferRef)sampleBuffer
 {
 //    NSLog(@"captured video (%f) seconds", vision.capturedVideoSeconds);
 }
