@@ -1,6 +1,6 @@
 //
 //  PBJVision.h
-//  Vision
+//  PBJVision
 //
 //  Created by Patrick Piemonte on 4/30/13.
 //  Copyright (c) 2013-present, Patrick Piemonte, http://patrickpiemonte.com
@@ -25,6 +25,15 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+
+// support for swift compiler
+#ifndef NS_ASSUME_NONNULL_BEGIN
+# define NS_ASSUME_NONNULL_BEGIN
+# define nullable
+# define NS_ASSUME_NONNULL_END
+#endif
+
+NS_ASSUME_NONNULL_BEGIN
 
 // vision types
 
@@ -125,7 +134,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 + (PBJVision *)sharedInstance;
 
-@property (nonatomic, weak) id<PBJVisionDelegate> delegate;
+@property (nonatomic, weak, nullable) id<PBJVisionDelegate> delegate;
 
 // session
 
@@ -187,10 +196,12 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 @property (nonatomic) PBJFocusMode focusMode;
 @property (nonatomic, readonly, getter=isFocusLockSupported) BOOL focusLockSupported;
 - (void)focusAtAdjustedPointOfInterest:(CGPoint)adjustedPoint;
+- (BOOL)isAdjustingFocus;
 
 @property (nonatomic) PBJExposureMode exposureMode;
 @property (nonatomic, readonly, getter=isExposureLockSupported) BOOL exposureLockSupported;
 - (void)exposeAtAdjustedPointOfInterest:(CGPoint)adjustedPoint;
+- (BOOL)isAdjustingExposure;
 
 // photo
 
@@ -283,7 +294,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 - (void)visionWillCapturePhoto:(PBJVision *)vision;
 - (void)visionDidCapturePhoto:(PBJVision *)vision;
-- (void)vision:(PBJVision *)vision capturedPhoto:(NSDictionary *)photoDict error:(NSError *)error;
+- (void)vision:(PBJVision *)vision capturedPhoto:(nullable NSDictionary *)photoDict error:(nullable NSError *)error;
 
 // video
 
@@ -292,11 +303,13 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 - (void)visionDidPauseVideoCapture:(PBJVision *)vision; // stopped but not ended
 - (void)visionDidResumeVideoCapture:(PBJVision *)vision;
 - (void)visionDidEndVideoCapture:(PBJVision *)vision;
-- (void)vision:(PBJVision *)vision capturedVideo:(NSDictionary *)videoDict error:(NSError *)error;
+- (void)vision:(PBJVision *)vision capturedVideo:(nullable NSDictionary *)videoDict error:(nullable NSError *)error;
 
 // video capture progress
 
 - (void)vision:(PBJVision *)vision didCaptureVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer;
 - (void)vision:(PBJVision *)vision didCaptureAudioSample:(CMSampleBufferRef)sampleBuffer;
+
+NS_ASSUME_NONNULL_END
 
 @end
