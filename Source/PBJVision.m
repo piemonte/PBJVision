@@ -659,8 +659,20 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 - (BOOL)supportsVideoFrameRate:(NSInteger)videoFrameRate
 {
     if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_6_1) {
-        AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-
+        AVCaptureDevice *videoDevice = nil;
+        NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+        NSPredicate *predicate = nil;
+        if (self.cameraDevice == PBJCameraDeviceBack) {
+            predicate = [NSPredicate predicateWithFormat:@"position == %i", AVCaptureDevicePositionBack];
+        } else {
+            predicate = [NSPredicate predicateWithFormat:@"position == %i", AVCaptureDevicePositionFront];
+        }
+        NSArray *filteredDevices = [videoDevices filteredArrayUsingPredicate:predicate];
+        if (filteredDevices.count > 0) {
+            videoDevice = filteredDevices.firstObject;
+        } else {
+            return NO;
+        }
         NSArray *formats = [videoDevice formats];
         for (AVCaptureDeviceFormat *format in formats) {
             NSArray *videoSupportedFrameRateRanges = [format videoSupportedFrameRateRanges];
