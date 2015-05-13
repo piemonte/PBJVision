@@ -562,7 +562,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
     CMTime fps = CMTimeMake(1, (int32_t)videoFrameRate);
 
-    AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    AVCaptureDevice *videoDevice = _currentDevice;
     AVCaptureDeviceFormat *supportingFormat = nil;
     int32_t maxWidth = 0;
 
