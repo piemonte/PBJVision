@@ -500,6 +500,13 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 }
 
+- (void) _setCurrentDevice:(AVCaptureDevice *)device
+{
+    _currentDevice  = device;
+    _exposureMode   = (PBJExposureMode)device.exposureMode;
+    _focusMode      = (PBJFocusMode)device.focusMode;
+}
+
 - (BOOL)isFlashAvailable
 {
     return (_currentDevice && [_currentDevice hasFlash]);
@@ -1128,7 +1135,7 @@ typedef void (^PBJVisionBlock)();
         AVCaptureDevice *device = [_currentInput device];
         if (device) {
             [self willChangeValueForKey:@"currentDevice"];
-            _currentDevice = device;
+            [self _setCurrentDevice:device];
             [self didChangeValueForKey:@"currentDevice"];
         }
     }
@@ -2318,7 +2325,7 @@ typedef void (^PBJVisionBlock)();
             AVCaptureDevice *device = [_currentInput device];
             if (device) {
                 [self willChangeValueForKey:@"currentDevice"];
-                _currentDevice = device;
+                [self _setCurrentDevice:device];
                 [self didChangeValueForKey:@"currentDevice"];
             }
         }
