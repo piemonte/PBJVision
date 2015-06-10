@@ -223,6 +223,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 #pragma mark - getters/setters
 
+- (BOOL)isVideoWritten
+{
+    return _flags.videoWritten;
+}
+
 - (BOOL)isCaptureSessionActive
 {
     return ([_captureSession isRunning]);
