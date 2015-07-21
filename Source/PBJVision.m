@@ -1660,6 +1660,7 @@ typedef void (^PBJVisionBlock)();
 - (void)capturePhoto
 {
     if (![self _canSessionCaptureWithOutput:_currentOutput] || _cameraMode != PBJCameraModePhoto) {
+        [self _failPhotoCaptureWithErrorCode:PBJVisionErrorSessionFailed];
         DLog(@"session is not setup properly for capture");
         return;
     }
@@ -1668,15 +1669,16 @@ typedef void (^PBJVisionBlock)();
     [self _setOrientationForConnection:connection];
     
     [_captureOutputPhoto captureStillImageAsynchronouslyFromConnection:connection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
-        if (!imageDataSampleBuffer) {
-            DLog(@"failed to obtain image data sample buffer");
-            return;
-        }
-    
         if (error) {
             if ([_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {
                 [_delegate vision:self capturedPhoto:nil error:error];
             }
+            return;
+        }
+
+        if (!imageDataSampleBuffer) {
+            [self _failPhotoCaptureWithErrorCode:PBJVisionErrorCaptureFailed];
+            DLog(@"failed to obtain image data sample buffer");
             return;
         }
         
@@ -1746,7 +1748,7 @@ typedef void (^PBJVisionBlock)();
 
 - (void)startVideoCapture
 {
-    if (![self _canSessionCaptureWithOutput:_currentOutput]) {
+    if (![self _canSessionCaptureWithOutput:_currentOutput] || _cameraMode != PBJCameraModeVideo) {
         [self _failVideoCaptureWithErrorCode:PBJVisionErrorSessionFailed];
         DLog(@"session is not setup properly for capture");
         return;
@@ -2029,6 +2031,14 @@ typedef void (^PBJVisionBlock)();
     if (errorCode && [_delegate respondsToSelector:@selector(vision:capturedVideo:error:)]) {
         NSError *error = [NSError errorWithDomain:PBJVisionErrorDomain code:errorCode userInfo:nil];
         [_delegate vision:self capturedVideo:nil error:error];
+    }
+}
+
+- (void)_failPhotoCaptureWithErrorCode:(NSInteger)errorCode
+{
+    if (errorCode && [_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {
+        NSError *error = [NSError errorWithDomain:PBJVisionErrorDomain code:errorCode userInfo:nil];
+        [_delegate vision:self capturedPhoto:nil error:error];
     }
 }
 
