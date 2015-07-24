@@ -1113,7 +1113,7 @@ typedef void (^PBJVisionBlock)();
     } else if ( newCaptureOutput && (newCaptureOutput == _captureOutputPhoto) ) {
     
         // specify photo preset
-        sessionPreset = AVCaptureSessionPresetPhoto;
+        sessionPreset = _captureSessionPreset;
     
         // setup photo settings
         NSDictionary *photoSettings = @{AVVideoCodecKey : AVVideoCodecJPEG};
