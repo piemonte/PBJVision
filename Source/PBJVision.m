@@ -2690,7 +2690,7 @@ typedef void (^PBJVisionBlock)();
 
     [EAGLContext setCurrentContext:_context];
     
-    NSBundle *bundle = [NSBundle mainBundle];
+    NSBundle *bundle = [NSBundle bundleForClass:[PBJVision class]];
     
     NSString *vertShaderName = [bundle pathForResource:@"Shader" ofType:@"vsh"];
     NSString *fragShaderName = [bundle pathForResource:@"Shader" ofType:@"fsh"];
