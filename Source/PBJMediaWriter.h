@@ -42,7 +42,8 @@
 @property (nonatomic, readonly, getter=isVideoReady) BOOL videoReady;
 
 - (BOOL)setupAudioWithSettings:(NSDictionary *)audioSettings;
-- (BOOL)setupVideoWithSettings:(NSDictionary *)videoSettings;
+
+- (BOOL)setupVideoWithSettings:(NSDictionary *)videoSettings withAdditional:(NSDictionary *)additional;
 
 // write methods, time durations
 

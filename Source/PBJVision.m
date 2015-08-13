@@ -31,6 +31,7 @@
 #import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 #import <OpenGLES/EAGL.h>
+#import <UIKit/UIKit.h>
 
 #define LOG_VISION 1
 #ifndef DLog
@@ -56,6 +57,10 @@ static NSString * const PBJVisionTorchModeObserverContext = @"PBJVisionTorchMode
 static NSString * const PBJVisionFlashAvailabilityObserverContext = @"PBJVisionFlashAvailabilityObserverContext";
 static NSString * const PBJVisionTorchAvailabilityObserverContext = @"PBJVisionTorchAvailabilityObserverContext";
 static NSString * const PBJVisionCaptureStillImageIsCapturingStillImageObserverContext = @"PBJVisionCaptureStillImageIsCapturingStillImageObserverContext";
+
+// additional video capture keys
+
+NSString * const PBJVisionVideoRotation = @"PBJVisionVideoRotation";
 
 // photo dictionary key definitions
 
@@ -2120,8 +2125,9 @@ typedef void (^PBJVisionBlock)();
                                      AVVideoWidthKey : @(videoDimensions.width),
                                      AVVideoHeightKey : @(videoDimensions.height),
                                      AVVideoCompressionPropertiesKey : compressionSettings };
-    
-    return [_mediaWriter setupVideoWithSettings:videoSettings];
+
+
+    return [_mediaWriter setupVideoWithSettings:videoSettings withAdditional:[self additionalVideoProperties]];
 }
 
 - (void)_automaticallyEndCaptureIfMaximumDurationReachedWithSampleBuffer:(CMSampleBufferRef)sampleBuffer

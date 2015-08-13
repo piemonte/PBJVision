@@ -105,6 +105,10 @@ typedef NS_ENUM(NSInteger, PBJVisionErrorType)
     PBJVisionErrorCaptureFailed = 104,
 };
 
+// additional video capture keys
+
+extern NSString * const PBJVisionVideoRotation;
+
 // photo dictionary keys
 
 extern NSString * const PBJVisionPhotoMetadataKey;
@@ -157,6 +161,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 // video output settings
 
+@property (nonatomic, copy) NSDictionary *additionalVideoProperties;
 @property (nonatomic, copy) NSString *captureSessionPreset;
 @property (nonatomic, copy) NSString *captureDirectory;
 @property (nonatomic) PBJOutputFormat outputFormat;
