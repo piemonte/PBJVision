@@ -138,7 +138,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     NSInteger _audioBitRate;
     NSInteger _videoFrameRate;
     NSDictionary *_additionalCompressionProperties;
-    
+    NSDictionary *_additionalVideoProperties;
+
     AVCaptureDevice *_currentDevice;
     AVCaptureDeviceInput *_currentInput;
     AVCaptureOutput *_currentOutput;
@@ -212,6 +213,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize audioBitRate = _audioBitRate;
 @synthesize videoBitRate = _videoBitRate;
 @synthesize additionalCompressionProperties = _additionalCompressionProperties;
+@synthesize additionalVideoProperties = _additionalVideoProperties;
 @synthesize maximumCaptureDuration = _maximumCaptureDuration;
 
 #pragma mark - singleton
