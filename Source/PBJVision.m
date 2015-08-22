@@ -31,6 +31,7 @@
 #import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 #import <OpenGLES/EAGL.h>
+#import <UIKit/UIKit.h>
 
 #define LOG_VISION 1
 #ifndef DLog
@@ -56,6 +57,10 @@ static NSString * const PBJVisionTorchModeObserverContext = @"PBJVisionTorchMode
 static NSString * const PBJVisionFlashAvailabilityObserverContext = @"PBJVisionFlashAvailabilityObserverContext";
 static NSString * const PBJVisionTorchAvailabilityObserverContext = @"PBJVisionTorchAvailabilityObserverContext";
 static NSString * const PBJVisionCaptureStillImageIsCapturingStillImageObserverContext = @"PBJVisionCaptureStillImageIsCapturingStillImageObserverContext";
+
+// additional video capture keys
+
+NSString * const PBJVisionVideoRotation = @"PBJVisionVideoRotation";
 
 // photo dictionary key definitions
 
@@ -133,7 +138,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     NSInteger _audioBitRate;
     NSInteger _videoFrameRate;
     NSDictionary *_additionalCompressionProperties;
-    
+    NSDictionary *_additionalVideoProperties;
+
     AVCaptureDevice *_currentDevice;
     AVCaptureDeviceInput *_currentInput;
     AVCaptureOutput *_currentOutput;
@@ -207,6 +213,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize audioBitRate = _audioBitRate;
 @synthesize videoBitRate = _videoBitRate;
 @synthesize additionalCompressionProperties = _additionalCompressionProperties;
+@synthesize additionalVideoProperties = _additionalVideoProperties;
 @synthesize maximumCaptureDuration = _maximumCaptureDuration;
 
 #pragma mark - singleton
@@ -2120,8 +2127,9 @@ typedef void (^PBJVisionBlock)();
                                      AVVideoWidthKey : @(videoDimensions.width),
                                      AVVideoHeightKey : @(videoDimensions.height),
                                      AVVideoCompressionPropertiesKey : compressionSettings };
-    
-    return [_mediaWriter setupVideoWithSettings:videoSettings];
+
+
+    return [_mediaWriter setupVideoWithSettings:videoSettings withAdditional:[self additionalVideoProperties]];
 }
 
 - (void)_automaticallyEndCaptureIfMaximumDurationReachedWithSampleBuffer:(CMSampleBufferRef)sampleBuffer
