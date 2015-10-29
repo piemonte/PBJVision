@@ -1,10 +1,10 @@
-![PBJVision](https://raw.github.com/piemonte/PBJVision/master/pbj.gif)
+![PBJVision](https://raw.githubusercontent.com/piemonte/PBJVision/master/pbj.gif)
 
 ## PBJVision
 
 `PBJVision` is an iOS camera engine library that allows easy integration of special capture features and camera customization in your iOS app.
 
-[![Build Status](https://travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
+[![Build Status](https://api.travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 [![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
 
 ### Features
@@ -25,7 +25,7 @@ Contributions are welcome!
 
 ### About
 
-This library was originally created at [DIY](http://diy.org) as a fun means for young people to author video and share their [skills](http://diy.org/skills). The touch-to-record interaction was originally pioneered by [Vine](http://vine.co) and [Instagram](http://instagram.com).
+This library was originally created at [DIY](https://diy.org/) as a fun means for young people to author video and share their [skills](https://diy.org//skills). The touch-to-record interaction was originally pioneered by [Vine](https://vine.co/) and [Instagram](https://instagram.com/).
 
 Thanks to everyone who has contributed and helped make this a fun project and community.
 
@@ -33,7 +33,7 @@ Thanks to everyone who has contributed and helped make this a fun project and co
 
 ### CocoaPods
 
-`PBJVision` is available and recommended for installation using the Cocoa dependency manager [CocoaPods](http://cocoapods.org/). 
+`PBJVision` is available and recommended for installation using the Cocoa dependency manager [CocoaPods](https://cocoapods.org/). 
 
 To integrate, just add the following line to your `Podfile`:
 
@@ -168,8 +168,8 @@ To adjust the video quality and compression bit rate, modify the following prope
 
 * [AV Foundation Programming Guide](https://developer.apple.com/library/ios/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/00_Introduction.html)
 * [AV Foundation Framework Reference](https://developer.apple.com/library/ios/documentation/AVFoundation/Reference/AVFoundationFramework/)
-* [objc.io Camera and Photos](http://www.objc.io/issue-21/)
-* [objc.io Video] (http://www.objc.io/issue-23/)
+* [objc.io Camera and Photos](https://www.objc.io/issues/21-camera-and-photos/)
+* [objc.io Video] (https://www.objc.io/issues/23-video/)
 * [PBJVideoPlayer, a simple iOS video player in Objective-C](https://github.com/piemonte/PBJVideoPlayer)
 * [Player, a simple iOS video player in Swift](https://github.com/piemonte/player)
 
