@@ -9,19 +9,9 @@
 /* Begin PBXBuildFile section */
 		060F7B0F179F459900E27091 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 060F7B0E179F459900E27091 /* AssetsLibrary.framework */; };
 		060F7B12179F45FA00E27091 /* PBJStrobeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 060F7B11179F45FA00E27091 /* PBJStrobeView.m */; };
-		060F7B17179F50B800E27091 /* capture_rec_base@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 060F7B13179F50B800E27091 /* capture_rec_base@2x.png */; };
-		060F7B18179F50B800E27091 /* capture_rec_blink@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 060F7B14179F50B800E27091 /* capture_rec_blink@2x.png */; };
-		060F7B19179F50B800E27091 /* capture_rec_off@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 060F7B15179F50B800E27091 /* capture_rec_off@2x.png */; };
-		060F7B1A179F50B800E27091 /* capture_done@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 060F7B16179F50B800E27091 /* capture_done@2x.png */; };
-		060F7B1D179F550800E27091 /* capture_flip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 060F7B1C179F550800E27091 /* capture_flip@2x.png */; };
-		061858ED1846B05300DEC416 /* capture_focus@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 061858EC1846B05300DEC416 /* capture_focus@2x.png */; };
 		06156D1D1C38EA47007EE71E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 06156D1B1C38EA47007EE71E /* LaunchScreen.storyboard */; };
 		061858F01846B06400DEC416 /* PBJFocusView.m in Sources */ = {isa = PBXBuildFile; fileRef = 061858EF1846B06400DEC416 /* PBJFocusView.m */; };
-		0624D09717D43BB500665930 /* capture_onion_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0624D09517D43BB500665930 /* capture_onion_selected@2x.png */; };
-		0624D09817D43BB500665930 /* capture_onion@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0624D09617D43BB500665930 /* capture_onion@2x.png */; };
 		0624D09A17D43D5D00665930 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0624D09917D43D5D00665930 /* OpenGLES.framework */; };
-		0679DF03185539CC00A831EF /* capture_focus_button_active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0679DF01185539CC00A831EF /* capture_focus_button_active@2x.png */; };
-		0679DF04185539CC00A831EF /* capture_focus_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0679DF02185539CC00A831EF /* capture_focus_button@2x.png */; };
 		067D52F817D8574200541B5E /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 067D52F717D8574200541B5E /* GLKit.framework */; };
 		067D52FC17D857DC00541B5E /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 067D52FA17D857AB00541B5E /* Shader.fsh */; };
 		067D52FD17D857DC00541B5E /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 067D52FB17D857AB00541B5E /* Shader.vsh */; };
@@ -50,20 +40,10 @@
 		060F7B0E179F459900E27091 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		060F7B10179F45FA00E27091 /* PBJStrobeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBJStrobeView.h; sourceTree = "<group>"; };
 		060F7B11179F45FA00E27091 /* PBJStrobeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PBJStrobeView.m; sourceTree = "<group>"; };
-		060F7B13179F50B800E27091 /* capture_rec_base@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_rec_base@2x.png"; path = "UI/capture_rec_base@2x.png"; sourceTree = "<group>"; };
-		060F7B14179F50B800E27091 /* capture_rec_blink@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_rec_blink@2x.png"; path = "UI/capture_rec_blink@2x.png"; sourceTree = "<group>"; };
-		060F7B15179F50B800E27091 /* capture_rec_off@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_rec_off@2x.png"; path = "UI/capture_rec_off@2x.png"; sourceTree = "<group>"; };
-		060F7B16179F50B800E27091 /* capture_done@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_done@2x.png"; path = "UI/capture_done@2x.png"; sourceTree = "<group>"; };
-		060F7B1C179F550800E27091 /* capture_flip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_flip@2x.png"; path = "UI/capture_flip@2x.png"; sourceTree = "<group>"; };
-		061858EC1846B05300DEC416 /* capture_focus@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_focus@2x.png"; path = "UI/capture_focus@2x.png"; sourceTree = "<group>"; };
 		06156D1C1C38EA47007EE71E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		061858EE1846B06400DEC416 /* PBJFocusView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBJFocusView.h; sourceTree = "<group>"; };
 		061858EF1846B06400DEC416 /* PBJFocusView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PBJFocusView.m; sourceTree = "<group>"; };
-		0624D09517D43BB500665930 /* capture_onion_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_onion_selected@2x.png"; path = "UI/capture_onion_selected@2x.png"; sourceTree = "<group>"; };
-		0624D09617D43BB500665930 /* capture_onion@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_onion@2x.png"; path = "UI/capture_onion@2x.png"; sourceTree = "<group>"; };
 		0624D09917D43D5D00665930 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		0679DF01185539CC00A831EF /* capture_focus_button_active@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_focus_button_active@2x.png"; path = "UI/capture_focus_button_active@2x.png"; sourceTree = "<group>"; };
-		0679DF02185539CC00A831EF /* capture_focus_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "capture_focus_button@2x.png"; path = "UI/capture_focus_button@2x.png"; sourceTree = "<group>"; };
 		067D52F717D8574200541B5E /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		067D52FA17D857AB00541B5E /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = ../Source/Shaders/Shader.fsh; sourceTree = "<group>"; };
 		067D52FB17D857AB00541B5E /* Shader.vsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = ../Source/Shaders/Shader.vsh; sourceTree = "<group>"; };
@@ -124,21 +104,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		060F7B1B179F50C300E27091 /* Interface */ = {
+		06156D1A1C38E8BD007EE71E /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				060F7B1C179F550800E27091 /* capture_flip@2x.png */,
-				061858EC1846B05300DEC416 /* capture_focus@2x.png */,
-				0679DF02185539CC00A831EF /* capture_focus_button@2x.png */,
-				0679DF01185539CC00A831EF /* capture_focus_button_active@2x.png */,
-				0624D09617D43BB500665930 /* capture_onion@2x.png */,
-				0624D09517D43BB500665930 /* capture_onion_selected@2x.png */,
-				060F7B13179F50B800E27091 /* capture_rec_base@2x.png */,
-				060F7B14179F50B800E27091 /* capture_rec_blink@2x.png */,
-				060F7B15179F50B800E27091 /* capture_rec_off@2x.png */,
-				060F7B16179F50B800E27091 /* capture_done@2x.png */,
+				0683D1D0179F2E1700EE66D6 /* PBJAppDelegate.h */,
+				0683D1D1179F2E1700EE66D6 /* PBJAppDelegate.m */,
+				0683D1CD179F2E1700EE66D6 /* main.m */,
 			);
-			name = Interface;
+			name = Core;
 			sourceTree = "<group>";
 		};
 		067D52F917D8577D00541B5E /* Shaders */ = {
@@ -191,8 +164,7 @@
 		0683D1C7179F2E1700EE66D6 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				0683D1D0179F2E1700EE66D6 /* PBJAppDelegate.h */,
-				0683D1D1179F2E1700EE66D6 /* PBJAppDelegate.m */,
+				06156D1A1C38E8BD007EE71E /* Core */,
 				0683D1D6179F2E1700EE66D6 /* PBJViewController.h */,
 				0683D1D7179F2E1700EE66D6 /* PBJViewController.m */,
 				061858EE1846B06400DEC416 /* PBJFocusView.h */,
@@ -208,7 +180,6 @@
 		0683D1C8179F2E1700EE66D6 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				060F7B1B179F50C300E27091 /* Interface */,
 				06B5F9321AAA1CF3007E330C /* Images.xcassets */,
 				06156D1B1C38EA47007EE71E /* LaunchScreen.storyboard */,
 				06B7D020179F2EDC00F3F527 /* Base.xcconfig */,
@@ -217,7 +188,6 @@
 				0683D1C9179F2E1700EE66D6 /* Vision-Info.plist */,
 				0683D1CF179F2E1700EE66D6 /* Vision-Prefix.pch */,
 				0683D1CA179F2E1700EE66D6 /* InfoPlist.strings */,
-				0683D1CD179F2E1700EE66D6 /* main.m */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -300,20 +270,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				067D52FC17D857DC00541B5E /* Shader.fsh in Resources */,
-				0679DF04185539CC00A831EF /* capture_focus_button@2x.png in Resources */,
 				067D52FD17D857DC00541B5E /* Shader.vsh in Resources */,
-				060F7B18179F50B800E27091 /* capture_rec_blink@2x.png in Resources */,
-				0679DF03185539CC00A831EF /* capture_focus_button_active@2x.png in Resources */,
-				0624D09717D43BB500665930 /* capture_onion_selected@2x.png in Resources */,
 				0683D1CC179F2E1700EE66D6 /* InfoPlist.strings in Resources */,
-				060F7B17179F50B800E27091 /* capture_rec_base@2x.png in Resources */,
-				060F7B1D179F550800E27091 /* capture_flip@2x.png in Resources */,
 				06156D1D1C38EA47007EE71E /* LaunchScreen.storyboard in Resources */,
 				06B5F9331AAA1CF3007E330C /* Images.xcassets in Resources */,
-				060F7B1A179F50B800E27091 /* capture_done@2x.png in Resources */,
-				060F7B19179F50B800E27091 /* capture_rec_off@2x.png in Resources */,
-				0624D09817D43BB500665930 /* capture_onion@2x.png in Resources */,
-				061858ED1846B05300DEC416 /* capture_focus@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
