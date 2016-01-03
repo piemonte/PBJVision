@@ -1538,6 +1538,37 @@ typedef void (^PBJVisionBlock)();
     return thumbnail;
 }
 
+// http://www.samwirch.com/blog/cropping-and-resizing-images-camera-ios-and-objective-c
+- (UIImage *)_squareImageWithImage:(UIImage *)image scaledToSize:(CGSize)newSize {
+    double ratio = 0.0;
+    double delta = 0.0;
+    CGPoint offset = CGPointZero;
+  
+    if (image.size.width > image.size.height) {
+        ratio = newSize.width / image.size.width;
+        delta = (ratio * image.size.width - ratio * image.size.height);
+        offset = CGPointMake(delta * 0.5, 0);
+    } else {
+        ratio = newSize.width / image.size.height;
+        delta = (ratio * image.size.height - ratio * image.size.width);
+        offset = CGPointMake(0, delta * 0.5);
+    }
+ 
+    CGRect clipRect = CGRectMake(-offset.x, -offset.y,
+                                 (ratio * image.size.width) + delta,
+                                 (ratio * image.size.height) + delta);
+  
+    CGSize squareSize = CGSizeMake(newSize.width, newSize.width);
+    
+    UIGraphicsBeginImageContextWithOptions(squareSize, YES, 0.0);
+    UIRectClip(clipRect);
+    [image drawInRect:clipRect];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+ 
+    return newImage;
+}
+
 // http://sylvana.net/jpegcrop/exif_orientation.html
 - (UIImageOrientation)_imageOrientationFromExifOrientation:(NSInteger)exifOrientation
 {
@@ -1636,6 +1667,12 @@ typedef void (^PBJVisionBlock)();
     }
     
     if (uiImage) {
+        if (_outputFormat == PBJOutputFormatSquare) {
+            uiImage = [self _squareImageWithImage:uiImage scaledToSize:uiImage.size];
+        }
+        // PBJOutputFormatWidescreen
+        // PBJOutputFormatStandard
+    
         photoDict[PBJVisionPhotoImageKey] = uiImage;
         
         // add JPEG, thumbnail
