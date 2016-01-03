@@ -270,7 +270,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = PBJ;
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = "Patrick Piemonte";
 			};
 			buildConfigurationList = 0683D1B9179F2E1700EE66D6 /* Build configuration list for PBXProject "Vision" */;
@@ -368,6 +368,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.patrickpiemonte.${PRODUCT_NAME:rfc1034identifier}";
 			};
 			name = Debug;
 		};
@@ -377,6 +378,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.patrickpiemonte.${PRODUCT_NAME:rfc1034identifier}";
 			};
 			name = Release;
 		};
