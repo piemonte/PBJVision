@@ -1540,18 +1540,18 @@ typedef void (^PBJVisionBlock)();
 
 // http://www.samwirch.com/blog/cropping-and-resizing-images-camera-ios-and-objective-c
 - (UIImage *)_squareImageWithImage:(UIImage *)image scaledToSize:(CGSize)newSize {
-    double ratio = 0.0;
-    double delta = 0.0;
+    CGFloat ratio = 0.0;
+    CGFloat delta = 0.0;
     CGPoint offset = CGPointZero;
   
     if (image.size.width > image.size.height) {
         ratio = newSize.width / image.size.width;
         delta = (ratio * image.size.width - ratio * image.size.height);
-        offset = CGPointMake(delta * 0.5, 0);
+        offset = CGPointMake(delta * 0.5f, 0);
     } else {
         ratio = newSize.width / image.size.height;
         delta = (ratio * image.size.height - ratio * image.size.width);
-        offset = CGPointMake(0, delta * 0.5);
+        offset = CGPointMake(0, delta * 0.5f);
     }
  
     CGRect clipRect = CGRectMake(-offset.x, -offset.y,
