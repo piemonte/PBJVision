@@ -5,5 +5,7 @@ before_install:
 xcode_scheme: Debug
 xcode_sdk:
   - iphonesimulator
-  - iphonesimulator8.1
-script: xctool -project Project/Vision.xcodeproj -scheme Debug -sdk iphonesimulator build analyze
+  - iphonesimulator9.0
+script:
+  - xcodebuild -showsdks
+  - xctool -project Project/Vision.xcodeproj -scheme Debug -sdk iphonesimulator build analyze
