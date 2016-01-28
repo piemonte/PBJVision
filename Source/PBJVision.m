@@ -1042,6 +1042,11 @@ typedef void (^PBJVisionBlock)();
                     [_captureSession addOutput:_captureOutputPhoto];
                     newCaptureOutput = _captureOutputPhoto;
                 }
+                if(self.frameDelegate != nil) {
+                    if ([_captureSession canAddOutput:_captureOutputVideo]) {
+                        [_captureSession addOutput:_captureOutputVideo];
+                    }
+                }
                 break;
             }
             default:
@@ -2202,6 +2207,12 @@ typedef void (^PBJVisionBlock)();
         DLog(@"sample buffer data is not ready");
         CFRelease(sampleBuffer);
         return;
+    }
+
+    if(self.frameDelegate != nil) {
+        if ([self.frameDelegate respondsToSelector:@selector(vision:didCaptureFrameSampleBuffer:)]) {
+            [self.frameDelegate vision:self didCaptureFrameSampleBuffer:sampleBuffer];
+        }
     }
 
     if (!_flags.recording || _flags.paused) {
