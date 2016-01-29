@@ -323,6 +323,10 @@ NS_ASSUME_NONNULL_END
 @protocol PBJFrameDelegate <NSObject>
 @optional
 
+NS_ASSUME_NONNULL_BEGIN
+
 - (void)vision:(PBJVision *)vision didCaptureFrameSampleBuffer:(CMSampleBufferRef)sampleBuffer;
+
+NS_ASSUME_NONNULL_END
 
 @end
