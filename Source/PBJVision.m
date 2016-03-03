@@ -538,9 +538,16 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         switch (_cameraMode) {
           case PBJCameraModePhoto:
           {
-            if ([_currentDevice isFlashModeSupported:(AVCaptureFlashMode)_flashMode]) {
-                [_currentDevice setFlashMode:(AVCaptureFlashMode)_flashMode];
-            }
+              if(!_isTorchMode){
+                  if ([_currentDevice isFlashModeSupported:(AVCaptureFlashMode)_flashMode]) {
+                      [_currentDevice setFlashMode:(AVCaptureFlashMode)_flashMode];
+                  }
+              }else {
+                  if ([_currentDevice isTorchModeSupported:(AVCaptureTorchMode)_flashMode]) {
+                      [_currentDevice setTorchMode:(AVCaptureTorchMode)_flashMode];
+                  }
+              }
+
             break;
           }
           case PBJCameraModeVideo:

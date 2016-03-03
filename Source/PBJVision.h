@@ -139,7 +139,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 + (PBJVision *)sharedInstance;
 
 @property (nonatomic, weak, nullable) id<PBJVisionDelegate> delegate;
-@property (nonatomic, strong) id<PBJFrameDelegate> frameDelegate;
+@property (nonatomic, weak, nullable) id<PBJFrameDelegate> frameDelegate;
 
 // session
 
@@ -156,6 +156,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice;
 
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
+@property (nonatomic) BOOL isTorchMode; // torch mode
 @property (nonatomic, readonly, getter=isFlashAvailable) BOOL flashAvailable;
 
 @property (nonatomic) PBJMirroringMode mirroringMode;
