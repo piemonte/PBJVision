@@ -790,7 +790,10 @@ typedef void (^PBJVisionBlock)();
     // create session
     _captureSession = [[AVCaptureSession alloc] init];
 
-    _captureSession.usesApplicationAudioSession = _usesApplicationAudioSession;
+    if (_usesApplicationAudioSession)
+    {
+        _captureSession.usesApplicationAudioSession = YES;
+    }
     _captureSession.automaticallyConfiguresApplicationAudioSession = _automaticallyConfiguresApplicationAudioSession;
 
     // capture devices
