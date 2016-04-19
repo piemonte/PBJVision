@@ -152,6 +152,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 // Indicates whether the capture session will make use of the app’s shared audio session. Allows you to
 // use a previously configured audios session with a category such as AVAudioSessionCategoryAmbient.
 @property (nonatomic) BOOL usesApplicationAudioSession;
+@property (nonatomic) BOOL automaticallyConfiguresApplicationAudioSession;
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice;
 
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
