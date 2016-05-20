@@ -122,6 +122,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     BOOL _autoUpdatePreviewOrientation;
     BOOL _autoFreezePreviewDuringCapture;
     BOOL _usesApplicationAudioSession;
+    BOOL _automaticallyConfiguresApplicationAudioSession;
 
     PBJFocusMode _focusMode;
     PBJExposureMode _exposureMode;
@@ -199,6 +200,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @synthesize autoUpdatePreviewOrientation = _autoUpdatePreviewOrientation;
 @synthesize autoFreezePreviewDuringCapture = _autoFreezePreviewDuringCapture;
 @synthesize usesApplicationAudioSession = _usesApplicationAudioSession;
+@synthesize automaticallyConfiguresApplicationAudioSession = _automaticallyConfiguresApplicationAudioSession;
 @synthesize cameraDevice = _cameraDevice;
 @synthesize cameraMode = _cameraMode;
 @synthesize focusMode = _focusMode;
@@ -683,6 +685,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         _autoUpdatePreviewOrientation = YES;
         _autoFreezePreviewDuringCapture = YES;
         _usesApplicationAudioSession = NO;
+        _automaticallyConfiguresApplicationAudioSession = YES;
 
         // Average bytes per second based on video dimensions
         // lower the bitRate, higher the compression
@@ -787,9 +790,11 @@ typedef void (^PBJVisionBlock)();
     // create session
     _captureSession = [[AVCaptureSession alloc] init];
 
-    if (_usesApplicationAudioSession) {
+    if (_usesApplicationAudioSession)
+    {
         _captureSession.usesApplicationAudioSession = YES;
     }
+    _captureSession.automaticallyConfiguresApplicationAudioSession = _automaticallyConfiguresApplicationAudioSession;
 
     // capture devices
     _captureDeviceFront = [PBJVisionUtilities captureDeviceForPosition:AVCaptureDevicePositionFront];
