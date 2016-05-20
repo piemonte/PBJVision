@@ -2293,13 +2293,17 @@ typedef void (^PBJVisionBlock)();
                     }
                 }];
             }
-            
-            [self _enqueueBlockOnMainQueue:^{
-                if ([_delegate respondsToSelector:@selector(vision:didCaptureVideoSampleBuffer:)]) {
-                    [_delegate vision:self didCaptureVideoSampleBuffer:bufferToWrite];
-                }
-            }];
-        
+
+            if ([_delegate respondsToSelector:@selector(vision:didCaptureVideoSampleBuffer:)]) {
+                CMSampleBufferRef forDelegate = bufferToWrite;
+                CFRetain(forDelegate);
+ 
+                [self _enqueueBlockOnMainQueue:^{
+                        [_delegate vision:self didCaptureVideoSampleBuffer:forDelegate];
+                        CFRelease(forDelegate);
+                }];
+            }
+
         } else if (!isVideo && _flags.videoWritten) {
             
             [_mediaWriter writeSampleBuffer:bufferToWrite withMediaTypeVideo:isVideo];
