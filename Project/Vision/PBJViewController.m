@@ -687,10 +687,14 @@ static NSString * const PBJViewControllerPhotoAlbum = @"PBJVision";
         [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:[NSURL URLWithString:videoPath]];
     } completionHandler:^(BOOL success, NSError * _Nullable error1) {
         if (success) {
-            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Video Saved!" message:@"Saved to the camera roll." preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-            [alertController addAction:ok];
-            [self presentViewController:alertController animated:YES completion:nil];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Video Saved!" message:@"Saved to the camera roll." preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+                [alertController addAction:ok];
+                [self presentViewController:alertController animated:YES completion:nil];
+            });
+        } else if (error1) {
+            NSLog(@"error: %@", error1);
         }
     }];
 }
