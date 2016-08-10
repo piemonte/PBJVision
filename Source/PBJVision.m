@@ -1077,8 +1077,6 @@ typedef void (^PBJVisionBlock)();
         if ([videoConnection isVideoStabilizationSupported]) {
             if ([videoConnection respondsToSelector:@selector(setPreferredVideoStabilizationMode:)]) {
                 [videoConnection setPreferredVideoStabilizationMode:AVCaptureVideoStabilizationModeAuto];
-            } else {
-                [videoConnection setEnablesVideoStabilizationWhenAvailable:YES];
             }
         }
         
@@ -2376,7 +2374,7 @@ typedef void (^PBJVisionBlock)();
                             [self startPreview];
                         break;
                     }
-                    case AVErrorDeviceIsNotAvailableInBackground:
+                    case AVCaptureSessionInterruptionReasonVideoDeviceNotAvailableInBackground:
                     {
                         DLog(@"error media services not available in background");
                         break;
