@@ -30,8 +30,13 @@
 #import "PBJVision.h"
 #import "PBJVisionUtilities.h"
 
-#import <AssetsLibrary/AssetsLibrary.h>
+#import <Photos/Photos.h>
 #import <GLKit/GLKit.h>
+#import <ImageIO/ImageIO.h>
+
+static NSString * const PBJViewControllerPhotoAlbum = @"PBJVision";
+
+#pragma mark - ExtendedHitButton
 
 @interface ExtendedHitButton : UIButton
 
@@ -58,10 +63,50 @@
 
 @end
 
+#pragma mark - UIImage Additions
+
+@interface UIImage (SecretAddition)
+
++ (NSData *)writeMetadataIntoImageData:(NSData *)imageData metadata:(NSDictionary *)metadata;
+
+@end
+
+@implementation UIImage (SecretAddition)
+
++ (NSData *)writeMetadataIntoImageData:(NSData *)imageData metadata:(NSDictionary *)metadata {
+    CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFDataRef)imageData, NULL);
+    CFStringRef sourceType = CGImageSourceGetType(source);
+    
+    NSMutableData *imageDataWithMetadata = [NSMutableData data];
+    
+    CGImageDestinationRef destination = CGImageDestinationCreateWithData((__bridge CFMutableDataRef)imageDataWithMetadata, sourceType, 1, NULL);
+    if (!destination) {
+        NSLog(@"could not create image destination");
+    }
+    
+    CGImageDestinationAddImageFromSource(destination, source, 0, (__bridge CFDictionaryRef) metadata);
+    BOOL success = NO;
+    success = CGImageDestinationFinalize(destination);
+    if (!success) {
+        NSLog(@"could not finalize image at destination");
+    }
+    
+    if (destination)
+        CFRelease(destination);
+    
+    if (source)
+        CFRelease(source);
+    
+    return imageDataWithMetadata;
+}
+
+@end
+
+#pragma mark - PBJViewController
+
 @interface PBJViewController () <
     UIGestureRecognizerDelegate,
-    PBJVisionDelegate,
-    UIAlertViewDelegate>
+    PBJVisionDelegate>
 {
     PBJStrobeView *_strobeView;
     UIButton *_doneButton;
@@ -85,7 +130,6 @@
     
     BOOL _recording;
 
-    ALAssetsLibrary *_assetLibrary;
     __block NSDictionary *_currentVideo;
     __block NSDictionary *_currentPhoto;
 }
@@ -119,8 +163,6 @@
 
     self.view.backgroundColor = [UIColor blackColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-
-    _assetLibrary = [[ALAssetsLibrary alloc] init];
     
     CGFloat viewWidth = CGRectGetWidth(self.view.frame);
 
@@ -252,9 +294,6 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
-    // iOS 6 support
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
     
     [self _resetCapture];
     [[PBJVision sharedInstance] startPreview];
@@ -265,9 +304,6 @@
     [super viewWillDisappear:animated];
     
     [[PBJVision sharedInstance] stopPreview];
-    
-    // iOS 6 support
-    [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationSlide];
 }
 
 #pragma mark - private start/stop helper methods
@@ -399,13 +435,6 @@
     _longPressGestureRecognizer.enabled = YES;
     
     [self _endCapture];
-}
-
-#pragma mark - UIAlertViewDelegate
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    [self _resetCapture];
 }
 
 #pragma mark - UIGestureRecognizer
@@ -586,45 +615,39 @@
     }
     _currentPhoto = photoDict;
     
-    // save to library
+    // pointers for the appropriate photo information
     NSData *photoData = _currentPhoto[PBJVisionPhotoJPEGKey];
     NSDictionary *metadata = _currentPhoto[PBJVisionPhotoMetadataKey];
-   [_assetLibrary writeImageDataToSavedPhotosAlbum:photoData metadata:metadata completionBlock:^(NSURL *assetURL, NSError *error1) {
-        if (error1 || !assetURL) {
-            // handle error properly
-            return;
+
+    // create an album
+    __block PHObjectPlaceholder *album;
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        PHAssetCollectionChangeRequest *changeRequest = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:PBJViewControllerPhotoAlbum];
+        album = changeRequest.placeholderForCreatedAssetCollection;
+    } completionHandler:^(BOOL success1, NSError *error1) {
+        if (success1) {
+            PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithLocalIdentifiers:@[album.localIdentifier] options:nil];
+            PHAssetCollection *assetCollection = fetchResult.firstObject;
+            
+            // add image with metadata to the album
+            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                UIImage *photoImage = [UIImage imageWithData:[UIImage writeMetadataIntoImageData:photoData metadata:metadata]] ;
+                PHAssetChangeRequest *assetChangeRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:photoImage];
+                PHAssetCollectionChangeRequest *assetCollectionChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:assetCollection];
+                [assetCollectionChangeRequest addAssets:@[[assetChangeRequest placeholderForCreatedAsset]]];
+            } completionHandler:^(BOOL success2, NSError *error2) {
+                if (success2) {
+                    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Photo Saved!" message:@"Saved to the camera roll." preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+                    [alertController addAction:ok];
+                    [self presentViewController:alertController animated:YES completion:nil];
+                }
+            }];
+        } else if (error1) {
+            NSLog(@"error: %@", error1);
         }
-       
-        NSString *albumName = @"PBJVision";
-        __block BOOL albumFound = NO;
-        [_assetLibrary enumerateGroupsWithTypes:ALAssetsGroupAlbum usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
-            if ([albumName compare:[group valueForProperty:ALAssetsGroupPropertyName]] == NSOrderedSame) {
-                albumFound = YES;
-                [_assetLibrary assetForURL:assetURL resultBlock:^(ALAsset *asset) {
-                    [group addAsset:asset];
-                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Photo Saved!" message: @"Saved to the camera roll."
-                                                       delegate:nil
-                                              cancelButtonTitle:nil
-                                              otherButtonTitles:@"OK", nil];
-                    [alert show];
-                } failureBlock:nil];
-            }
-            if (!group && !albumFound) {
-                __weak ALAssetsLibrary *blockSafeLibrary = _assetLibrary;
-                [_assetLibrary addAssetsGroupAlbumWithName:albumName resultBlock:^(ALAssetsGroup *group1) {
-                    [blockSafeLibrary assetForURL:assetURL resultBlock:^(ALAsset *asset) {
-                        [group1 addAsset:asset];
-                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Photo Saved!" message: @"Saved to the camera roll."
-                                                       delegate:nil
-                                              cancelButtonTitle:nil
-                                              otherButtonTitles:@"OK", nil];
-                        [alert show];
-                    } failureBlock:nil];
-                } failureBlock:nil];
-            }
-        } failureBlock:nil];
     }];
-    
+        
     _currentPhoto = nil;
 }
 
@@ -659,14 +682,16 @@
     }
 
     _currentVideo = videoDict;
-    
-    NSString *videoPath = [_currentVideo  objectForKey:PBJVisionVideoPathKey];
-    [_assetLibrary writeVideoAtPathToSavedPhotosAlbum:[NSURL URLWithString:videoPath] completionBlock:^(NSURL *assetURL, NSError *error1) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Video Saved!" message: @"Saved to the camera roll."
-                                                       delegate:self
-                                              cancelButtonTitle:nil
-                                              otherButtonTitles:@"OK", nil];
-        [alert show];
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        NSString *videoPath = [_currentVideo  objectForKey:PBJVisionVideoPathKey];
+        [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:[NSURL URLWithString:videoPath]];
+    } completionHandler:^(BOOL success, NSError * _Nullable error1) {
+        if (success) {
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Video Saved!" message:@"Saved to the camera roll." preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+            [alertController addAction:ok];
+            [self presentViewController:alertController animated:YES completion:nil];
+        }
     }];
 }
 
