@@ -2,7 +2,7 @@
 
 ## PBJVision
 
-`PBJVision` is a camera library for iOS that enables easy integration of special capture features and camera customization in an iOS app.
+`PBJVision` is a camera library for iOS that enables easy integration of special capture features and camera interface customizations in your iOS app.
 
 [![Build Status](https://api.travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 [![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
