@@ -73,9 +73,9 @@ typedef NS_ENUM(NSInteger, PBJFlashMode) {
 };
 
 typedef NS_ENUM(NSInteger, PBJMirroringMode) {
-	PBJMirroringAuto = 0,
-	PBJMirroringOn,
-	PBJMirroringOff
+    PBJMirroringAuto = 0,
+    PBJMirroringOn,
+    PBJMirroringOff
 };
 
 typedef NS_ENUM(NSInteger, PBJAuthorizationStatus) {

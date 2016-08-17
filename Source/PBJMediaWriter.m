@@ -40,8 +40,8 @@
 @interface PBJMediaWriter ()
 {
     AVAssetWriter *_assetWriter;
-	AVAssetWriterInput *_assetWriterAudioInput;
-	AVAssetWriterInput *_assetWriterVideoInput;
+    AVAssetWriterInput *_assetWriterAudioInput;
+    AVAssetWriterInput *_assetWriterVideoInput;
 
     NSURL *_outputURL;
 
@@ -165,13 +165,13 @@
 
 - (BOOL)setupAudioWithSettings:(NSDictionary *)audioSettings
 {
-	if (!_assetWriterAudioInput && [_assetWriter canApplyOutputSettings:audioSettings forMediaType:AVMediaTypeAudio]) {
+    if (!_assetWriterAudioInput && [_assetWriter canApplyOutputSettings:audioSettings forMediaType:AVMediaTypeAudio]) {
 
-		_assetWriterAudioInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:audioSettings];
-		_assetWriterAudioInput.expectsMediaDataInRealTime = YES;
+        _assetWriterAudioInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:audioSettings];
+        _assetWriterAudioInput.expectsMediaDataInRealTime = YES;
 
-		if (_assetWriterAudioInput && [_assetWriter canAddInput:_assetWriterAudioInput]) {
-			[_assetWriter addInput:_assetWriterAudioInput];
+        if (_assetWriterAudioInput && [_assetWriter canAddInput:_assetWriterAudioInput]) {
+            [_assetWriter addInput:_assetWriterAudioInput];
 
             DLog(@"setup audio input with settings sampleRate (%f) channels (%lu) bitRate (%ld)",
                 [[audioSettings objectForKey:AVSampleRateKey] floatValue],
@@ -179,13 +179,13 @@
                 (long)[[audioSettings objectForKey:AVEncoderBitRateKey] integerValue]);
 
         } else {
-			DLog(@"couldn't add asset writer audio input");
-		}
+            DLog(@"couldn't add asset writer audio input");
+        }
 
-	} else {
+    } else {
 
         _assetWriterAudioInput = nil;
-		DLog(@"couldn't apply audio output settings");
+        DLog(@"couldn't apply audio output settings");
 
     }
 
@@ -193,11 +193,11 @@
 }
 
 - (BOOL)setupVideoWithSettings:(NSDictionary *)videoSettings withAdditional:(NSDictionary *)additional {
-	if (!_assetWriterVideoInput && [_assetWriter canApplyOutputSettings:videoSettings forMediaType:AVMediaTypeVideo]) {
+    if (!_assetWriterVideoInput && [_assetWriter canApplyOutputSettings:videoSettings forMediaType:AVMediaTypeVideo]) {
 
-		_assetWriterVideoInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:videoSettings];
-		_assetWriterVideoInput.expectsMediaDataInRealTime = YES;
-		_assetWriterVideoInput.transform = CGAffineTransformIdentity;
+        _assetWriterVideoInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:videoSettings];
+        _assetWriterVideoInput.expectsMediaDataInRealTime = YES;
+        _assetWriterVideoInput.transform = CGAffineTransformIdentity;
 
         if (additional != nil) {
             NSNumber *angle = additional[PBJVisionVideoRotation];
@@ -206,8 +206,8 @@
             }
         }
 
-		if (_assetWriterVideoInput && [_assetWriter canAddInput:_assetWriterVideoInput]) {
-			[_assetWriter addInput:_assetWriterVideoInput];
+        if (_assetWriterVideoInput && [_assetWriter canAddInput:_assetWriterVideoInput]) {
+            [_assetWriter addInput:_assetWriterVideoInput];
 
 #if !defined(NDEBUG) && LOG_WRITER
             NSDictionary *videoCompressionProperties = videoSettings[AVVideoCompressionPropertiesKey];
@@ -220,16 +220,16 @@
             }
 #endif
 
-		} else {
-			DLog(@"couldn't add asset writer video input");
-		}
+        } else {
+            DLog(@"couldn't add asset writer video input");
+        }
 
-	} else {
+    } else {
 
         _assetWriterVideoInput = nil;
-		DLog(@"couldn't apply video output settings");
+        DLog(@"couldn't apply video output settings");
 
-	}
+    }
 
     return self.isVideoReady;
 }
@@ -243,18 +243,18 @@
     }
 
     // setup the writer
-	if ( _assetWriter.status == AVAssetWriterStatusUnknown ) {
+    if ( _assetWriter.status == AVAssetWriterStatusUnknown ) {
 
         if ([_assetWriter startWriting]) {
             CMTime timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-			[_assetWriter startSessionAtSourceTime:timestamp];
+            [_assetWriter startSessionAtSourceTime:timestamp];
             DLog(@"started writing with status (%ld)", (long)_assetWriter.status);
-		} else {
-			DLog(@"error when starting to write (%@)", [_assetWriter error]);
+        } else {
+            DLog(@"error when starting to write (%@)", [_assetWriter error]);
             return;
-		}
+        }
 
-	}
+    }
 
     // check for completion state
     if ( _assetWriter.status == AVAssetWriterStatusFailed ) {
@@ -273,7 +273,7 @@
     }
 
     // perform write
-	if ( _assetWriter.status == AVAssetWriterStatusWriting ) {
+    if ( _assetWriter.status == AVAssetWriterStatusWriting ) {
 
         CMTime timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
         CMTime duration = CMSampleBufferGetDuration(sampleBuffer);
@@ -281,25 +281,25 @@
             timestamp = CMTimeAdd(timestamp, duration);
         }
 
-		if (video) {
-			if (_assetWriterVideoInput.readyForMoreMediaData) {
-				if ([_assetWriterVideoInput appendSampleBuffer:sampleBuffer]) {
+        if (video) {
+            if (_assetWriterVideoInput.readyForMoreMediaData) {
+                if ([_assetWriterVideoInput appendSampleBuffer:sampleBuffer]) {
                     _videoTimestamp = timestamp;
-				} else {
-					DLog(@"writer error appending video (%@)", _assetWriter.error);
+                } else {
+                    DLog(@"writer error appending video (%@)", _assetWriter.error);
                 }
-			}
-		} else {
-			if (_assetWriterAudioInput.readyForMoreMediaData) {
-				if ([_assetWriterAudioInput appendSampleBuffer:sampleBuffer]) {
+            }
+        } else {
+            if (_assetWriterAudioInput.readyForMoreMediaData) {
+                if ([_assetWriterAudioInput appendSampleBuffer:sampleBuffer]) {
                     _audioTimestamp = timestamp;
-				} else {
-					DLog(@"writer error appending audio (%@)", _assetWriter.error);
+                } else {
+                    DLog(@"writer error appending audio (%@)", _assetWriter.error);
                 }
-			}
-		}
+            }
+        }
 
-	}
+    }
 }
 
 - (void)finishWritingWithCompletionHandler:(void (^)(void))handler

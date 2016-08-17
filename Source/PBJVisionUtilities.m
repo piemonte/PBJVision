@@ -127,15 +127,15 @@
 
 + (AVCaptureConnection *)connectionWithMediaType:(NSString *)mediaType fromConnections:(NSArray *)connections
 {
-	for ( AVCaptureConnection *connection in connections ) {
-		for ( AVCaptureInputPort *port in [connection inputPorts] ) {
-			if ( [[port mediaType] isEqual:mediaType] ) {
-				return connection;
-			}
-		}
-	}
+    for ( AVCaptureConnection *connection in connections ) {
+        for ( AVCaptureInputPort *port in [connection inputPorts] ) {
+            if ( [[port mediaType] isEqual:mediaType] ) {
+                return connection;
+            }
+        }
+    }
     
-	return nil;
+    return nil;
 }
 
 + (CMSampleBufferRef)createOffsetSampleBufferWithSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset
@@ -177,24 +177,24 @@
 
 + (CGFloat)angleOffsetFromPortraitOrientationToOrientation:(AVCaptureVideoOrientation)orientation
 {
-	CGFloat angle = 0.0;
-	
-	switch (orientation) {
-		case AVCaptureVideoOrientationPortraitUpsideDown:
-			angle = (CGFloat)M_PI;
-			break;
-		case AVCaptureVideoOrientationLandscapeRight:
-			angle = (CGFloat)-M_PI_2;
-			break;
-		case AVCaptureVideoOrientationLandscapeLeft:
-			angle = (CGFloat)M_PI_2;
-			break;
-		case AVCaptureVideoOrientationPortrait:
-		default:
-			break;
-	}
+    CGFloat angle = 0.0;
+    
+    switch (orientation) {
+        case AVCaptureVideoOrientationPortraitUpsideDown:
+            angle = (CGFloat)M_PI;
+            break;
+        case AVCaptureVideoOrientationLandscapeRight:
+            angle = (CGFloat)-M_PI_2;
+            break;
+        case AVCaptureVideoOrientationLandscapeLeft:
+            angle = (CGFloat)M_PI_2;
+            break;
+        case AVCaptureVideoOrientationPortrait:
+        default:
+            break;
+    }
 
-	return angle;
+    return angle;
 }
 
 #pragma mark - memory
