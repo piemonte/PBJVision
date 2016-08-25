@@ -13,7 +13,7 @@ If you need a video player, check out [Player (Swift)](https://github.com/piemon
 - [x] touch-to-record video capture
 - [x] slow motion capture (120 fps on [supported hardware](https://www.apple.com/iphone/compare/))
 - [x] photo capture
-- [x] customizable UI and user interactions
+- [x] customizable user interface and gestural interactions
 - [x] ghosting (onion skinning) of last recorded segment
 - [x] flash/torch support
 - [x] white balance, focus, and exposure adjustment support
