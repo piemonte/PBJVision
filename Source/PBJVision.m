@@ -1466,7 +1466,7 @@ typedef void (^PBJVisionBlock)();
 
 - (BOOL)canCapturePhoto
 {
-    BOOL isDiskSpaceAvailable = [PBJVisionUtilities availableDiskSpaceInBytes] > PBJVisionRequiredMinimumDiskSpaceInBytes;
+    BOOL isDiskSpaceAvailable = [PBJVisionUtilities availableStorageSpaceInBytes] > PBJVisionRequiredMinimumDiskSpaceInBytes;
     return [self isCaptureSessionActive] && !_flags.changingModes && isDiskSpaceAvailable;
 }
 
@@ -1787,7 +1787,7 @@ typedef void (^PBJVisionBlock)();
 
 - (BOOL)canCaptureVideo
 {
-    BOOL isDiskSpaceAvailable = [PBJVisionUtilities availableDiskSpaceInBytes] > PBJVisionRequiredMinimumDiskSpaceInBytes;
+    BOOL isDiskSpaceAvailable = [PBJVisionUtilities availableStorageSpaceInBytes] > PBJVisionRequiredMinimumDiskSpaceInBytes;
     return [self supportsVideoCapture] && [self isCaptureSessionActive] && !_flags.changingModes && isDiskSpaceAvailable;
 }
 

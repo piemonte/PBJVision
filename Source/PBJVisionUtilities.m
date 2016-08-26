@@ -199,20 +199,22 @@
 
 #pragma mark - memory
 
-+ (uint64_t)availableDiskSpaceInBytes
++ (uint64_t)availableStorageSpaceInBytes
 {
-    uint64_t totalFreeSpace = 0;
+    uint64_t freeSize = 0;
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     
     __autoreleasing NSError *error = nil;
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSDictionary *dictionary = [[NSFileManager defaultManager] attributesOfFileSystemForPath:[paths lastObject] error:&error];
-    
-    if (dictionary) {
-        NSNumber *freeFileSystemSizeInBytes = [dictionary objectForKey:NSFileSystemFreeSize];
-        totalFreeSpace = [freeFileSystemSizeInBytes unsignedLongLongValue];
+    NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfFileSystemForPath:[paths lastObject] error:&error];
+    if (attributes) {
+        NSNumber *freeFileSystemSizeInBytes = attributes[NSFileSystemFreeSize];
+        if (freeFileSystemSizeInBytes) {
+            freeSize = [freeFileSystemSizeInBytes unsignedLongLongValue];
+        }
     }
     
-    return totalFreeSpace;
+    return freeSize;
 }
 
 @end

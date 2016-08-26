@@ -48,7 +48,7 @@
 
 // storage
 
-+ (uint64_t)availableDiskSpaceInBytes;
++ (uint64_t)availableStorageSpaceInBytes;
 
 @end
 
