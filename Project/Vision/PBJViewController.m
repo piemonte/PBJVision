@@ -488,7 +488,7 @@ static NSString * const PBJViewControllerPhotoAlbum = @"PBJVision";
     [_previewView addSubview:_focusView];
     [_focusView startAnimation];
 
-    CGPoint adjustPoint = [PBJVisionUtilities convertToPointOfInterestFromViewCoordinates:tapPoint inFrame:_previewView.frame];
+    CGPoint adjustPoint = [_previewLayer captureDevicePointOfInterestForPoint:tapPoint];
     [[PBJVision sharedInstance] focusExposeAndAdjustWhiteBalanceAtAdjustedPoint:adjustPoint];
 }
 
