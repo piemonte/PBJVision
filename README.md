@@ -30,11 +30,9 @@ This library was originally created at [DIY](https://diy.org/) as a fun means fo
 
 Thanks to everyone who has contributed and helped make this a fun project and community.
 
-## Installation
+## Quick Start
 
-### CocoaPods
-
-`PBJVision` is available and recommended for installation using the Cocoa dependency manager [CocoaPods](https://cocoapods.org/). 
+`PBJVision` is available and recommended for installation using the dependency manager [CocoaPods](https://cocoapods.org/). 
 
 To integrate, just add the following line to your `Podfile`:
 
