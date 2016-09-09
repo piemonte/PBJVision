@@ -7,7 +7,8 @@
 [![Build Status](https://api.travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 [![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
 
-If you need a video player, check out [Player (Swift)](https://github.com/piemonte/player) and [PBJVideoPlayer (obj-c)](https://github.com/piemonte/PBJVideoPlayer).
+- Looking for a Swift version? Check out [NextLevel](https://github.com/NextLevel/NextLevel).
+- Looking for a video player? Check out [Player (Swift)](https://github.com/piemonte/player) and [PBJVideoPlayer (obj-c)](https://github.com/piemonte/PBJVideoPlayer).
 
 ### Features
 - [x] touch-to-record video capture
