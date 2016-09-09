@@ -7,7 +7,7 @@
 [![Build Status](https://api.travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 [![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
 
-- Looking for a Swift version? Check out [NextLevel](https://github.com/NextLevel/NextLevel).
+- Looking for a Swift version? Check out [Next Level](https://github.com/NextLevel/NextLevel).
 - Looking for a video player? Check out [Player (Swift)](https://github.com/piemonte/player) and [PBJVideoPlayer (obj-c)](https://github.com/piemonte/PBJVideoPlayer).
 
 ### Features
@@ -174,6 +174,7 @@ To adjust the video quality and compression bit rate, modify the following prope
 * [objc.io Video] (https://www.objc.io/issues/23-video/)
 * [Player, a simple iOS video player in Swift](https://github.com/piemonte/player)
 * [PBJVideoPlayer, a simple iOS video player in Objective-C](https://github.com/piemonte/PBJVideoPlayer)
+* [SCRecorder](https://github.com/rflex/SCRecorder) another great obj-c suite of media tools
 
 ## License
 
