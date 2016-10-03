@@ -1715,6 +1715,11 @@ typedef void (^PBJVisionBlock)();
     }
 
     AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
+    
+    if (!connection.enabled) {
+        return;
+    }
+    
     [self _setOrientationForConnection:connection];
     
     [_captureOutputPhoto captureStillImageAsynchronouslyFromConnection:connection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
