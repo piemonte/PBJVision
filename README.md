@@ -62,6 +62,15 @@ Setup the camera preview using `[[PBJVision sharedInstance] previewLayer]`.
     [_previewView.layer addSublayer:_previewLayer];
 ```
 
+If your view controller is managed by a Storyboard, keep the previewLayer updated for device sizes
+
+```objective-c
+- (void)viewDidLayoutSubviews
+{
+    _previewLayer.frame = _previewView.bounds;
+}
+```
+
 Setup and configure the `PBJVision` controller, then start the camera preview.
 
 ```objective-c
