@@ -44,5 +44,7 @@
 	<string>Allowing access to the microphone lets you record source for your videos.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Allowing access to the camera lets you capture photos and videos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allowing access to the library lets you save photos and videos.</string>
 </dict>
 </plist>
