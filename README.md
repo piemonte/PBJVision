@@ -2,7 +2,7 @@
 
 ## PBJVision
 
-`PBJVision` is a camera library for iOS that enables easy integration of special capture features and camera interface customizations in your iOS app.
+`PBJVision` is a camera library for iOS that enables easy integration of special capture features and camera interface customizations in your iOS app. [Next Level](https://github.com/NextLevel/NextLevel) is the Swift counterpart.
 
 [![Build Status](https://api.travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 [![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
@@ -22,11 +22,9 @@
 
 Capture is also possible without having to use the touch-to-record gesture interaction as the sample project provides.
 
-Contributions are welcome!
-
 ### About
 
-This library was originally created at [DIY](https://diy.org/) as a fun means for kids to author video and share their [skills](https://diy.org//skills). The touch-to-record interaction was originally pioneered by [Vine](https://vine.co/) and [Instagram](https://instagram.com/).
+This library was originally created at [DIY](https://diy.org/) as a fun means for kids to author video and share their [skills](https://diy.org//skills). The touch-to-record interaction was pioneered by [Vine](https://vine.co/) and [Instagram](https://instagram.com/).
 
 Thanks to everyone who has contributed and helped make this a fun project and community.
 
@@ -166,22 +164,29 @@ To adjust the video quality and compression bit rate, modify the following prope
 
 ## Community
 
+Contributions and discussions are welcome!
+
+### Project
+
 - Need help? Use [Stack Overflow](http://stackoverflow.com/questions/tagged/pbjvision) with the tag 'pbjvision'.
 - Questions? Use [Stack Overflow](http://stackoverflow.com/questions/tagged/pbjvision) with the tag 'pbjvision'.
 - Found a bug? Open an [issue](https://github.com/piemonte/PBJVision/issues).
 - Feature idea? Open an [issue](https://github.com/piemonte/PBJVision/issues).
 - Want to contribute? Submit a [pull request](https://github.com/piemonte/PBJVision/blob/master/CONTRIBUTING.md).
 
-## Resources
+### Related Projects
 
 * [Next Level](https://github.com/NextLevel/NextLevel/), rad media capture in Swift
+* [Player](https://github.com/piemonte/player), a simple iOS video player in Swift
+* [PBJVideoPlayer](https://github.com/piemonte/PBJVideoPlayer), a simple iOS video player in Objective-C
+
+## Resources
+
+* [iOS Device Camera Summary](https://developer.apple.com/library/prerelease/content/documentation/DeviceInformation/Reference/iOSDeviceCompatibility/Cameras/Cameras.html)
 * [AV Foundation Programming Guide](https://developer.apple.com/library/ios/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/00_Introduction.html)
 * [AV Foundation Framework Reference](https://developer.apple.com/library/ios/documentation/AVFoundation/Reference/AVFoundationFramework/)
 * [objc.io Camera and Photos](https://www.objc.io/issues/21-camera-and-photos/)
 * [objc.io Video](https://www.objc.io/issues/23-video/)
-* [Player](https://github.com/piemonte/player), a simple iOS video player in Swift
-* [PBJVideoPlayer](https://github.com/piemonte/PBJVideoPlayer), a simple iOS video player in Objective-C
-* [SCRecorder](https://github.com/rflex/SCRecorder), another great obj-c suite of media tools
 * [Cameras, ecommerce and machine learning](http://ben-evans.com/benedictevans/2016/11/20/ku6omictaredoge4cao9cytspbz4jt)
 
 ## License
