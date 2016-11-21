@@ -182,6 +182,7 @@ To adjust the video quality and compression bit rate, modify the following prope
 * [Player](https://github.com/piemonte/player), a simple iOS video player in Swift
 * [PBJVideoPlayer](https://github.com/piemonte/PBJVideoPlayer), a simple iOS video player in Objective-C
 * [SCRecorder](https://github.com/rflex/SCRecorder), another great obj-c suite of media tools
+* [Cameras, ecommerce and machine learning](http://ben-evans.com/benedictevans/2016/11/20/ku6omictaredoge4cao9cytspbz4jt)
 
 ## License
 
