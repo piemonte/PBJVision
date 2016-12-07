@@ -89,6 +89,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 @interface PBJVision () <
     AVCaptureAudioDataOutputSampleBufferDelegate,
     AVCaptureVideoDataOutputSampleBufferDelegate,
+    AVCapturePhotoCaptureDelegate,
     PBJMediaWriterDelegate>
 {
     // AV
@@ -103,7 +104,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     AVCaptureDeviceInput *_captureDeviceInputBack;
     AVCaptureDeviceInput *_captureDeviceInputAudio;
 
-    AVCaptureStillImageOutput *_captureOutputPhoto;
+    AVCapturePhotoOutput *_captureOutputPhoto;
+    AVCaptureStillImageOutput *_captureOutputImage;
     AVCaptureAudioDataOutput *_captureOutputAudio;
     AVCaptureVideoDataOutput *_captureOutputVideo;
 
@@ -822,7 +824,14 @@ typedef void (^PBJVisionBlock)();
     }
     
     // capture device ouputs
-    _captureOutputPhoto = [[AVCaptureStillImageOutput alloc] init];
+    if ([AVCapturePhotoOutput class]) {
+        _captureOutputPhoto = [[AVCapturePhotoOutput alloc] init];
+        _captureOutputPhoto.highResolutionCaptureEnabled = YES;
+    }
+    else {
+        _captureOutputImage = [[AVCaptureStillImageOutput alloc] init];
+    }
+    
     if (_cameraMode != PBJCameraModePhoto && _flags.audioCaptureEnabled) {
         _captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
     }
@@ -862,7 +871,9 @@ typedef void (^PBJVisionBlock)();
     [self addObserver:self forKeyPath:@"currentDevice.torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
 
     // KVO is only used to monitor focus and capture events
-    [_captureOutputPhoto addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew context:(__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext)];
+    if (![AVCapturePhotoOutput class]) {
+        [_captureOutputImage addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew context:(__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext)];
+    }
     
     DLog(@"camera setup");
 }
@@ -883,7 +894,9 @@ typedef void (^PBJVisionBlock)();
     [self removeObserver:self forKeyPath:@"currentDevice.torchAvailable"];
     
     // capture events KVO notifications
-    [_captureOutputPhoto removeObserver:self forKeyPath:@"capturingStillImage"];
+    if (![AVCapturePhotoOutput class]) {
+        [_captureOutputImage removeObserver:self forKeyPath:@"capturingStillImage"];
+    }
 
     // remove notification observers (we don't want to just 'remove all' because we're also observing background notifications
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
@@ -902,6 +915,7 @@ typedef void (^PBJVisionBlock)();
     [notificationCenter removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:nil];
 
     _captureOutputPhoto = nil;
+    _captureOutputImage = nil;
     _captureOutputAudio = nil;
     _captureOutputVideo = nil;
     
@@ -941,8 +955,9 @@ typedef void (^PBJVisionBlock)();
                               ((_currentDevice == _captureDeviceFront) && (_cameraDevice != PBJCameraDeviceFront)) ||
                               ((_currentDevice == _captureDeviceBack) && (_cameraDevice != PBJCameraDeviceBack));
     
+    AVCaptureOutput *cameraOutput = [AVCapturePhotoOutput class] ? _captureOutputPhoto : _captureOutputImage;
     BOOL shouldSwitchMode = (_currentOutput == nil) ||
-                            ((_currentOutput == _captureOutputPhoto) && (_cameraMode != PBJCameraModePhoto)) ||
+                            ((_currentOutput == cameraOutput) && (_cameraMode != PBJCameraModePhoto)) ||
                             ((_currentOutput == _captureOutputVideo) && (_cameraMode != PBJCameraModeVideo));
     
     DLog(@"switchDevice %d switchMode %d", shouldSwitchDevice, shouldSwitchMode);
@@ -1018,7 +1033,13 @@ typedef void (^PBJVisionBlock)();
         }
         
         [_captureSession removeOutput:_captureOutputVideo];
-        [_captureSession removeOutput:_captureOutputPhoto];
+        
+        if ([AVCapturePhotoOutput class]) {
+            [_captureSession removeOutput:_captureOutputPhoto];
+        }
+        else {
+            [_captureSession removeOutput:_captureOutputImage];
+        }
         
         switch (_cameraMode) {
             case PBJCameraModeVideo:
@@ -1041,9 +1062,9 @@ typedef void (^PBJVisionBlock)();
             case PBJCameraModePhoto:
             {
                 // photo output
-                if ([_captureSession canAddOutput:_captureOutputPhoto]) {
-                    [_captureSession addOutput:_captureOutputPhoto];
-                    newCaptureOutput = _captureOutputPhoto;
+                if ([_captureSession canAddOutput:cameraOutput]) {
+                    [_captureSession addOutput:cameraOutput];
+                    newCaptureOutput = cameraOutput;
                 }
                 break;
             }
@@ -1123,14 +1144,16 @@ typedef void (^PBJVisionBlock)();
             DLog(@"error locking device for video device configuration (%@)", error);
         }
         
-    } else if ( newCaptureOutput && (newCaptureOutput == _captureOutputPhoto) ) {
+    } else if ( newCaptureOutput && (newCaptureOutput == cameraOutput) ) {
     
         // specify photo preset
         sessionPreset = _captureSessionPreset;
     
         // setup photo settings
-        NSDictionary *photoSettings = @{AVVideoCodecKey : AVVideoCodecJPEG};
-        [_captureOutputPhoto setOutputSettings:photoSettings];
+        if (![AVCapturePhotoOutput class]) {
+            NSDictionary *photoSettings = @{AVVideoCodecKey : AVVideoCodecJPEG};
+            [_captureOutputImage setOutputSettings:photoSettings];
+        }
         
         // setup photo device configuration
         NSError *error = nil;
@@ -1702,6 +1725,76 @@ typedef void (^PBJVisionBlock)();
     }];
 }
 
+- (void)_processImageWithPhotoSampleBuffer:(CMSampleBufferRef)photoSampleBuffer previewSampleBuffer:(CMSampleBufferRef)previewSampleBuffer error:(NSError *)error {
+    
+    if (error) {
+        if ([_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {
+            [_delegate vision:self capturedPhoto:nil error:error];
+        }
+        return;
+    }
+    
+    if (!photoSampleBuffer) {
+        [self _failPhotoCaptureWithErrorCode:PBJVisionErrorCaptureFailed];
+        DLog(@"failed to obtain image data sample buffer");
+        return;
+    }
+    
+    // add any attachments to propagate
+    NSDictionary *tiffDict = @{ (NSString *)kCGImagePropertyTIFFSoftware : @"PBJVision",
+                                (NSString *)kCGImagePropertyTIFFDateTime : [NSString PBJformattedTimestampStringFromDate:[NSDate date]] };
+    CMSetAttachment(photoSampleBuffer, kCGImagePropertyTIFFDictionary, (__bridge CFTypeRef)(tiffDict), kCMAttachmentMode_ShouldPropagate);
+    
+    NSMutableDictionary *photoDict = [[NSMutableDictionary alloc] init];
+    NSDictionary *metadata = nil;
+    
+    // add photo metadata (ie EXIF: Aperture, Brightness, Exposure, FocalLength, etc)
+    metadata = (__bridge NSDictionary *)CMCopyDictionaryOfAttachments(kCFAllocatorDefault, photoSampleBuffer, kCMAttachmentMode_ShouldPropagate);
+    if (metadata) {
+        photoDict[PBJVisionPhotoMetadataKey] = metadata;
+        CFRelease((__bridge CFTypeRef)(metadata));
+    } else {
+        DLog(@"failed to generate metadata for photo");
+    }
+    
+    NSData *jpegData = nil;
+    if ([AVCapturePhotoOutput class]) {
+        jpegData = [AVCapturePhotoOutput JPEGPhotoDataRepresentationForJPEGSampleBuffer:photoSampleBuffer previewPhotoSampleBuffer:previewSampleBuffer];
+    }
+    else {
+        jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:photoSampleBuffer];
+    }
+    
+    if (jpegData) {
+        // add JPEG
+        photoDict[PBJVisionPhotoJPEGKey] = jpegData;
+        
+        // add image
+        UIImage *image = [self _uiimageFromJPEGData:jpegData];
+        if (image) {
+            photoDict[PBJVisionPhotoImageKey] = image;
+        } else {
+            DLog(@"failed to create image from JPEG");
+            error = [NSError errorWithDomain:PBJVisionErrorDomain code:PBJVisionErrorCaptureFailed userInfo:nil];
+        }
+        
+        // add thumbnail
+        if (_flags.thumbnailEnabled) {
+            UIImage *thumbnail = [self _thumbnailJPEGData:jpegData];
+            if (thumbnail) {
+                photoDict[PBJVisionPhotoThumbnailKey] = thumbnail;
+            }
+        }
+    }
+    
+    if ([_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {
+        [_delegate vision:self capturedPhoto:photoDict error:error];
+    }
+    
+    // run a post shot focus
+    [self performSelector:@selector(_adjustFocusExposureAndWhiteBalance) withObject:nil afterDelay:0.5f];
+}
+
 - (void)capturePhoto
 {
     if (![self _canSessionCaptureWithOutput:_currentOutput] || _cameraMode != PBJCameraModePhoto) {
@@ -1713,69 +1806,19 @@ typedef void (^PBJVisionBlock)();
     AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
     [self _setOrientationForConnection:connection];
     
-    [_captureOutputPhoto captureStillImageAsynchronouslyFromConnection:connection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
-        if (error) {
-            if ([_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {
-                [_delegate vision:self capturedPhoto:nil error:error];
-            }
-            return;
-        }
+    if ([AVCapturePhotoOutput class]) {
+        AVCapturePhotoSettings *settings = [AVCapturePhotoSettings photoSettingsWithFormat:@{AVVideoCodecKey : AVVideoCodecJPEG}];
+        settings.highResolutionPhotoEnabled = YES;
+        
+        [_captureOutputPhoto capturePhotoWithSettings:settings delegate:self];
+    }
+    else {
+        [_captureOutputImage captureStillImageAsynchronouslyFromConnection:connection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
+            
+            [self _processImageWithPhotoSampleBuffer:imageDataSampleBuffer previewSampleBuffer:nil error:error];
+        }];
 
-        if (!imageDataSampleBuffer) {
-            [self _failPhotoCaptureWithErrorCode:PBJVisionErrorCaptureFailed];
-            DLog(@"failed to obtain image data sample buffer");
-            return;
-        }
-        
-        // add any attachments to propagate
-        NSDictionary *tiffDict = @{ (NSString *)kCGImagePropertyTIFFSoftware : @"PBJVision",
-                                    (NSString *)kCGImagePropertyTIFFDateTime : [NSString PBJformattedTimestampStringFromDate:[NSDate date]] };
-        CMSetAttachment(imageDataSampleBuffer, kCGImagePropertyTIFFDictionary, (__bridge CFTypeRef)(tiffDict), kCMAttachmentMode_ShouldPropagate);
-    
-        NSMutableDictionary *photoDict = [[NSMutableDictionary alloc] init];
-        NSDictionary *metadata = nil;
-
-        // add photo metadata (ie EXIF: Aperture, Brightness, Exposure, FocalLength, etc)
-        metadata = (__bridge NSDictionary *)CMCopyDictionaryOfAttachments(kCFAllocatorDefault, imageDataSampleBuffer, kCMAttachmentMode_ShouldPropagate);
-        if (metadata) {
-            photoDict[PBJVisionPhotoMetadataKey] = metadata;
-            CFRelease((__bridge CFTypeRef)(metadata));
-        } else {
-            DLog(@"failed to generate metadata for photo");
-        }
-        
-        // add JPEG, UIImage, thumbnail
-        NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-        if (jpegData) {
-            // add JPEG
-            photoDict[PBJVisionPhotoJPEGKey] = jpegData;
-            
-            // add image
-            UIImage *image = [self _uiimageFromJPEGData:jpegData];
-            if (image) {
-                photoDict[PBJVisionPhotoImageKey] = image;
-            } else {
-                DLog(@"failed to create image from JPEG");
-                error = [NSError errorWithDomain:PBJVisionErrorDomain code:PBJVisionErrorCaptureFailed userInfo:nil];
-            }
-            
-            // add thumbnail
-            if (_flags.thumbnailEnabled) {
-                UIImage *thumbnail = [self _thumbnailJPEGData:jpegData];
-                if (thumbnail) {
-                    photoDict[PBJVisionPhotoThumbnailKey] = thumbnail;
-                }
-            }
-            
-        }
-        
-        if ([_delegate respondsToSelector:@selector(vision:capturedPhoto:error:)]) {
-            [_delegate vision:self capturedPhoto:photoDict error:error];
-        }
-        
-        // run a post shot focus
-        [self performSelector:@selector(_adjustFocusExposureAndWhiteBalance) withObject:nil afterDelay:0.5f];
-    }];
+    }
 }
 
 #pragma mark - video
@@ -2191,6 +2234,18 @@ typedef void (^PBJVisionBlock)();
             }
         }
     }
+}
+
+#pragma mark - AVCapturePhotoCaptureDelegate
+
+- (void)captureOutput:(AVCapturePhotoOutput *)captureOutput
+didFinishProcessingPhotoSampleBuffer:(CMSampleBufferRef)photoSampleBuffer
+previewPhotoSampleBuffer:(CMSampleBufferRef)previewPhotoSampleBuffer
+     resolvedSettings:(AVCaptureResolvedPhotoSettings *)resolvedSettings
+      bracketSettings:(AVCaptureBracketedStillImageSettings *)bracketSettings
+                error:(NSError *)error
+{
+    [self _processImageWithPhotoSampleBuffer:photoSampleBuffer previewSampleBuffer:previewPhotoSampleBuffer error:error];
 }
 
 #pragma mark - AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate
