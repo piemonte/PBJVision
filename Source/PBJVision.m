@@ -2238,6 +2238,14 @@ typedef void (^PBJVisionBlock)();
 
 #pragma mark - AVCapturePhotoCaptureDelegate
 
+- (void)captureOutput:(AVCapturePhotoOutput *)captureOutput willBeginCaptureForResolvedSettings:(AVCaptureResolvedPhotoSettings *)resolvedSettings {
+    [self _willCapturePhoto];
+}
+
+- (void)captureOutput:(AVCapturePhotoOutput *)captureOutput didFinishCaptureForResolvedSettings:(AVCaptureResolvedPhotoSettings *)resolvedSettings error:(NSError *)error {
+    [self _didCapturePhoto];
+}
+
 - (void)captureOutput:(AVCapturePhotoOutput *)captureOutput
 didFinishProcessingPhotoSampleBuffer:(CMSampleBufferRef)photoSampleBuffer
 previewPhotoSampleBuffer:(CMSampleBufferRef)previewPhotoSampleBuffer
