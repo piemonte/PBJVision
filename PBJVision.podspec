@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'PBJVision'
-  s.version = '0.5.0'
+  s.version = '0.5.1'
   s.summary = 'iOS camera engine, supports touch-to-record video, slow motion video, and photo capture.'
   s.homepage = 'https://github.com/piemonte/PBJVision'
   s.social_media_url = 'http://twitter.com/piemonte'
