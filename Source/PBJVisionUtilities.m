@@ -26,6 +26,8 @@
 #import "PBJVisionUtilities.h"
 #import "PBJVision.h"
 
+#import <ImageIO/ImageIO.h>
+
 @implementation PBJVisionUtilities
 
 + (AVCaptureDevice *)captureDeviceForPosition:(AVCaptureDevicePosition)position
@@ -97,6 +99,83 @@
     }
     
     return offsetSampleBuffer;
+}
+
++ (UIImage *)uiimageFromJPEGData:(NSData *)jpegData
+{
+    CGImageRef jpegCGImage = NULL;
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)jpegData);
+    
+    UIImageOrientation imageOrientation = UIImageOrientationUp;
+    
+    if (provider) {
+        CGImageSourceRef imageSource = CGImageSourceCreateWithDataProvider(provider, NULL);
+        if (imageSource) {
+            if (CGImageSourceGetCount(imageSource) > 0) {
+                jpegCGImage = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+                
+                // extract the cgImage properties
+                CFDictionaryRef properties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, NULL);
+                if (properties) {
+                    // set orientation
+                    CFNumberRef orientationProperty = CFDictionaryGetValue(properties, kCGImagePropertyOrientation);
+                    if (orientationProperty) {
+                        NSInteger exifOrientation = 1;
+                        CFNumberGetValue(orientationProperty, kCFNumberIntType, &exifOrientation);
+                        imageOrientation = [PBJVisionUtilities uiimageOrientationFromExifOrientation:exifOrientation];
+                    }
+                    
+                    CFRelease(properties);
+                }
+                
+            }
+            CFRelease(imageSource);
+        }
+        CGDataProviderRelease(provider);
+    }
+    
+    UIImage *image = nil;
+    if (jpegCGImage) {
+        image = [[UIImage alloc] initWithCGImage:jpegCGImage scale:1.0 orientation:imageOrientation];
+        CGImageRelease(jpegCGImage);
+    }
+    return image;
+}
+
+// http://sylvana.net/jpegcrop/exif_orientation.html
++ (UIImageOrientation)uiimageOrientationFromExifOrientation:(NSInteger)exifOrientation
+{
+    UIImageOrientation imageOrientation = UIImageOrientationUp;
+    
+    switch (exifOrientation) {
+        case 2:
+            imageOrientation = UIImageOrientationUpMirrored;
+            break;
+        case 3:
+            imageOrientation = UIImageOrientationDown;
+            break;
+        case 4:
+            imageOrientation = UIImageOrientationDownMirrored;
+            break;
+        case 5:
+            imageOrientation = UIImageOrientationLeftMirrored;
+            break;
+        case 6:
+            imageOrientation = UIImageOrientationRight;
+            break;
+        case 7:
+            imageOrientation = UIImageOrientationRightMirrored;
+            break;
+        case 8:
+            imageOrientation = UIImageOrientationLeft;
+            break;
+        case 1:
+        default:
+            // UIImageOrientationUp;
+            break;
+    }
+    
+    return imageOrientation;
 }
 
 + (CGFloat)angleOffsetFromPortraitOrientationToOrientation:(AVCaptureVideoOrientation)orientation

@@ -38,8 +38,11 @@
 
 + (CMSampleBufferRef)createOffsetSampleBufferWithSampleBuffer:(CMSampleBufferRef)sampleBuffer withTimeOffset:(CMTime)timeOffset;
 
++ (UIImage *)uiimageFromJPEGData:(NSData *)jpegData;
+
 // orientation
 
++ (UIImageOrientation)uiimageOrientationFromExifOrientation:(NSInteger)exifOrientation;
 + (CGFloat)angleOffsetFromPortraitOrientationToOrientation:(AVCaptureVideoOrientation)orientation;
 
 // storage
