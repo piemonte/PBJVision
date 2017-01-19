@@ -56,9 +56,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0605279B1E3069DE005298D4 /* PBJVision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PBJVision.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		0605279E1E3069DE005298D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../Framework/Info.plist; sourceTree = "<group>"; };
-		060527AC1E306E76005298D4 /* Vision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vision.h; path = ../Framework/Vision.h; sourceTree = "<group>"; };
+		0605279B1E3069DE005298D4 /* Vision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Vision.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0605279E1E3069DE005298D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = Framework/Info.plist; sourceTree = "<group>"; };
+		060527AC1E306E76005298D4 /* Vision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vision.h; path = Framework/Vision.h; sourceTree = "<group>"; };
 		060F7B10179F45FA00E27091 /* PBJStrobeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBJStrobeView.h; sourceTree = "<group>"; };
 		060F7B11179F45FA00E27091 /* PBJStrobeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PBJStrobeView.m; sourceTree = "<group>"; };
 		06156D1C1C38EA47007EE71E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -68,7 +68,7 @@
 		067D52F717D8574200541B5E /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		067D52FA17D857AB00541B5E /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = ../Source/Shaders/Shader.fsh; sourceTree = "<group>"; };
 		067D52FB17D857AB00541B5E /* Shader.vsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = ../Source/Shaders/Shader.vsh; sourceTree = "<group>"; };
-		0683D1BE179F2E1700EE66D6 /* Vision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vision.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0683D1BE179F2E1700EE66D6 /* Vision_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vision_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0683D1C1179F2E1700EE66D6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		0683D1C5179F2E1700EE66D6 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -196,8 +196,8 @@
 		0683D1BF179F2E1700EE66D6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0683D1BE179F2E1700EE66D6 /* Vision.app */,
-				0605279B1E3069DE005298D4 /* PBJVision.app */,
+				0683D1BE179F2E1700EE66D6 /* Vision_iOS.app */,
+				0605279B1E3069DE005298D4 /* Vision.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -291,9 +291,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		0605279A1E3069DE005298D4 /* PBJVision */ = {
+		0605279A1E3069DE005298D4 /* Vision */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 060527A21E3069DE005298D4 /* Build configuration list for PBXNativeTarget "PBJVision" */;
+			buildConfigurationList = 060527A21E3069DE005298D4 /* Build configuration list for PBXNativeTarget "Vision" */;
 			buildPhases = (
 				060527961E3069DE005298D4 /* Sources */,
 				060527971E3069DE005298D4 /* Frameworks */,
@@ -304,14 +304,14 @@
 			);
 			dependencies = (
 			);
-			name = PBJVision;
+			name = Vision;
 			productName = PBJVision;
-			productReference = 0605279B1E3069DE005298D4 /* PBJVision.app */;
+			productReference = 0605279B1E3069DE005298D4 /* Vision.app */;
 			productType = "com.apple.product-type.framework";
 		};
-		0683D1BD179F2E1700EE66D6 /* Vision */ = {
+		0683D1BD179F2E1700EE66D6 /* Vision_iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0683D1F0179F2E1700EE66D6 /* Build configuration list for PBXNativeTarget "Vision" */;
+			buildConfigurationList = 0683D1F0179F2E1700EE66D6 /* Build configuration list for PBXNativeTarget "Vision_iOS" */;
 			buildPhases = (
 				0683D1BA179F2E1700EE66D6 /* Sources */,
 				0683D1BB179F2E1700EE66D6 /* Frameworks */,
@@ -321,9 +321,9 @@
 			);
 			dependencies = (
 			);
-			name = Vision;
+			name = Vision_iOS;
 			productName = Vision;
-			productReference = 0683D1BE179F2E1700EE66D6 /* Vision.app */;
+			productReference = 0683D1BE179F2E1700EE66D6 /* Vision_iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -359,8 +359,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0683D1BD179F2E1700EE66D6 /* Vision */,
-				0605279A1E3069DE005298D4 /* PBJVision */,
+				0683D1BD179F2E1700EE66D6 /* Vision_iOS */,
+				0605279A1E3069DE005298D4 /* Vision */,
 			);
 		};
 /* End PBXProject section */
@@ -575,7 +575,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		060527A21E3069DE005298D4 /* Build configuration list for PBXNativeTarget "PBJVision" */ = {
+		060527A21E3069DE005298D4 /* Build configuration list for PBXNativeTarget "Vision" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				060527A01E3069DE005298D4 /* Debug */,
@@ -593,7 +593,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0683D1F0179F2E1700EE66D6 /* Build configuration list for PBXNativeTarget "Vision" */ = {
+		0683D1F0179F2E1700EE66D6 /* Build configuration list for PBXNativeTarget "Vision_iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0683D1F1179F2E1700EE66D6 /* Debug */,
