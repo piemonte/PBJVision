@@ -554,6 +554,8 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = WPFGSL5BLN;
+				GCC_PREFIX_HEADER = "Vision/Vision-Prefix.pch";
+				INFOPLIST_FILE = "Vision/Vision-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.patrickpiemonte.${PRODUCT_NAME:rfc1034identifier}";
 				PROVISIONING_PROFILE = "";
 			};
@@ -566,6 +568,8 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = WPFGSL5BLN;
+				GCC_PREFIX_HEADER = "Vision/Vision-Prefix.pch";
+				INFOPLIST_FILE = "Vision/Vision-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.patrickpiemonte.${PRODUCT_NAME:rfc1034identifier}";
 				PROVISIONING_PROFILE = "";
 			};
