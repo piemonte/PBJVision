@@ -7,6 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		060527A41E306AD6005298D4 /* PBJMediaWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 06DF60731896B535000870C9 /* PBJMediaWriter.m */; };
+		060527A51E306AD8005298D4 /* PBJVisionUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 06B7D01D179F2E7700F3F527 /* PBJVisionUtilities.m */; };
+		060527A61E306ADC005298D4 /* PBJVision.m in Sources */ = {isa = PBXBuildFile; fileRef = 06B7D01B179F2E7700F3F527 /* PBJVision.m */; };
+		060527A71E306AE0005298D4 /* PBJGLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 06FEB59E18F5C15600AFD4DB /* PBJGLProgram.m */; };
+		060527A81E306AE6005298D4 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 067D52FB17D857AB00541B5E /* Shader.vsh */; };
+		060527A91E306AE9005298D4 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 067D52FA17D857AB00541B5E /* Shader.fsh */; };
+		060527AD1E306E76005298D4 /* Vision.h in Headers */ = {isa = PBXBuildFile; fileRef = 060527AC1E306E76005298D4 /* Vision.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		060527AE1E306FCA005298D4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0683D1C1179F2E1700EE66D6 /* Foundation.framework */; };
+		060527AF1E306FDD005298D4 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0624D09917D43D5D00665930 /* OpenGLES.framework */; };
+		060527B01E306FE3005298D4 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 067D52F717D8574200541B5E /* GLKit.framework */; };
+		060527B11E306FE9005298D4 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D02D179F330E00F3F527 /* MobileCoreServices.framework */; };
+		060527B21E306FEF005298D4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0683D1C5179F2E1700EE66D6 /* UIKit.framework */; };
+		060527B31E306FF9005298D4 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D030179F33B500F3F527 /* ImageIO.framework */; };
+		060527B41E307000005298D4 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D027179F307D00F3F527 /* AVFoundation.framework */; };
+		060527B51E307006005298D4 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06BB5D501AAA50040023C3FC /* QuartzCore.framework */; };
+		060527B61E30700C005298D4 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06C216CE1A4A924700C83065 /* CoreImage.framework */; };
+		060527B71E307016005298D4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0683D1C3179F2E1700EE66D6 /* CoreGraphics.framework */; };
+		060527B81E30701C005298D4 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D029179F312F00F3F527 /* CoreMedia.framework */; };
+		060527B91E307024005298D4 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D02B179F313800F3F527 /* CoreVideo.framework */; };
 		060F7B12179F45FA00E27091 /* PBJStrobeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 060F7B11179F45FA00E27091 /* PBJStrobeView.m */; };
 		06156D1D1C38EA47007EE71E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 06156D1B1C38EA47007EE71E /* LaunchScreen.storyboard */; };
 		061858F01846B06400DEC416 /* PBJFocusView.m in Sources */ = {isa = PBXBuildFile; fileRef = 061858EF1846B06400DEC416 /* PBJFocusView.m */; };
@@ -37,6 +56,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0605279B1E3069DE005298D4 /* PBJVision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PBJVision.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0605279E1E3069DE005298D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../Framework/Info.plist; sourceTree = "<group>"; };
+		060527AC1E306E76005298D4 /* Vision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vision.h; path = ../Framework/Vision.h; sourceTree = "<group>"; };
 		060F7B10179F45FA00E27091 /* PBJStrobeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBJStrobeView.h; sourceTree = "<group>"; };
 		060F7B11179F45FA00E27091 /* PBJStrobeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PBJStrobeView.m; sourceTree = "<group>"; };
 		06156D1C1C38EA47007EE71E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -81,6 +103,25 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		060527971E3069DE005298D4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				060527B91E307024005298D4 /* CoreVideo.framework in Frameworks */,
+				060527B81E30701C005298D4 /* CoreMedia.framework in Frameworks */,
+				060527B71E307016005298D4 /* CoreGraphics.framework in Frameworks */,
+				060527B61E30700C005298D4 /* CoreImage.framework in Frameworks */,
+				060527B51E307006005298D4 /* QuartzCore.framework in Frameworks */,
+				060527B41E307000005298D4 /* AVFoundation.framework in Frameworks */,
+				060527B31E306FF9005298D4 /* ImageIO.framework in Frameworks */,
+				060527B21E306FEF005298D4 /* UIKit.framework in Frameworks */,
+				060527B11E306FE9005298D4 /* MobileCoreServices.framework in Frameworks */,
+				060527B01E306FE3005298D4 /* GLKit.framework in Frameworks */,
+				060527AF1E306FDD005298D4 /* OpenGLES.framework in Frameworks */,
+				060527AE1E306FCA005298D4 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0683D1BB179F2E1700EE66D6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -104,6 +145,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0605279C1E3069DE005298D4 /* Framework */ = {
+			isa = PBXGroup;
+			children = (
+				060527AC1E306E76005298D4 /* Vision.h */,
+				0605279E1E3069DE005298D4 /* Info.plist */,
+			);
+			name = Framework;
+			path = PBJVision;
+			sourceTree = "<group>";
+		};
+		060527A31E306AC3005298D4 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				0683D1C0179F2E1700EE66D6 /* Frameworks */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		06156D1A1C38E8BD007EE71E /* Core */ = {
 			isa = PBXGroup;
 			children = (
@@ -128,7 +187,8 @@
 			children = (
 				06B7D026179F2F0800F3F527 /* Vision */,
 				0683D1C7179F2E1700EE66D6 /* App */,
-				0683D1C0179F2E1700EE66D6 /* Frameworks */,
+				0605279C1E3069DE005298D4 /* Framework */,
+				060527A31E306AC3005298D4 /* Supporting Files */,
 				0683D1BF179F2E1700EE66D6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -137,6 +197,7 @@
 			isa = PBXGroup;
 			children = (
 				0683D1BE179F2E1700EE66D6 /* Vision.app */,
+				0605279B1E3069DE005298D4 /* PBJVision.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -218,7 +279,36 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		060527981E3069DE005298D4 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				060527AD1E306E76005298D4 /* Vision.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
+		0605279A1E3069DE005298D4 /* PBJVision */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 060527A21E3069DE005298D4 /* Build configuration list for PBXNativeTarget "PBJVision" */;
+			buildPhases = (
+				060527961E3069DE005298D4 /* Sources */,
+				060527971E3069DE005298D4 /* Frameworks */,
+				060527981E3069DE005298D4 /* Headers */,
+				060527991E3069DE005298D4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PBJVision;
+			productName = PBJVision;
+			productReference = 0605279B1E3069DE005298D4 /* PBJVision.app */;
+			productType = "com.apple.product-type.framework";
+		};
 		0683D1BD179F2E1700EE66D6 /* Vision */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0683D1F0179F2E1700EE66D6 /* Build configuration list for PBXNativeTarget "Vision" */;
@@ -246,6 +336,11 @@
 				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Patrick Piemonte";
 				TargetAttributes = {
+					0605279A1E3069DE005298D4 = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = WPFGSL5BLN;
+						ProvisioningStyle = Automatic;
+					};
 					0683D1BD179F2E1700EE66D6 = {
 						DevelopmentTeam = WPFGSL5BLN;
 					};
@@ -265,11 +360,21 @@
 			projectRoot = "";
 			targets = (
 				0683D1BD179F2E1700EE66D6 /* Vision */,
+				0605279A1E3069DE005298D4 /* PBJVision */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		060527991E3069DE005298D4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				060527A91E306AE9005298D4 /* Shader.fsh in Resources */,
+				060527A81E306AE6005298D4 /* Shader.vsh in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0683D1BC179F2E1700EE66D6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -285,6 +390,17 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		060527961E3069DE005298D4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				060527A71E306AE0005298D4 /* PBJGLProgram.m in Sources */,
+				060527A41E306AD6005298D4 /* PBJMediaWriter.m in Sources */,
+				060527A61E306ADC005298D4 /* PBJVision.m in Sources */,
+				060527A51E306AD8005298D4 /* PBJVisionUtilities.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0683D1BA179F2E1700EE66D6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -323,6 +439,99 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		060527A01E3069DE005298D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = WPFGSL5BLN;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREFIX_HEADER = "Vision/Vision-Prefix.pch";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = Framework/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.patrickpiemonte.PBJVision;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		060527A11E3069DE005298D4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = WPFGSL5BLN;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Vision/Vision-Prefix.pch";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = Framework/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.patrickpiemonte.PBJVision;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		0683D1EE179F2E1700EE66D6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 06B7D021179F2EDC00F3F527 /* Debug.xcconfig */;
@@ -366,6 +575,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		060527A21E3069DE005298D4 /* Build configuration list for PBXNativeTarget "PBJVision" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				060527A01E3069DE005298D4 /* Debug */,
+				060527A11E3069DE005298D4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		0683D1B9179F2E1700EE66D6 /* Build configuration list for PBXProject "Vision" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
