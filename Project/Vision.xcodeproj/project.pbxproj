@@ -333,7 +333,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = PBJ;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = "Patrick Piemonte";
 				TargetAttributes = {
 					0605279A1E3069DE005298D4 = {
