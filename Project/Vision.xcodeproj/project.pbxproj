@@ -57,7 +57,7 @@
 
 /* Begin PBXFileReference section */
 		0605279B1E3069DE005298D4 /* Vision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Vision.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		0605279E1E3069DE005298D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = Framework/Info.plist; sourceTree = "<group>"; };
+		0605279E1E3069DE005298D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Framework/Info.plist; sourceTree = "<group>"; };
 		060527AC1E306E76005298D4 /* Vision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vision.h; path = Framework/Vision.h; sourceTree = "<group>"; };
 		060F7B10179F45FA00E27091 /* PBJStrobeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBJStrobeView.h; sourceTree = "<group>"; };
 		060F7B11179F45FA00E27091 /* PBJStrobeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PBJStrobeView.m; sourceTree = "<group>"; };
@@ -145,16 +145,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0605279C1E3069DE005298D4 /* Framework */ = {
-			isa = PBXGroup;
-			children = (
-				060527AC1E306E76005298D4 /* Vision.h */,
-				0605279E1E3069DE005298D4 /* Info.plist */,
-			);
-			name = Framework;
-			path = PBJVision;
-			sourceTree = "<group>";
-		};
 		060527A31E306AC3005298D4 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -187,7 +177,7 @@
 			children = (
 				06B7D026179F2F0800F3F527 /* Vision */,
 				0683D1C7179F2E1700EE66D6 /* App */,
-				0605279C1E3069DE005298D4 /* Framework */,
+				06A8EE721E3077C500B2B22F /* Framework */,
 				060527A31E306AC3005298D4 /* Supporting Files */,
 				0683D1BF179F2E1700EE66D6 /* Products */,
 			);
@@ -251,6 +241,15 @@
 				0683D1CA179F2E1700EE66D6 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		06A8EE721E3077C500B2B22F /* Framework */ = {
+			isa = PBXGroup;
+			children = (
+				060527AC1E306E76005298D4 /* Vision.h */,
+				0605279E1E3069DE005298D4 /* Info.plist */,
+			);
+			name = Framework;
 			sourceTree = "<group>";
 		};
 		06B7D026179F2F0800F3F527 /* Vision */ = {
