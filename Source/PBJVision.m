@@ -1732,7 +1732,7 @@ typedef void (^PBJVisionBlock)();
     if ([AVCapturePhotoOutput class]) {
         AVCapturePhotoSettings *settings = [AVCapturePhotoSettings photoSettingsWithFormat:@{AVVideoCodecKey : AVVideoCodecJPEG}];
         settings.highResolutionPhotoEnabled = YES;
-        settings.flashMode = _currentDevice.flashMode;
+        settings.flashMode = (AVCaptureFlashMode)self.flashMode;
         
         [_captureOutputPhoto capturePhotoWithSettings:settings delegate:self];
     }
