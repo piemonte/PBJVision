@@ -433,6 +433,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         [self setMirroringMode:_mirroringMode];
         
         [self _enqueueBlockOnMainQueue:didChangeBlock];
+        [self setFlashMode:self.flashMode forceUpdate:YES];
     }];
 }
 
@@ -528,9 +529,12 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     return (_currentDevice && [_currentDevice hasFlash]);
 }
 
-- (void)setFlashMode:(PBJFlashMode)flashMode
-{
-    BOOL shouldChangeFlashMode = (_flashMode != flashMode);
+- (void)setFlashMode:(PBJFlashMode)flashMode {
+    [self setFlashMode:flashMode forceUpdate:NO];
+}
+
+- (void)setFlashMode:(PBJFlashMode)flashMode forceUpdate:(BOOL)forceUpdate {
+    BOOL shouldChangeFlashMode = (_flashMode != flashMode) || forceUpdate ;
     if (![_currentDevice hasFlash] || !shouldChangeFlashMode)
         return;
 
