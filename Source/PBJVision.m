@@ -1558,9 +1558,6 @@ typedef void (^PBJVisionBlock)();
     if ([_delegate respondsToSelector:@selector(visionWillCapturePhoto:)]) {
         [_delegate visionWillCapturePhoto:self];
     }
-    if (_autoFreezePreviewDuringCapture) {
-        [self freezePreview];
-    }
 }
 
 - (void)_didCapturePhoto
@@ -1569,6 +1566,9 @@ typedef void (^PBJVisionBlock)();
         [_delegate visionDidCapturePhoto:self];
     }
     DLog(@"did capture photo");
+    if (_autoFreezePreviewDuringCapture) {
+        [self freezePreview];
+    }
 }
 
 - (void)_capturePhotoFromSampleBuffer:(CMSampleBufferRef)sampleBuffer
