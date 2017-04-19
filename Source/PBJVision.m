@@ -526,7 +526,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 - (BOOL)isFlashAvailable
 {
-    return (_currentDevice && [_currentDevice hasFlash]);
+    return (_currentDevice && [_currentDevice hasFlash] && [_currentDevice isFlashAvailable]);
 }
 
 - (void)setFlashMode:(PBJFlashMode)flashMode {
@@ -1736,7 +1736,7 @@ typedef void (^PBJVisionBlock)();
     if ([AVCapturePhotoOutput class]) {
         AVCapturePhotoSettings *settings = [AVCapturePhotoSettings photoSettingsWithFormat:@{AVVideoCodecKey : AVVideoCodecJPEG}];
         settings.highResolutionPhotoEnabled = YES;
-        settings.flashMode = (AVCaptureFlashMode)self.flashMode;
+        settings.flashMode = [self isFlashAvailable] ? (AVCaptureFlashMode)self.flashMode : AVCaptureFlashModeOff;
         
         [_captureOutputPhoto capturePhotoWithSettings:settings delegate:self];
     }
