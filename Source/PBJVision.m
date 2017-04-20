@@ -546,9 +546,16 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         switch (_cameraMode) {
           case PBJCameraModePhoto:
           {
-            if ([_currentDevice isFlashModeSupported:(AVCaptureFlashMode)_flashMode]) {
-                [_currentDevice setFlashMode:(AVCaptureFlashMode)_flashMode];
-            }
+              if(!_isTorchMode){
+                  if ([_currentDevice isFlashModeSupported:(AVCaptureFlashMode)_flashMode]) {
+                      [_currentDevice setFlashMode:(AVCaptureFlashMode)_flashMode];
+                  }
+              }else {
+                  if ([_currentDevice isTorchModeSupported:(AVCaptureTorchMode)_flashMode]) {
+                      [_currentDevice setTorchMode:(AVCaptureTorchMode)_flashMode];
+                  }
+              }
+
             break;
           }
           case PBJCameraModeVideo:
@@ -1069,6 +1076,11 @@ typedef void (^PBJVisionBlock)();
                 if ([_captureSession canAddOutput:cameraOutput]) {
                     [_captureSession addOutput:cameraOutput];
                     newCaptureOutput = cameraOutput;
+                }
+                if(self.frameDelegate != nil) {
+                    if ([_captureSession canAddOutput:_captureOutputVideo]) {
+                        [_captureSession addOutput:_captureOutputVideo];
+                    }
                 }
                 break;
             }
@@ -2194,6 +2206,12 @@ previewPhotoSampleBuffer:(CMSampleBufferRef)previewPhotoSampleBuffer
         DLog(@"sample buffer data is not ready");
         CFRelease(sampleBuffer);
         return;
+    }
+
+    if(self.frameDelegate != nil) {
+        if ([self.frameDelegate respondsToSelector:@selector(vision:didCaptureFrameSampleBuffer:)]) {
+            [self.frameDelegate vision:self didCaptureFrameSampleBuffer:sampleBuffer];
+        }
     }
 
     if (!_flags.recording || _flags.paused) {

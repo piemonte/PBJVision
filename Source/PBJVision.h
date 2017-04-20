@@ -133,12 +133,13 @@ static CGFloat const PBJVideoBitRate960x540 = 3750000 * 8;
 static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 @class EAGLContext;
-@protocol PBJVisionDelegate;
+@protocol PBJVisionDelegate, PBJFrameDelegate;
 @interface PBJVision : NSObject
 
 + (PBJVision *)sharedInstance;
 
 @property (nonatomic, weak, nullable) id<PBJVisionDelegate> delegate;
+@property (nonatomic, weak, nullable) id<PBJFrameDelegate> frameDelegate;
 
 // session
 
@@ -156,6 +157,7 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 - (BOOL)isCameraDeviceAvailable:(PBJCameraDevice)cameraDevice;
 
 @property (nonatomic) PBJFlashMode flashMode; // flash and torch
+@property (nonatomic) BOOL isTorchMode; // torch mode
 @property (nonatomic, readonly, getter=isFlashAvailable) BOOL flashAvailable;
 
 @property (nonatomic) PBJMirroringMode mirroringMode;
@@ -315,6 +317,17 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 
 - (void)vision:(PBJVision *)vision didCaptureVideoSampleBuffer:(CMSampleBufferRef)sampleBuffer;
 - (void)vision:(PBJVision *)vision didCaptureAudioSample:(CMSampleBufferRef)sampleBuffer;
+
+NS_ASSUME_NONNULL_END
+
+@end
+
+@protocol PBJFrameDelegate <NSObject>
+@optional
+
+NS_ASSUME_NONNULL_BEGIN
+
+- (void)vision:(PBJVision *)vision didCaptureFrameSampleBuffer:(CMSampleBufferRef)sampleBuffer;
 
 NS_ASSUME_NONNULL_END
 
