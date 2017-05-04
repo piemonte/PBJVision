@@ -232,6 +232,9 @@ static CGFloat const PBJVideoBitRate1280x750 = 5000000 * 8;
 @property (nonatomic, readonly) Float64 capturedAudioSeconds;
 @property (nonatomic, readonly) Float64 capturedVideoSeconds;
 
+@property (nonatomic, assign) CGFloat videoZoomFactor;
+@property (nonatomic, readonly) CGPoint focusPoint;
+
 - (void)startVideoCapture;
 - (void)pauseVideoCapture;
 - (void)resumeVideoCapture;
