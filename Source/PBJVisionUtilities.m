@@ -120,9 +120,10 @@
                     // set orientation
                     CFNumberRef orientationProperty = CFDictionaryGetValue(properties, kCGImagePropertyOrientation);
                     if (orientationProperty) {
-                        NSInteger exifOrientation = 1;
+                        int exifOrientation = 1;
                         CFNumberGetValue(orientationProperty, kCFNumberIntType, &exifOrientation);
-                        imageOrientation = [PBJVisionUtilities uiimageOrientationFromExifOrientation:exifOrientation];
+                        NSInteger nsExifOrientation = (NSInteger)exifOrientation;
+                        imageOrientation = [PBJVisionUtilities uiimageOrientationFromExifOrientation:nsExifOrientation];
                     }
                     
                     CFRelease(properties);
