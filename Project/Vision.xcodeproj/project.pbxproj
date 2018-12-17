@@ -332,7 +332,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = PBJ;
-				LastUpgradeCheck = 1000;
+				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "Patrick Piemonte";
 				TargetAttributes = {
 					0605279A1E3069DE005298D4 = {
