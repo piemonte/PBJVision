@@ -6,6 +6,7 @@
 
 [![Build Status](https://api.travis-ci.org/piemonte/PBJVision.svg?branch=master)](https://travis-ci.org/piemonte/PBJVision)
 [![Pod Version](https://img.shields.io/cocoapods/v/PBJVision.svg?style=flat)](http://cocoadocs.org/docsets/PBJVision/)
+[![GitHub license](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://github.com/NextLevel/NextLevel/blob/master/LICENSE) [![Downloads](https://img.shields.io/cocoapods/dt/PBJVision.svg?style=flat)](http://cocoapods.org/pods/PBJVision)
 
 - Looking for a Swift version? Check out [Next Level](https://github.com/NextLevel/NextLevel).
 - Looking for a video player? Check out [Player (Swift)](https://github.com/piemonte/player) and [PBJVideoPlayer (obj-c)](https://github.com/piemonte/PBJVideoPlayer).
