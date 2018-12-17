@@ -95,8 +95,9 @@
 - (void)start
 {
     _strobeViewRecord.alpha = 1;
+    __block __weak __typeof(self) me = self;
     [UIView animateWithDuration:0.1f delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-        _strobeViewRecordIdle.transform = CGAffineTransformMakeScale(0, 0);
+        me._strobeViewRecordIdle.transform = CGAffineTransformMakeScale(0, 0);
     } completion:^(BOOL finished) {
     }];
 }
@@ -106,8 +107,9 @@
     [_strobeViewRecord.layer removeAllAnimations];
 
     _strobeViewRecord.alpha = 0;
+    __block __weak __typeof(self) me = self;
     [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-        _strobeViewRecordIdle.transform = CGAffineTransformMakeScale(0.7f, 0.7f);
+        me._strobeViewRecordIdle.transform = CGAffineTransformMakeScale(0.7f, 0.7f);
     } completion:^(BOOL finished) {
     }];
 }

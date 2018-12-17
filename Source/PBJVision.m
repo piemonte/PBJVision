@@ -445,9 +445,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 - (void)setCaptureSessionPreset:(NSString *)captureSessionPreset
 {
     _captureSessionPreset = captureSessionPreset;
-    if ([_captureSession canSetSessionPreset:captureSessionPreset]){
+    if ([_captureSession canSetSessionPreset:captureSessionPreset]) {
+        __block __weak __typeof(self) me = self;
         [self _commitBlock:^{
-            [_captureSession setSessionPreset:captureSessionPreset];
+            __typeof(self) strongMe = me;
+            [strongMe->_captureSession setSessionPreset:captureSessionPreset];
         }];
     }
 }
@@ -707,7 +709,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         _captureSessionDispatchQueue = dispatch_queue_create("PBJVisionSession", DISPATCH_QUEUE_SERIAL); // protects session
         _captureCaptureDispatchQueue = dispatch_queue_create("PBJVisionCapture", DISPATCH_QUEUE_SERIAL); // protects capture
         
-        _previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:nil];
+        _previewLayer = [[AVCaptureVideoPreviewLayer alloc] init];
         
         _maximumCaptureDuration = kCMTimeInvalid;
 
@@ -737,7 +739,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 #pragma mark - queue helper methods
 
-typedef void (^PBJVisionBlock)();
+typedef void (^PBJVisionBlock)(void);
 
 - (void)_enqueueBlockOnCaptureSessionQueue:(PBJVisionBlock)block
 {
@@ -1294,16 +1296,18 @@ typedef void (^PBJVisionBlock)();
         }
     }
 
-    if ([_delegate respondsToSelector:@selector(visionDidStopFocus:)])
+    if ([_delegate respondsToSelector:@selector(visionDidStopFocus:)]) {
         [_delegate visionDidStopFocus:self];
-//    DLog(@"focus ended");
+    }
+    //    DLog(@"focus ended");
 }
 
 - (void)_exposureChangeStarted
 {
     //    DLog(@"exposure change started");
-    if ([_delegate respondsToSelector:@selector(visionWillChangeExposure:)])
+    if ([_delegate respondsToSelector:@selector(visionWillChangeExposure:)]) {
         [_delegate visionWillChangeExposure:self];
+    }
 }
 
 - (void)_exposureChangeEnded
@@ -1326,9 +1330,10 @@ typedef void (^PBJVisionBlock)();
 
     }
 
-    if ([_delegate respondsToSelector:@selector(visionDidChangeExposure:)])
+    if ([_delegate respondsToSelector:@selector(visionDidChangeExposure:)]) {
         [_delegate visionDidChangeExposure:self];
     //    DLog(@"exposure change ended");
+    }
 }
 
 - (void)_whiteBalanceChangeStarted
@@ -2498,32 +2503,38 @@ previewPhotoSampleBuffer:(CMSampleBufferRef)previewPhotoSampleBuffer
 {
     if ( context == (__bridge void *)PBJVisionFocusObserverContext ) {
     
-        BOOL isFocusing = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
-        if (isFocusing) {
-            [self _focusStarted];
-        } else {
-            [self _focusEnded];
-        }
-    
+        [self _enqueueBlockOnMainQueue:^{
+            BOOL isFocusing = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
+            if (isFocusing) {
+                [self _focusStarted];
+            } else {
+                [self _focusEnded];
+            }
+        }];
+        
     }
     else if ( context == (__bridge void *)PBJVisionExposureObserverContext ) {
         
-        BOOL isChangingExposure = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
-        if (isChangingExposure) {
-            [self _exposureChangeStarted];
-        } else {
-            [self _exposureChangeEnded];
-        }
+        [self _enqueueBlockOnMainQueue:^{
+            BOOL isChangingExposure = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
+            if (isChangingExposure) {
+                [self _exposureChangeStarted];
+            } else {
+                [self _exposureChangeEnded];
+            }
+        }];
         
     }
     else if ( context == (__bridge void *)PBJVisionWhiteBalanceObserverContext ) {
-        
-        BOOL isWhiteBalanceChanging = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
-        if (isWhiteBalanceChanging) {
-            [self _whiteBalanceChangeStarted];
-        } else {
-            [self _whiteBalanceChangeEnded];
-        }
+
+        [self _enqueueBlockOnMainQueue:^{
+            BOOL isWhiteBalanceChanging = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
+            if (isWhiteBalanceChanging) {
+                [self _whiteBalanceChangeStarted];
+            } else {
+                [self _whiteBalanceChangeEnded];
+            }
+        }];
         
     }
     else if ( context == (__bridge void *)PBJVisionFlashAvailabilityObserverContext ||
@@ -2531,8 +2542,9 @@ previewPhotoSampleBuffer:(CMSampleBufferRef)previewPhotoSampleBuffer
         
         //        DLog(@"flash/torch availability did change");
         [self _enqueueBlockOnMainQueue:^{
-            if ([_delegate respondsToSelector:@selector(visionDidChangeFlashAvailablility:)])
+            if ([_delegate respondsToSelector:@selector(visionDidChangeFlashAvailablility:)]) {
                 [_delegate visionDidChangeFlashAvailablility:self];
+            }
         }];
         
     }
@@ -2541,8 +2553,9 @@ previewPhotoSampleBuffer:(CMSampleBufferRef)previewPhotoSampleBuffer
         
         //        DLog(@"flash/torch mode did change");
         [self _enqueueBlockOnMainQueue:^{
-            if ([_delegate respondsToSelector:@selector(visionDidChangeFlashMode:)])
+            if ([_delegate respondsToSelector:@selector(visionDidChangeFlashMode:)]) {
                 [_delegate visionDidChangeFlashMode:self];
+            }
         }];
         
     }
