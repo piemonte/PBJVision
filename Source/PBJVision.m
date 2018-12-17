@@ -105,7 +105,6 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     AVCaptureDeviceInput *_captureDeviceInputAudio;
 
     AVCapturePhotoOutput *_captureOutputPhoto;
-    AVCaptureStillImageOutput *_captureOutputImage;
     AVCaptureAudioDataOutput *_captureOutputAudio;
     AVCaptureVideoDataOutput *_captureOutputVideo;
 
@@ -830,13 +829,8 @@ typedef void (^PBJVisionBlock)(void);
     }
     
     // capture device ouputs
-    if ([AVCapturePhotoOutput class]) {
-        _captureOutputPhoto = [[AVCapturePhotoOutput alloc] init];
-        _captureOutputPhoto.highResolutionCaptureEnabled = YES;
-    }
-    else {
-        _captureOutputImage = [[AVCaptureStillImageOutput alloc] init];
-    }
+    _captureOutputPhoto = [[AVCapturePhotoOutput alloc] init];
+    _captureOutputPhoto.highResolutionCaptureEnabled = YES;
     
     if (_cameraMode != PBJCameraModePhoto && _flags.audioCaptureEnabled) {
         _captureOutputAudio = [[AVCaptureAudioDataOutput alloc] init];
@@ -875,11 +869,6 @@ typedef void (^PBJVisionBlock)(void);
     [self addObserver:self forKeyPath:@"currentDevice.torchMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchModeObserverContext];
     [self addObserver:self forKeyPath:@"currentDevice.flashAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFlashAvailabilityObserverContext];
     [self addObserver:self forKeyPath:@"currentDevice.torchAvailable" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionTorchAvailabilityObserverContext];
-
-    // KVO is only used to monitor focus and capture events
-    if (![AVCapturePhotoOutput class]) {
-        [_captureOutputImage addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew context:(__bridge void *)(PBJVisionCaptureStillImageIsCapturingStillImageObserverContext)];
-    }
     
     DLog(@"camera setup");
 }
@@ -898,11 +887,6 @@ typedef void (^PBJVisionBlock)(void);
     [self removeObserver:self forKeyPath:@"currentDevice.torchMode"];
     [self removeObserver:self forKeyPath:@"currentDevice.flashAvailable"];
     [self removeObserver:self forKeyPath:@"currentDevice.torchAvailable"];
-    
-    // capture events KVO notifications
-    if (![AVCapturePhotoOutput class]) {
-        [_captureOutputImage removeObserver:self forKeyPath:@"capturingStillImage"];
-    }
 
     // remove notification observers (we don't want to just 'remove all' because we're also observing background notifications
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
@@ -921,7 +905,6 @@ typedef void (^PBJVisionBlock)(void);
     [notificationCenter removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:nil];
 
     _captureOutputPhoto = nil;
-    _captureOutputImage = nil;
     _captureOutputAudio = nil;
     _captureOutputVideo = nil;
     
@@ -961,7 +944,7 @@ typedef void (^PBJVisionBlock)(void);
                               ((_currentDevice == _captureDeviceFront) && (_cameraDevice != PBJCameraDeviceFront)) ||
                               ((_currentDevice == _captureDeviceBack) && (_cameraDevice != PBJCameraDeviceBack));
     
-    AVCaptureOutput *cameraOutput = [AVCapturePhotoOutput class] ? _captureOutputPhoto : _captureOutputImage;
+    AVCaptureOutput *cameraOutput = _captureOutputPhoto;
     BOOL shouldSwitchMode = (_currentOutput == nil) ||
                             ((_currentOutput == cameraOutput) && (_cameraMode != PBJCameraModePhoto)) ||
                             ((_currentOutput == _captureOutputVideo) && (_cameraMode != PBJCameraModeVideo));
@@ -1040,12 +1023,7 @@ typedef void (^PBJVisionBlock)(void);
         
         [_captureSession removeOutput:_captureOutputVideo];
         
-        if ([AVCapturePhotoOutput class]) {
-            [_captureSession removeOutput:_captureOutputPhoto];
-        }
-        else {
-            [_captureSession removeOutput:_captureOutputImage];
-        }
+        [_captureSession removeOutput:_captureOutputPhoto];
         
         switch (_cameraMode) {
             case PBJCameraModeVideo:
@@ -1154,13 +1132,7 @@ typedef void (^PBJVisionBlock)(void);
     
         // specify photo preset
         sessionPreset = _captureSessionPreset;
-    
-        // setup photo settings
-        if (![AVCapturePhotoOutput class]) {
-            NSDictionary *photoSettings = @{AVVideoCodecKey : AVVideoCodecJPEG};
-            [_captureOutputImage setOutputSettings:photoSettings];
-        }
-        
+            
         // setup photo device configuration
         NSError *error = nil;
         if ([newCaptureDevice lockForConfiguration:&error]) {
@@ -1744,13 +1716,6 @@ typedef void (^PBJVisionBlock)(void);
         settings.flashMode = [self isFlashAvailable] ? (AVCaptureFlashMode)self.flashMode : AVCaptureFlashModeOff;
         
         [_captureOutputPhoto capturePhotoWithSettings:settings delegate:self];
-    }
-    else {
-        [_captureOutputImage captureStillImageAsynchronouslyFromConnection:connection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
-            
-            [self _processImageWithPhotoSampleBuffer:imageDataSampleBuffer previewSampleBuffer:nil error:error];
-        }];
-
     }
 }
 

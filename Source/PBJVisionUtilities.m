@@ -42,13 +42,14 @@
     return nil;
 }
 
++ (AVCaptureDevice *)videoDevice
+{
+    return [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+}
+
 + (AVCaptureDevice *)audioDevice
 {
-    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeAudio];
-    if ([devices count] > 0)
-        return [devices objectAtIndex:0];
-    
-    return nil;
+    return [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
 }
 
 + (AVCaptureConnection *)connectionWithMediaType:(NSString *)mediaType fromConnections:(NSArray *)connections
@@ -60,7 +61,6 @@
             }
         }
     }
-    
     return nil;
 }
 

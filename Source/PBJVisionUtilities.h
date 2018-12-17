@@ -31,6 +31,7 @@
 // devices and connections
 
 + (AVCaptureDevice *)captureDeviceForPosition:(AVCaptureDevicePosition)position;
++ (AVCaptureDevice *)videoDevice;
 + (AVCaptureDevice *)audioDevice;
 + (AVCaptureConnection *)connectionWithMediaType:(NSString *)mediaType fromConnections:(NSArray *)connections;
 
