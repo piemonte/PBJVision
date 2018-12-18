@@ -547,17 +547,11 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         switch (_cameraMode) {
           case PBJCameraModePhoto:
           {
-            if ([_currentDevice isFlashModeSupported:(AVCaptureFlashMode)_flashMode]) {
-                [_currentDevice setFlashMode:(AVCaptureFlashMode)_flashMode];
-            }
+            // set at capture
             break;
           }
           case PBJCameraModeVideo:
           {
-            if ([_currentDevice isFlashModeSupported:(AVCaptureFlashMode)_flashMode]) {
-                [_currentDevice setFlashMode:AVCaptureFlashModeOff];
-            }
-            
             if ([_currentDevice isTorchModeSupported:(AVCaptureTorchMode)_flashMode]) {
                 [_currentDevice setTorchMode:(AVCaptureTorchMode)_flashMode];
             }
@@ -636,29 +630,20 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
 
 - (NSInteger)videoFrameRate
 {
-    if (!_currentDevice)
+    if (!_currentDevice) {
         return 0;
+    }
 
     return _currentDevice.activeVideoMaxFrameDuration.timescale;
 }
 
 - (BOOL)supportsVideoFrameRate:(NSInteger)videoFrameRate
 {
-    AVCaptureDevice *videoDevice = nil;
-    NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-    NSPredicate *predicate = nil;
-    if (self.cameraDevice == PBJCameraDeviceBack) {
-        predicate = [NSPredicate predicateWithFormat:@"position == %i", AVCaptureDevicePositionBack];
-    } else {
-        predicate = [NSPredicate predicateWithFormat:@"position == %i", AVCaptureDevicePositionFront];
-    }
-    NSArray *filteredDevices = [videoDevices filteredArrayUsingPredicate:predicate];
-    if (filteredDevices.count > 0) {
-        videoDevice = filteredDevices.firstObject;
-    } else {
+    if (!_currentDevice) {
         return NO;
     }
-    NSArray *formats = [videoDevice formats];
+    
+    NSArray *formats = [_currentDevice formats];
     for (AVCaptureDeviceFormat *format in formats) {
         NSArray *videoSupportedFrameRateRanges = [format videoSupportedFrameRateRanges];
         for (AVFrameRateRange *frameRateRange in videoSupportedFrameRateRanges) {
@@ -1661,14 +1646,7 @@ typedef void (^PBJVisionBlock)(void);
         DLog(@"failed to generate metadata for photo");
     }
     
-    NSData *jpegData = nil;
-    if ([AVCapturePhotoOutput class]) {
-        jpegData = [AVCapturePhotoOutput JPEGPhotoDataRepresentationForJPEGSampleBuffer:photoSampleBuffer previewPhotoSampleBuffer:previewSampleBuffer];
-    }
-    else {
-        jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:photoSampleBuffer];
-    }
-    
+    NSData *jpegData = [AVCapturePhotoOutput JPEGPhotoDataRepresentationForJPEGSampleBuffer:photoSampleBuffer previewPhotoSampleBuffer:previewSampleBuffer];
     if (jpegData) {
         // add JPEG
         photoDict[PBJVisionPhotoJPEGKey] = jpegData;
@@ -1710,20 +1688,18 @@ typedef void (^PBJVisionBlock)(void);
     AVCaptureConnection *connection = [_currentOutput connectionWithMediaType:AVMediaTypeVideo];
     [self _setOrientationForConnection:connection];
     
-    if ([AVCapturePhotoOutput class]) {
-        AVCapturePhotoSettings *settings = [AVCapturePhotoSettings photoSettingsWithFormat:@{AVVideoCodecKey : AVVideoCodecJPEG}];
-        settings.highResolutionPhotoEnabled = YES;
-        settings.flashMode = [self isFlashAvailable] ? (AVCaptureFlashMode)self.flashMode : AVCaptureFlashModeOff;
-        
-        [_captureOutputPhoto capturePhotoWithSettings:settings delegate:self];
-    }
+    AVCapturePhotoSettings *settings = [AVCapturePhotoSettings photoSettingsWithFormat:@{AVVideoCodecKey : AVVideoCodecJPEG}];
+    settings.highResolutionPhotoEnabled = YES;
+    settings.flashMode = [self isFlashAvailable] ? (AVCaptureFlashMode)self.flashMode : AVCaptureFlashModeOff;
+    
+    [_captureOutputPhoto capturePhotoWithSettings:settings delegate:self];
 }
 
 #pragma mark - video
 
 - (BOOL)supportsVideoCapture
 {
-    return ([[AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo] count] > 0);
+    return [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo] != NULL;
 }
 
 - (BOOL)canCaptureVideo
