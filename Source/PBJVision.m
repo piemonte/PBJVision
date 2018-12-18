@@ -802,8 +802,8 @@ typedef void (^PBJVisionBlock)(void);
     _captureSession.automaticallyConfiguresApplicationAudioSession = _automaticallyConfiguresApplicationAudioSession;
 
     // capture devices
-    _captureDeviceFront = [PBJVisionUtilities captureDeviceForPosition:AVCaptureDevicePositionFront];
-    _captureDeviceBack = [PBJVisionUtilities captureDeviceForPosition:AVCaptureDevicePositionBack];
+    _captureDeviceFront = [PBJVisionUtilities primaryVideoDeviceForPosition:AVCaptureDevicePositionFront];
+    _captureDeviceBack = [PBJVisionUtilities primaryVideoDeviceForPosition:AVCaptureDevicePositionBack];
 
     // capture device inputs
     NSError *error = nil;

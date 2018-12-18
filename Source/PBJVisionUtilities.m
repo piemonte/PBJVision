@@ -30,15 +30,15 @@
 
 @implementation PBJVisionUtilities
 
-+ (AVCaptureDevice *)captureDeviceForPosition:(AVCaptureDevicePosition)position
++ (AVCaptureDevice *)primaryVideoDeviceForPosition:(AVCaptureDevicePosition)position
 {
-    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-    for (AVCaptureDevice *device in devices) {
+    NSArray *deviceTypes = @[AVCaptureDeviceTypeBuiltInWideAngleCamera];
+    AVCaptureDeviceDiscoverySession *discoverySession = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:deviceTypes mediaType:AVMediaTypeVideo position:position];
+    for (AVCaptureDevice *device in discoverySession.devices) {
         if ([device position] == position) {
             return device;
         }
     }
-    
     return nil;
 }
 
