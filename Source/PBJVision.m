@@ -48,7 +48,7 @@ static uint64_t const PBJVisionRequiredMinimumDiskSpaceInBytes = 49999872; // ~ 
 static CGFloat const PBJVisionThumbnailWidth = 160.0f;
 
 // KVO contexts
-
+static NSString * const PBJVisionFocusModeObserverContext = @"PBJVisionFocusModeObserverContext";
 static NSString * const PBJVisionFocusObserverContext = @"PBJVisionFocusObserverContext";
 static NSString * const PBJVisionExposureObserverContext = @"PBJVisionExposureObserverContext";
 static NSString * const PBJVisionWhiteBalanceObserverContext = @"PBJVisionWhiteBalanceObserverContext";
@@ -124,6 +124,7 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
     BOOL _autoFreezePreviewDuringCapture;
     BOOL _usesApplicationAudioSession;
     BOOL _automaticallyConfiguresApplicationAudioSession;
+    BOOL _locked;
 
     PBJFocusMode _focusMode;
     PBJExposureMode _exposureMode;
@@ -485,7 +486,8 @@ typedef NS_ENUM(GLint, PBJVisionUniformLocationTypes)
         return;
     
     _focusMode = focusMode;
-    
+    _locked = focusMode == PBJFocusModeLocked;
+
     NSError *error = nil;
     if (_currentDevice && [_currentDevice lockForConfiguration:&error]) {
         [_currentDevice setFocusMode:(AVCaptureFocusMode)focusMode];
@@ -847,6 +849,7 @@ typedef void (^PBJVisionBlock)(void);
     [notificationCenter addObserver:self selector:@selector(_deviceSubjectAreaDidChange:) name:AVCaptureDeviceSubjectAreaDidChangeNotification object:nil];
 
     // current device KVO notifications
+    [self addObserver:self forKeyPath:@"currentDevice.focusMode" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusModeObserverContext];
     [self addObserver:self forKeyPath:@"currentDevice.adjustingFocus" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionFocusObserverContext];
     [self addObserver:self forKeyPath:@"currentDevice.adjustingExposure" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionExposureObserverContext];
     [self addObserver:self forKeyPath:@"currentDevice.adjustingWhiteBalance" options:NSKeyValueObservingOptionNew context:(__bridge void *)PBJVisionWhiteBalanceObserverContext];
@@ -865,6 +868,7 @@ typedef void (^PBJVisionBlock)(void);
         return;
     
     // current device KVO notifications
+    [self removeObserver:self forKeyPath:@"currentDevice.focusMode"];
     [self removeObserver:self forKeyPath:@"currentDevice.adjustingFocus"];
     [self removeObserver:self forKeyPath:@"currentDevice.adjustingExposure"];
     [self removeObserver:self forKeyPath:@"currentDevice.adjustingWhiteBalance"];
@@ -1363,7 +1367,7 @@ typedef void (^PBJVisionBlock)(void);
     if ([_delegate respondsToSelector:@selector(visionWillStartFocus:)])
         [_delegate visionWillStartFocus:self];
 
-    CGPoint focusPoint = CGPointMake(0.5f, 0.5f);
+    CGPoint focusPoint = _locked ? _currentDevice.focusPointOfInterest : CGPointMake(0.5f, 0.5f);
     [self focusAtAdjustedPointOfInterest:focusPoint];
 }
 
@@ -2442,7 +2446,11 @@ previewPhotoSampleBuffer:(CMSampleBufferRef)previewPhotoSampleBuffer
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if ( context == (__bridge void *)PBJVisionFocusObserverContext ) {
+    if ( context == (__bridge void *)PBJVisionFocusModeObserverContext ) {
+        PBJFocusMode newMode = (PBJFocusMode)[[change objectForKey:NSKeyValueChangeNewKey] integerValue];
+        _focusMode = newMode;
+
+    } else if ( context == (__bridge void *)PBJVisionFocusObserverContext ) {
     
         [self _enqueueBlockOnMainQueue:^{
             BOOL isFocusing = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
@@ -2725,6 +2733,25 @@ previewPhotoSampleBuffer:(CMSampleBufferRef)previewPhotoSampleBuffer
     
     if ([EAGLContext currentContext] == _context) {
         [EAGLContext setCurrentContext:nil];
+    }
+}
+
+- (CGFloat)videoZoomFactor {
+    return _currentDevice.videoZoomFactor;
+}
+
+- (CGPoint)focusPoint {
+    return _currentDevice.focusPointOfInterest;
+}
+
+- (void)setVideoZoomFactor:(CGFloat)videoZoomFactor {
+    NSError *error = nil;
+    if ([_currentDevice lockForConfiguration:&error]) {
+        CGFloat factor = MAX(1, MIN(videoZoomFactor, _currentDevice.activeFormat.videoMaxZoomFactor));
+        _currentDevice.videoZoomFactor = factor;
+        [_currentDevice unlockForConfiguration];
+    } else {
+        NSLog(@"error: %@", error);
     }
 }
 
