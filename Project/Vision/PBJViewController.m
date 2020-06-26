@@ -313,8 +313,8 @@ static NSString * const PBJViewControllerPhotoAlbum = @"PBJVision";
     [UIApplication sharedApplication].idleTimerDisabled = YES;
 
     [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-        _instructionLabel.alpha = 0;
-        _instructionLabel.transform = CGAffineTransformMakeTranslation(0, 10.0f);
+        self->_instructionLabel.alpha = 0;
+        self->_instructionLabel.transform = CGAffineTransformMakeTranslation(0, 10.0f);
     } completion:^(BOOL finished) {
     }];
     [[PBJVision sharedInstance] startVideoCapture];
@@ -323,8 +323,8 @@ static NSString * const PBJViewControllerPhotoAlbum = @"PBJVision";
 - (void)_pauseCapture
 {
     [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-        _instructionLabel.alpha = 1;
-        _instructionLabel.transform = CGAffineTransformIdentity;
+        self->_instructionLabel.alpha = 1;
+        self->_instructionLabel.transform = CGAffineTransformIdentity;
     } completion:^(BOOL finished) {
     }];
 
@@ -335,8 +335,8 @@ static NSString * const PBJViewControllerPhotoAlbum = @"PBJVision";
 - (void)_resumeCapture
 {
     [UIView animateWithDuration:0.2f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-        _instructionLabel.alpha = 0;
-        _instructionLabel.transform = CGAffineTransformMakeTranslation(0, 10.0f);
+        self->_instructionLabel.alpha = 0;
+        self->_instructionLabel.transform = CGAffineTransformMakeTranslation(0, 10.0f);
     } completion:^(BOOL finished) {
     }];
     
@@ -404,12 +404,12 @@ static NSString * const PBJViewControllerPhotoAlbum = @"PBJVision";
     }
     
     [UIView animateWithDuration:0.15f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-        _instructionLabel.alpha = 0;
+        self->_instructionLabel.alpha = 0;
     } completion:^(BOOL finished) {
-        _instructionLabel.text = _focusButton.selected ? NSLocalizedString(@"Touch to focus", @"Touch to focus") :
+        self->_instructionLabel.text = self->_focusButton.selected ? NSLocalizedString(@"Touch to focus", @"Touch to focus") :
                                                          NSLocalizedString(@"Touch and hold to record", @"Touch and hold to record");
         [UIView animateWithDuration:0.15f delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-            _instructionLabel.alpha = 1;
+            self->_instructionLabel.alpha = 1;
         } completion:^(BOOL finished1) {
         }];
     }];
@@ -683,7 +683,7 @@ static NSString * const PBJViewControllerPhotoAlbum = @"PBJVision";
 
     _currentVideo = videoDict;
     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-        NSString *videoPath = [_currentVideo  objectForKey:PBJVisionVideoPathKey];
+        NSString *videoPath = [self->_currentVideo  objectForKey:PBJVisionVideoPathKey];
         [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:[NSURL URLWithString:videoPath]];
     } completionHandler:^(BOOL success, NSError * _Nullable error1) {
         if (success) {
