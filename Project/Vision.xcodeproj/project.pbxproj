@@ -332,7 +332,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = PBJ;
-				LastUpgradeCheck = 1010;
+				LastUpgradeCheck = 1150;
 				ORGANIZATIONNAME = "Patrick Piemonte";
 				TargetAttributes = {
 					0605279A1E3069DE005298D4 = {
@@ -347,7 +347,7 @@
 			};
 			buildConfigurationList = 0683D1B9179F2E1700EE66D6 /* Build configuration list for PBXProject "Vision" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
