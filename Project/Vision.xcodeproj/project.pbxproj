@@ -29,6 +29,7 @@
 		060F7B12179F45FA00E27091 /* PBJStrobeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 060F7B11179F45FA00E27091 /* PBJStrobeView.m */; };
 		06156D1D1C38EA47007EE71E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 06156D1B1C38EA47007EE71E /* LaunchScreen.storyboard */; };
 		061858F01846B06400DEC416 /* PBJFocusView.m in Sources */ = {isa = PBXBuildFile; fileRef = 061858EF1846B06400DEC416 /* PBJFocusView.m */; };
+		06228EDC24A5DBE10099DAC1 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06228EDB24A5DBE10099DAC1 /* CoreServices.framework */; };
 		0624D09A17D43D5D00665930 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0624D09917D43D5D00665930 /* OpenGLES.framework */; };
 		067D52F817D8574200541B5E /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 067D52F717D8574200541B5E /* GLKit.framework */; };
 		067D52FC17D857DC00541B5E /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 067D52FA17D857AB00541B5E /* Shader.fsh */; };
@@ -46,7 +47,6 @@
 		06B7D028179F307D00F3F527 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D027179F307D00F3F527 /* AVFoundation.framework */; };
 		06B7D02A179F312F00F3F527 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D029179F312F00F3F527 /* CoreMedia.framework */; };
 		06B7D02C179F313800F3F527 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D02B179F313800F3F527 /* CoreVideo.framework */; };
-		06B7D02F179F333400F3F527 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D02D179F330E00F3F527 /* MobileCoreServices.framework */; };
 		06B7D031179F33B500F3F527 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06B7D030179F33B500F3F527 /* ImageIO.framework */; };
 		06BB5D511AAA50040023C3FC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06BB5D501AAA50040023C3FC /* QuartzCore.framework */; };
 		06BFC1B11D5AB19B00E5A7C9 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06BFC1B01D5AB19B00E5A7C9 /* Photos.framework */; };
@@ -64,6 +64,7 @@
 		06156D1C1C38EA47007EE71E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		061858EE1846B06400DEC416 /* PBJFocusView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBJFocusView.h; sourceTree = "<group>"; };
 		061858EF1846B06400DEC416 /* PBJFocusView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PBJFocusView.m; sourceTree = "<group>"; };
+		06228EDB24A5DBE10099DAC1 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		0624D09917D43D5D00665930 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		067D52F717D8574200541B5E /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		067D52FA17D857AB00541B5E /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = ../Source/Shaders/Shader.fsh; sourceTree = "<group>"; };
@@ -132,12 +133,12 @@
 				06C216CF1A4A924700C83065 /* CoreImage.framework in Frameworks */,
 				067D52F817D8574200541B5E /* GLKit.framework in Frameworks */,
 				0624D09A17D43D5D00665930 /* OpenGLES.framework in Frameworks */,
-				06B7D02F179F333400F3F527 /* MobileCoreServices.framework in Frameworks */,
 				06B7D02C179F313800F3F527 /* CoreVideo.framework in Frameworks */,
 				06B7D02A179F312F00F3F527 /* CoreMedia.framework in Frameworks */,
 				06B7D028179F307D00F3F527 /* AVFoundation.framework in Frameworks */,
 				0683D1C4179F2E1700EE66D6 /* CoreGraphics.framework in Frameworks */,
 				0683D1C6179F2E1700EE66D6 /* UIKit.framework in Frameworks */,
+				06228EDC24A5DBE10099DAC1 /* CoreServices.framework in Frameworks */,
 				0683D1C2179F2E1700EE66D6 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -163,6 +164,14 @@
 			name = Core;
 			sourceTree = "<group>";
 		};
+		06228EDA24A5DBE10099DAC1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				06228EDB24A5DBE10099DAC1 /* CoreServices.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		067D52F917D8577D00541B5E /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
@@ -180,6 +189,7 @@
 				06A8EE721E3077C500B2B22F /* Framework */,
 				060527A31E306AC3005298D4 /* Supporting Files */,
 				0683D1BF179F2E1700EE66D6 /* Products */,
+				06228EDA24A5DBE10099DAC1 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
